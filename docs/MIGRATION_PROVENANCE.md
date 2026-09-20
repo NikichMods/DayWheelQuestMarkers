@@ -4,7 +4,7 @@ The public repository starts a new Git history from the accepted production line
 
 ## Accepted legacy baseline
 
-- Legacy private repository: `666drjekyll666-cloud/CalendarQuestsPins-legacy-private`
+- Legacy private repository: `NikichMods/CalendarQuestsPins-legacy-private`
 - Accepted stable version: 1.0.17
 - Frozen accepted source: `frozen/1.0.17`
 - Exact accepted source commit: `507fc6dd192993bf6290f7b6735718e3b98430a4`

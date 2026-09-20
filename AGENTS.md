@@ -1,11 +1,11 @@
 # Day Wheel Quest Markers — Working Rules
 
-Read the global engineering contract in `666drjekyll666-cloud/DevRules` before substantive work. `ENGINEERING_RULES.md`, `CI_POLICY.md`, `GIT_WORKFLOW.md`, and `PROJECT_BOOTSTRAP.md` apply here; this file adds project-specific constraints.
+Read the global engineering contract in `NikichMods/DevRules` before substantive work. `ENGINEERING_RULES.md`, `CI_POLICY.md`, `GIT_WORKFLOW.md`, and `PROJECT_BOOTSTRAP.md` apply here; this file adds project-specific constraints.
 
 ## Project identity
 
 - Public mod: **Day Wheel Quest Markers**
-- Repository: `666drjekyll666-cloud/DayWheelQuestMarkers`
+- Repository: `NikichMods/DayWheelQuestMarkers`
 - Project / assembly / DLL: `DayWheelQuestMarkers`
 - Game: Graveyard Keeper 1.407
 - Stable BepInEx GUID: `nikich.gyk.calendarquestspins`
