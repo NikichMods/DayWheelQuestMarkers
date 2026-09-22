@@ -494,3 +494,20 @@ Every handed DLL is immutable and tied to exact committed source plus build arti
   3. load any developed save where all six weekday NPCs are available;
   4. no dialogue/quest interaction is required; after normal gameplay finishes loading, return `BepInEx/LogOutput.log`;
   5. expected snapshot includes `TASKSNAP_SUMMARY`, `UNIVERSE_RAW_SUMMARY`, and `NAVSNAP_SUMMARY`. The strict importer will reject incomplete/non-canonical output.
+
+
+## Research probe — MultipleAnswer gate 0.1.0
+
+- Date built: 2026-09-22.
+- Status: **research-only / handed for runtime evidence / not a production candidate**.
+- Trigger: player screenshot/log shows Snake root menu renders Better Save Soul answer `@souls_s_s33_ask` ("Рассказать о слухах...") while accepted 1.1.6 has no marker contribution for that route.
+- Existing accepted route evidence: `npc_cultist / dlc_souls_s29_3 / @souls_s_s33_ask`, root multi `106`, answer index `29`; task/lifecycle/navigation are already known, but final gate source node `2644` is the sole unsupported dialogue variant in 1.1.6.
+- Goal: prove exact runtime source/gate type and test the native `MultipleAnswerData.FillVisualData` evaluator without guessing gate semantics or changing save state.
+- Research branch: `research/multiple-answer-gate-probe`.
+- Exact executable/build source: `0d95db252aa2dca7427faac858ab7d48cac5341c`.
+- Frozen ref: `frozen/multiple-answer-gate-probe-0.1.0`.
+- CI: run `35776671552`, job `106911742067`, **success, 0 warnings / 0 errors**.
+- Artifact: `MultipleAnswerGateProbe-0.1.0`, ID `10715998365`.
+- Raw DLL: **24,576 bytes**; SHA-256 `375aae6e9c6b0a38057588614a0fbad483a4768865281aeb8fc4ae579fbdd0d2`.
+- Requested test: keep production 1.1.6, install this probe, load the same save, wait for normal gameplay, exit, return `LogOutput.log`. No dialogue with Snake is required.
+- Production runtime remains **1.1.6** and is unchanged.
