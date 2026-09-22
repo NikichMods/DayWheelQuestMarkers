@@ -99,8 +99,8 @@ namespace CalendarQuestsPinsResearch
             }
 
             var controller = component.GetComponent(_controllerType);
-            object graph;
-            object serializedObj;
+            object graph = null;
+            object serializedObj = null;
             if (controller == null ||
                 !ReflectionUtil.TryRead(controller, "_graph", out graph) || graph == null ||
                 !ReflectionUtil.TryRead(graph, "_serializedGraph", out serializedObj) ||
@@ -295,8 +295,8 @@ namespace CalendarQuestsPinsResearch
 
         private void LogTaskState()
         {
-            object save;
-            object known;
+            object save = null;
+            object known = null;
             if (!ReflectionUtil.TryRead(_mainGame, "save", out save) || save == null ||
                 !ReflectionUtil.TryRead(save, "known_npcs", out known) || known == null)
             {
