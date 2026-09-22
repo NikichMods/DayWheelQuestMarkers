@@ -557,3 +557,22 @@ Every handed DLL is immutable and tied to exact committed source plus build arti
   5. expected result is **no red watchdog UI**;
   6. return one `BepInEx/LogOutput.log`; if a red `!` appears, return that log without manual diagnosis.
 - Production Day Wheel Quest Markers remains accepted **1.1.6** and is unchanged.
+
+
+## Research probe 0.1.0 — Souls s33 AnswerData
+
+- Date built: 2026-09-22.
+- Research branch: `research/souls-s33-answerdata-probe`.
+- Frozen source: `frozen/souls-s33-answerdata-probe-0.1.0`.
+- Exact build-bearing source: `1f5a231e87afbcabe4ee6c6fee6fe0c1189a82b8`.
+- Goal: resolve the remaining unsupported authored `AnswerData` source for Snake main-menu occurrence `@souls_s_s33_ask` (multi `106`, index `29`) without mutating save/UI state or changing production 1.1.6.
+- Diagnostic scope: one-shot static inspection of the exact authored AnswerData producer and its incoming value connections; current `dlc_souls_s29_3` task state; exact phrase unlocked/blacklisted state; event-driven observation of the rendered target `AnswerVisualData.can_be_picked`; live linked `AnswerData.d_price` / `d_lock` / `d_reward` SmartRes values and read-only `Player.IsEnough` checks.
+- Runtime cost: static graph/save inspection runs once after game startup and then disables its `Update`; live observation is a Harmony prefix on `MultiAnswerOptionGUI.Show` and ignores every option except exact internal ID `@souls_s_s33_ask`.
+- CI: run `35779871123`, job `106922346269`, success; Release build completed with **0 warnings / 0 errors**.
+- Artifact: `DayWheelQuestMarkers-SoulsS33AnswerDataProbe-0.1.0` (artifact ID `10716918251`), archive digest `sha256:b2b9ee381c19bf1d51c07a5768768f3b9c0ca1c76b68ebdb95a9ff0d3f9d1a2e`.
+- Raw DLL: 22,016 bytes.
+- Raw DLL SHA-256: `edca9b60490a2a48517e5cfbf9427aa032a5e593a517326d607cdc0e83262362`.
+- Requested test: keep production 1.1.6 installed, add this probe DLL, load the current save where Snake offers “Рассказать о слухах...”, open Snake's main dialogue menu once, then quit and provide the fresh `LogOutput.log`. No dialogue option needs to be selected.
+- Expected evidence: `S33_STATIC_*`, `S33_TASK_STATE`, `S33_PHRASE_STATE`, and after opening Snake `S33_LIVE_OPTION` / `S33_LIVE_PRICE` / `S33_LIVE_LOCK`.
+- Player result: **pending**.
+- Status: **research diagnostic only / not production / awaiting one narrow runtime capture**.
