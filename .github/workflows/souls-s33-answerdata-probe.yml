@@ -1,0 +1,45 @@
+name: Build Souls s33 AnswerData probe
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'research/souls-s33-answerdata-probe'
+    paths:
+      - 'SoulsS33AnswerDataProbe.csproj'
+      - 'src/SoulsS33AnswerDataProbe.cs'
+      - 'src/ReflectionUtil.cs'
+      - '.github/workflows/souls-s33-answerdata-probe.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: souls-s33-answerdata-probe-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Build Release
+        run: dotnet build SoulsS33AnswerDataProbe.csproj -c Release --nologo
+      - name: Hash DLL
+        shell: bash
+        run: |
+          sha256sum bin/SoulsS33AnswerDataProbe/DayWheelQuestMarkers.SoulsS33AnswerDataProbe.dll
+          stat -c '%s bytes' bin/SoulsS33AnswerDataProbe/DayWheelQuestMarkers.SoulsS33AnswerDataProbe.dll
+      - name: Upload DLL
+        uses: actions/upload-artifact@v4
+        with:
+          name: DayWheelQuestMarkers-SoulsS33AnswerDataProbe-0.1.0
+          path: bin/SoulsS33AnswerDataProbe/DayWheelQuestMarkers.SoulsS33AnswerDataProbe.dll
+          if-no-files-found: error
+          retention-days: 7
