@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using BepInEx;
 using UnityEngine;
+using CalendarQuestsPins;
 
 namespace CalendarQuestsPinsResearch
 {
