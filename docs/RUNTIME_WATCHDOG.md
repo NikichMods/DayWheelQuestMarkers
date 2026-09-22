@@ -111,3 +111,66 @@ Supporting exhaustive validator:
 - live dispositions: **243 occurrences classified / UNKNOWN=0**.
 
 Production Day Wheel Quest Markers 1.1.6 is unchanged.
+
+
+## Planned 0.3.0 semantic-contributor invariant
+
+Runtime Watchdog 0.2.0 proves that an executing authored menu and its rendered options still belong to the accepted interaction universe, but it intentionally stops before asking whether production actually represents a known live reminder-shaped interaction. The live Snake Save Soul case `npc_cultist / multi 106 / index 29 / @souls_s_s33_ask` demonstrates that this is a real coverage gap: the independent fixture classifies the occurrence as `REMINDER_TASK_OWNED`, while production 1.1.6 can fail closed on its unsupported `AnswerData` shape and therefore omit the marker.
+
+The next watchdog revision should add a second, semantic invariant:
+
+```
+rendered + can_be_picked live occurrence
+    -> exact accepted occurrence record
+    -> accepted semantic reminder owner
+    -> exact current production contributor obligation
+    -> contributor represented, otherwise WATCHDOG_FAIL
+```
+
+This is deliberately **not** `visible option count == marker count`.
+
+### Oracle side
+
+Keep `validator/fixtures/live-answer-dispositions-1.1.6.tsv` as the independent accepted oracle. Do not derive the expected semantic owner from the production compiler at runtime.
+
+For a visible option with `can_be_picked == true`:
+
+- `REMINDER_TASK_OWNED` creates one task-owned semantic obligation keyed by accepted owner, for example `TASK_OWNER|npc_cultist|@souls_s_s33_ask`. The fixture's `tasks` field is the admissible task set used to prove whether production currently represents that owner.
+- `REMINDER_DIALOGUE_OWNER` creates one dialogue-owner obligation such as `DIALOGUE_OWNER|npc|owner`.
+- `SAME_VISIT_NON_REMINDER`, `SAME_VISIT_DESCENDANT_OF_*`, navigation/utility/repeatable dispositions and event-invoked non-reminders create no live reminder obligation.
+
+Task-owned dedup is therefore semantic-owner based, not rendered-option based. This also handles the accepted Astrologer occurrence whose one interaction owner is associated with two task IDs.
+
+### Production-representation side
+
+For each live semantic obligation, query only the exact production state needed for that owner through the already-bound production objects (`_save`, `_rules`, `_reachability`, `_verifiedCompletionRules`, `_mainGame`). This side is intentionally an observation of what production currently considers contributable; it is not the oracle.
+
+For a task-owned obligation:
+
+1. inspect only the fixture-listed task IDs under the already-bound target NPC;
+2. require the task to satisfy production's current visible-task predicate;
+3. evaluate the exact current owner-task actionability seam used by production:
+   `NavigationReachabilityCache.IsOwnerTaskActionable(...) || VerifiedCompletionReminderRules.IsOwnerTaskActionable(...)`;
+4. the semantic owner is represented if at least one admissible task produces that exact owner contribution.
+
+For a dialogue-owner obligation, resolve the exact accepted owner topic and evaluate the current production topic/reachability predicate for that owner.
+
+If a live pickable accepted reminder owner has no matching current production contribution, emit a red failure such as:
+
+`WATCHDOG_FAIL code=LIVE_REMINDER_UNREPRESENTED detail=npc=... multi=... index=... answer=... owner=... tasks=...`
+
+This catches the Snake false negative even if another unrelated Snake marker happens to exist, which an aggregate marker-count comparison cannot guarantee.
+
+### Interaction with existing checks
+
+Keep 0.2.0's authored-menu drift, unknown live answer, disposition completeness, manifest/binding validity and visual-parity checks. The semantic-contributor invariant is additional:
+
+- nested menus remain occurrence-specific because lookup is still `npc + multi + index + answer`;
+- same-visit descendants remain suppressed by their accepted dispositions;
+- multiple independent reminder owners for one NPC/day remain separate obligations and are all checked;
+- event-only accepted stages remain covered by the existing structural/runtime checks rather than being synthesized from a live menu option;
+- visual parity still checks that desired marker visuals match active UI, but it is no longer the only runtime evidence that a reminder-shaped interaction is represented.
+
+### Performance boundary
+
+The new check stays event-driven. It runs only when an authored menu is executing and only for rendered, pickable, reminder-shaped options. It must not traverse FlowCanvas graphs, rebuild manifests, scan all NPCs, allocate recurring large collections, start background workers or mutate saves. The fixture is loaded once. Per live obligation the work is bounded to one target plus its fixture-listed task IDs (currently at most two in the accepted 1.1.6 fixture).
