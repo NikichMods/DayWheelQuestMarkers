@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.7
+
+- Fixes a false negative for Better Save Soul task `dlc_souls_s29_3` at Snake's `@souls_s_s33_ask` interaction.
+- Uses the runtime-verified `MultipleAnswerData` child gates: `note_with_rumors x1` or `sin_shard x1`, with sufficiency delegated to the game's own `Player.IsEnough(SmartRes)`.
+- Preserves the existing exact phrase and root-to-answer navigation requirements; the marker still fails closed if the interaction is locked, consumed, or unreachable.
+- Keeps schema 5 unchanged; existing persistent manifests remain valid and no gameplay FlowCanvas parsing is added.
+
+
 ## 1.1.6
 
 - Generalizes one-time dialogue reminders from exact-self consumption to **nearest persistent lifecycle ownership**: when a progressing child persistently consumes its selectable parent on the same authored path, that parent can now represent the reminder interaction.
