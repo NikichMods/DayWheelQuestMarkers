@@ -64,10 +64,10 @@ namespace CalendarQuestsPins
                 return IsSnakeRelationEnough(target.WorldObject, mainGame);
             }
 
-            // The remaining audited routes already exist as persisted one-shot TopicRules in
-            // schema 2. Reuse those exact phrase, SmartRes, and navigation predicates instead of
-            // re-encoding their item/relation semantics here. This also intentionally keeps
-            // @souls_s_s33_ask fail-closed because its AnswerData shape is unsupported.
+            // The remaining audited routes already exist as persisted TopicRules. Reuse their exact
+            // phrase, resource, and navigation predicates instead of re-encoding quest-specific
+            // item semantics here. Relay-backed MultipleAnswerData gates are compiled generically
+            // by WeekdayInteractionRuleCache before this supplement is evaluated.
             for (var i = 0; i < PromotedRoutes.Length; i++)
             {
                 var route = PromotedRoutes[i];
