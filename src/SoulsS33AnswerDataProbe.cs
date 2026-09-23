@@ -15,7 +15,7 @@ namespace CalendarQuestsPins
     {
         public const string PluginGuid = "nikich.gyk.daywheel.souls-s33-answerdata-probe";
         public const string PluginName = "Day Wheel Quest Markers - souls s33 AnswerData probe";
-        public const string PluginVersion = "0.1.0";
+        public const string PluginVersion = "0.1.1";
 
         private const string NpcId = "npc_cultist";
         private const string TaskId = "dlc_souls_s29_3";
@@ -180,6 +180,8 @@ namespace CalendarQuestsPins
                                " nPrice=" + IntText(nPrice) +
                                " answerDataType=" + (answerData == null ? "<null>" : answerData.GetType().FullName));
 
+                DumpNestedVisuals(visual);
+
                 if (answerData == null)
                 {
                     Logger.LogWarning("S33_LIVE_ANSWERDATA missing=True");
@@ -197,6 +199,46 @@ namespace CalendarQuestsPins
             {
                 Logger.LogError("S33_LIVE_FATAL " + ex);
             }
+        }
+
+        private void DumpNestedVisuals(object visual)
+        {
+            var nested = ReadMember(visual, "answer_visual_datas") as IEnumerable;
+            if (nested == null)
+            {
+                Logger.LogInfo("S33_LIVE_CHILDREN count=0 collection=<null>");
+                return;
+            }
+
+            var index = 0;
+            foreach (var child in nested)
+            {
+                if (child == null)
+                {
+                    Logger.LogInfo("S33_LIVE_CHILD index=" + index + " value=<null>");
+                    index++;
+                    continue;
+                }
+
+                var childData = ReadMember(child, "link_to_answer_data");
+                var price = childData == null ? null : ReadMember(childData, "d_price");
+                var gate = childData == null ? null : ReadMember(childData, "d_lock");
+                Logger.LogInfo("S33_LIVE_CHILD index=" + index +
+                               " id=" + Safe(ReadString(child, "id")) +
+                               " translation=" + Safe(ReadString(child, "translation")) +
+                               " canBePicked=" + BoolText(ReadBool(child, "can_be_picked")) +
+                               " insidePriceIsRed=" + BoolText(ReadBool(child, "inside_price_is_red")) +
+                               " iconLock=" + Safe(ReadString(child, "icon_lock")) +
+                               " nLock=" + IntText(ReadInt(child, "n_lock")) +
+                               " iconPrice=" + Safe(ReadString(child, "icon_price")) +
+                               " nPrice=" + IntText(ReadInt(child, "n_price")) +
+                               " answerDataType=" + (childData == null ? "<null>" : childData.GetType().FullName));
+                Logger.LogInfo("S33_LIVE_CHILD_GATE index=" + index +
+                               " price={" + DescribeSmartRes(price) + "} priceEnough=" + EnoughText(price) +
+                               " lock={" + DescribeSmartRes(gate) + "} lockEnough=" + EnoughText(gate));
+                index++;
+            }
+            Logger.LogInfo("S33_LIVE_CHILDREN count=" + index);
         }
 
         private void DumpStaticAndSaveState()
@@ -261,11 +303,63 @@ namespace CalendarQuestsPins
                     }
 
                     Logger.LogInfo("S33_STATIC_PRODUCER_RAW " + Safe(NodeRawWindow(serialized, producer)));
+
+                    DumpRelayProducer(serialized, nodes, connections, producer);
                 }
             }
 
             DumpTaskState();
             DumpPhraseState();
+        }
+
+
+        private void DumpRelayProducer(string serialized, Dictionary<string, Node> nodes,
+            List<Connection> connections, Node producer)
+        {
+            if (producer == null || producer.Type == null ||
+                producer.Type.IndexOf("RelayValueOutput", StringComparison.Ordinal) < 0) return;
+
+            var uid = ReadNodeDirectString(serialized, producer, "_sourceInputUID", 900);
+            Logger.LogInfo("S33_STATIC_RELAY_OUTPUT node=" + producer.Id + " sourceInputUID=" + Safe(uid));
+            if (string.IsNullOrEmpty(uid)) return;
+
+            Node relayInput = null;
+            foreach (var pair in nodes)
+            {
+                var node = pair.Value;
+                if (node == null || node.Type == null ||
+                    node.Type.IndexOf("RelayValueInput", StringComparison.Ordinal) < 0) continue;
+                var nodeUid = ReadNodeDirectString(serialized, node, "_UID", 900);
+                if (!string.Equals(nodeUid, uid, StringComparison.Ordinal)) continue;
+                relayInput = node;
+                break;
+            }
+
+            if (relayInput == null)
+            {
+                Logger.LogWarning("S33_STATIC_RELAY_INPUT missing=True uid=" + Safe(uid));
+                return;
+            }
+
+            Logger.LogInfo("S33_STATIC_RELAY_INPUT node=" + relayInput.Id +
+                           " type=" + Safe(relayInput.Type) +
+                           " identifier=" + Safe(ReadNodeDirectString(serialized, relayInput, "identifier", 1200)));
+
+            var incomingCount = 0;
+            for (var i = 0; i < connections.Count; i++)
+            {
+                var incoming = connections[i];
+                if (!string.Equals(incoming.TargetNode, relayInput.Id, StringComparison.Ordinal)) continue;
+                incomingCount++;
+                Node source;
+                nodes.TryGetValue(incoming.SourceNode, out source);
+                Logger.LogInfo("S33_STATIC_RELAY_INPUT_SOURCE targetPort=" + Safe(incoming.TargetPort) +
+                               " source=" + Safe(incoming.SourceNode) +
+                               " sourcePort=" + Safe(incoming.SourcePort) +
+                               " sourceType=" + (source == null ? "<unknown>" : Safe(source.Type)) +
+                               " sourceFields=" + (source == null ? "<unknown>" : DescribeNodeFields(serialized, source)));
+            }
+            Logger.LogInfo("S33_STATIC_RELAY_INPUT_SOURCES count=" + incomingCount);
         }
 
         private void DumpTaskState()
@@ -502,6 +596,19 @@ namespace CalendarQuestsPins
                 start = dstEnd + 1;
             }
             return result;
+        }
+
+
+        private static string ReadNodeDirectString(string serialized, Node node, string key, int lookBehind)
+        {
+            if (serialized == null || node == null || string.IsNullOrEmpty(key)) return null;
+            var begin = Math.Max(0, node.TypePosition - Math.Max(100, lookBehind));
+            var window = serialized.Substring(begin, node.TypePosition - begin);
+            var marker = "\"" + key + "\":\"";
+            var pos = window.LastIndexOf(marker, StringComparison.Ordinal);
+            if (pos < 0) return null;
+            int end;
+            return ReadJsonString(window, pos + marker.Length, out end);
         }
 
         private static string ReadNodeContent(string serialized, Node node, string key)
