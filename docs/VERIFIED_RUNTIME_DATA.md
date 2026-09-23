@@ -54,6 +54,48 @@ Verified direct `Flow_Answer` price/lock requirements are evaluated by Graveyard
 
 If a route uses an unsupported answer/gate shape, no reminder is emitted.
 
+## Verified MultipleAnswerData compound-gate semantics
+
+Research completed on 2026-09-23 closed the previously unsupported Better Save Soul `MultipleAnswerData` family in Graveyard Keeper 1.407.
+
+Direct IL from the loaded game's own `MultipleAnswerData.FillVisualData` proves native actionability semantics:
+
+- `MultipleAnswerData` inherits `AnswerData` and iterates its `datas` child list;
+- for every child, the game checks `child.d_lock` through `WorldGameObject.IsEnough`;
+- only when that lock is sufficient does it check `child.d_price` through the same game-owned sufficiency path;
+- any insufficient child lock clears the aggregate lock flag;
+- any insufficient child price clears the aggregate price flag;
+- after all children, the parent answer is pickable only when **all child locks and all child prices are sufficient**;
+- therefore child requirements are an **AND set**, not alternative OR routes.
+
+The complete six-weekday-NPC census found exactly **7** `RelayValueOutput<MultipleAnswerData>` menu uses, all resolving through the same authored structure:
+
+`RelayValueOutput<MultipleAnswerData> -> RelayValueInput<MultipleAnswerData> -> Flow_MultipleAnswer -> Flow_AnswersArray -> child Flow_Answer`
+
+Distribution:
+
+- Astrologer: 0;
+- Inquisitor: 2 menu uses of `@souls_s_s22_ask`, one compound producer;
+- Snake: 1 menu use of `@souls_s_s33_ask`, one compound producer;
+- Merchant: 1 menu use of `@souls_s_s24_ask`, one compound producer;
+- Ms. Charm: 0;
+- Bishop: 3 menu uses of `@souls_s_s15_ask`, one shared compound producer.
+
+Verified child lock sets:
+
+- Inquisitor: `Item:ash_on_shawl x1` AND `Item:sin_shard x1`;
+- Snake: `Item:note_with_rumors x1` AND `Item:sin_shard x1`;
+- Merchant: `Item:sauce_for_meal x1` AND `Item:sin_shard x1`;
+- Bishop: `Item:ode_for_bishop x1` AND `Item:sin_shard x1`.
+
+Production must not hard-code those item IDs. The verified structural contract is the relay/compound chain plus native AND semantics. Missing relay ownership, ambiguous producers, unknown intermediate node types, unsupported child gates, or an empty/unresolved child set fail closed. Live sufficiency continues to delegate to the game's own SmartRes/Player path.
+
+Accepted 1.1.9 implements this during loading/bootstrap only and persists the resulting compact compound requirements in manifest schema 6.
+
+Accepted 1.1.9 canonical schema-6 partition, derived from the complete audited structure and confirmed in player runtime: owner **81 supported / 0 unsupported**, cross-owner **8 tasks / 6 supported / 0 unsupported**, base persisted topics **55 / 55 supported / 0 unsupported**, dialogue-lifecycle **65 / 65 / 0**, navigation **210 / 270 / 151 / 0**. The owner total remains 81; the generic compiler changes the previous 1.1.6 partition from 75/6 to 81/0.
+
+Accepted player runtime evidence for 1.1.9 (2026-09-23) covers the full requested lifecycle. Schema 6 bootstrapped successfully behind loading in **923.35 ms**, reported the exact canonical counts above, reached the normal `Ready` state, and restored all three expected current weekday markers including the Snake/Envy Souls marker. The player then selected `@souls_s_s33_ask`; the game completed `npc_cultist/dlc_souls_s29_3`, the answer disappeared from Snake's menu, and the wheel changed **3 -> 2**, proving the reminder contribution is removed after consumption without disturbing the two unrelated markers. A follow-up process deserialized the persisted schema-6 manifest in **10.62 ms** with `FlowCanvas graph parse skipped`. This behavior is accepted stable.
+
 ## Verified persistent dialogue-lifecycle semantics
 
 Graveyard Keeper has authored dialogue branches that persistently consume selectable entries through the phrase blacklist:
@@ -99,7 +141,7 @@ The 12 ancestor-owned paths collapse to exactly six unique lifecycle owners:
 - Merchant `@merchant_favore_done` — task-owned, suppressed;
 - Bishop `bishop_2_1a` — admitted.
 
-Therefore schema 5 expects **6 ancestor-owner candidates / 2 task-owned exclusions / 4 admitted / 4 supported / 0 unsupported**.
+This lifecycle sub-census remains **6 ancestor-owner candidates / 2 task-owned exclusions / 4 admitted / 4 supported / 0 unsupported** under schema 6.
 
 ### Exact-self/non-`@` retained evidence
 
@@ -171,7 +213,7 @@ The accepted direct owner-task classifier does not represent every verified comp
 - promoted task/topic pairs reuse existing persisted exact-self-consuming topic/navigation predicates;
 - `npc_cultist/snake_trap` uses the verified `snake_stone_ready` answer plus `_rel >= 10` through game-owned SmartRes sufficiency;
 - `npc_inquisitor/inquisitor_talk` and `npc_cultist/snake_back` are exact mandatory interaction-event stages whose visible task is the verified actionability boundary;
-- unsupported `@souls_s_s33_ask` remains fail-closed;
+- accepted 1.1.9 represents `@souls_s_s33_ask` and the complete verified relay-backed `MultipleAnswerData` family through the generic compound-gate compiler rather than a Snake-specific rule;
 - there is no broad `Visible task`, `CustomEvent`, or `AddInteractionEvent` classifier.
 
 Research after accepted 1.0.35 shows that several answer-backed supplemental routes are candidates for future consolidation into a common graph compiler, but the two mandatory event-only stages remain a genuinely distinct evidence type unless a broader event contract is separately proved.
@@ -208,28 +250,27 @@ Cross-owner and generic dialogue-lifecycle routes retain their accepted SmartRes
 
 ## Accepted persistent loading/performance contract
 
-Accepted runtime architecture as of **1.1.6**:
+Accepted runtime architecture as of **1.1.9**:
 
 - per frame: timer comparison only until the one-second refresh is due;
-- one schema-5 manifest path: `BepInEx/cache/DayWheelQuestMarkers/rules-1.407.bin`;
-- schema 5 stores owner/cross task rules, unified dialogue-lifecycle topics, compact navigation predicates, and lifecycle census integrity counts;
+- one schema-6 manifest path: `BepInEx/cache/DayWheelQuestMarkers/rules-1.407.bin`;
+- schema 6 stores owner/cross task rules, direct and compound SmartRes requirements, unified dialogue-lifecycle topics, compact navigation predicates, and lifecycle census integrity counts;
 - `UnifiedDialogueLifecycleCompiler` exists only for loading/bootstrap derivation;
-- the legacy 1.0.35 `non-at-self-consuming-1.407.bin` is ignored;
-- when schema 5 is missing/incompatible, graph parsing occurs only during the verified loading window;
+- the legacy 1.0.35 `non-at-self-consuming-1.407.bin` file is ignored;
+- when schema 6 is missing/incompatible, graph parsing occurs only during the verified loading window;
 - cached loads deserialize compact data and recreate only live runtime bindings; normal gameplay does not invoke the graph parser;
 - once per second: evaluate cached task/interaction state, phrase state, navigation predicates, game-owned gate predicates, and live HUD semantics;
 - approximately every 30 seconds: perform allocation-light runtime/known-NPC validation through cached references and a `ulong` fingerprint;
 - real known-NPC membership changes use cheap rebinding from the manifest;
 - no background worker and no save mutation.
 
-Accepted 1.1.6 runtime evidence:
+Accepted 1.1.9 runtime evidence:
 
-- schema-4 -> schema-5 rebuild behind loading: **1005.16 ms**;
-- canonical summary: owner 75/6, cross-owner 8/6/0, dialogue-lifecycle 65/64/1, non-`@` 77 / 19 / 6, ancestor owners 6 / 2 / 4 / 4 / 0, navigation 210/270/151/0;
-- subsequent same-process save reload: schema-5 manifest read in **3.89 ms** with `FlowCanvas graph parse skipped`;
-- final live-object transition invalidated the prewarmed binding once, causing a guarded **3.21 ms** manifest re-read with no graph parse before `Ready`;
-- the fallback is bounded to the load/runtime ownership transition and is not recurring gameplay work;
-- the Snake two-interaction regression passed **2 -> 1 -> 0**.
+- schema-5 -> schema-6 rebuild behind loading: **923.35 ms**;
+- canonical summary: owner **81/0**, cross-owner **8/6/0**, dialogue-lifecycle **65/65/0**, non-`@` **77 / 19 / 6**, ancestor owners **6 / 2 / 4 / 4 / 0**, navigation **210/270/151/0**;
+- subsequent process load: schema-6 manifest read in **10.62 ms** with `FlowCanvas graph parse skipped`;
+- preserved Better Save Soul Snake regression passed **3 -> 2**, with the consumed Snake contribution disappearing and two unrelated reminders remaining;
+- no Day Wheel Quest Markers warning/error was observed.
 
 Historical performance lineage:
 
@@ -245,7 +286,7 @@ Historical performance lineage:
 
 The rejected universal provenance-parser experiment pushed loading work toward roughly 1.8 seconds and is not an accepted architecture. Do not reintroduce arbitrary external dependency/provenance traversal into production.
 
-## Accepted architecture consolidation in 1.1.6
+## Accepted architecture consolidation through 1.1.9
 
 The accepted architecture is now substantially more general than the historical implementation.
 
@@ -256,7 +297,8 @@ The accepted architecture is now substantially more general than the historical 
 - navigation ancestry, phrase state, and supported AnswerData/SmartRes gates are shared predicates;
 - task-owned and same-visit deduplication are part of compilation rather than tactical runtime exceptions;
 - the Snake counterfeit-coins hard-code from 1.1.5 is removed;
-- one schema-5 manifest persists the resulting compact runtime model.
+- relay-backed `MultipleAnswerData` is handled generically through the verified authored relay/array structure and native AND semantics;
+- one schema-6 manifest persists the resulting compact runtime model, including compound `MultipleAnswerData` child requirements.
 
 ### What intentionally remains separate
 

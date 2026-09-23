@@ -37,12 +37,12 @@ Private 1.0.18–1.0.20 development experiments are not accepted release baselin
 
 The migration baseline above is historical provenance, not the current release.
 
-- Current stable version: **1.1.3**
-- Exact accepted runtime source: `438558980ae5fbf62cac361b14f9aaaf8d292099`
-- Candidate ref: `candidate/1.1.3`
-- Accepted baseline ref: `baseline/1.1.3-accepted`
-- CI run: `35403868241`
-- Artifact: `DayWheelQuestMarkers-1.1.3` (`10571433560`)
-- Accepted raw DLL SHA-256: `4cd4c67063deb672de32d1d88bb578fdcf5800dc4012ce397b5ceac13735030a`
-- Player acceptance: 2026-09-19
-- Stable distribution: GitHub Release `v1.1.3`, using the exact accepted DLL without rebuilding.
+- Current stable version: **1.1.9**
+- Exact accepted runtime source: `73b35a3bffcb440bf644dd03532fbf2cf6ce4b11`
+- Candidate ref: `candidate/1.1.9`
+- Accepted baseline ref: `baseline/1.1.9-accepted`
+- CI run: `35894899505`
+- Artifact: `DayWheelQuestMarkers-1.1.9` (`10766711402`)
+- Accepted raw DLL SHA-256: `069f9e1533f42fb4c4673effb5069de4354d72aeeb32e48818b14a752cb6359e`
+- Player acceptance: 2026-09-23
+- Stable distribution: GitHub Release `v1.1.9`, using the exact accepted DLL without rebuilding.
