@@ -524,3 +524,37 @@ Every handed DLL is immutable and tied to exact committed source plus build arti
 - Player result: **captured 2026-09-23**. The loaded GK 1.407 IL initializes aggregate lock/price flags true, iterates every child `AnswerData`, calls `WorldGameObject.IsEnough` on each child `d_lock` and `d_price`, and sets parent `can_be_picked=false` if either aggregate becomes false. Canonical semantics are therefore **AND across every child lock and every child price**. The same run enumerated exactly **7** `RelayValueOutput<MultipleAnswerData>` menu uses: Inquisitor 2, Snake 1, Merchant 1, Bishop 3, Astrologer 0, Ms. Charm 0; every relay resolves to `Flow_MultipleAnswer`. `MAD_DONE` completed without audit failure.
 - Status: **research complete / evidence accepted / not production**.
 
+
+
+## 1.1.8 — generic MultipleAnswerData candidate
+
+- Date built: 2026-09-23.
+- Development branch: `dev/1.1.8`, created from current stable `main` at `5ab41ae3378862da4ef8f50765fbf129ced48cc0`.
+- Exact executable/build source: `9e9655faf46af91e52e0974c5bc4a918540f044f`.
+- Candidate ref: `candidate/1.1.8` at the exact build-bearing source above. Later workflow/docs commits do not change the handed binary identity.
+- Trigger: accepted 1.1.6 fails closed on relay-backed `MultipleAnswerData` final-answer gates, producing false negatives for the audited Better Save Soul weekday-NPC completion family.
+- Decisive runtime evidence:
+  - six-NPC audit completed `6/6` and resolved the four affected task-owned answers through `RelayValueOutput<MultipleAnswerData> -> RelayValueInput -> Flow_MultipleAnswer -> Flow_AnswersArray -> child Flow_Answer`;
+  - the independent semantics audit disassembled live GK 1.407 `MultipleAnswerData.FillVisualData` and proved **AND semantics**: every child `d_lock` and every child `d_price` must satisfy the game's own `WorldGameObject.IsEnough` path before the parent remains pickable;
+  - complete six-NPC usage census is exactly **7 menu uses across 4 NPCs**: Inquisitor 2, Snake 1, Merchant 1, Bishop 3; Astrologer and Ms. Charm 0.
+- Production change: generic loading-time support for that exact structural family. No Souls quest ID, weekday NPC ID, or item ID is hard-coded into the compiler. Unknown/ambiguous relay ownership, unexpected intermediate node types, unsupported child gates, or empty child sets fail closed.
+- Live evaluation: compound child requirements are persisted as compact `Requirement` objects and AND-evaluated through the existing game-owned SmartRes sufficiency seam. No gameplay FlowCanvas parsing or new recurring scan is added.
+- Persistent manifest: schema **6**. Existing schema-5 `rules-1.407.bin` is rejected once and rebuilt behind loading; later loads deserialize schema 6 normally.
+- Expected canonical candidate counts: owner **79 supported / 2 unsupported**; cross-owner **8 tasks / 6 supported / 0 unsupported**; base persisted topics **55 / 55 supported / 0 unsupported**; final dialogue-lifecycle summary expected **65 / 65 / 0**; lifecycle ownership and navigation totals remain unchanged.
+- Interaction-universe validator: run `35889350732`, job `107277581479` — **PASS 68 / 0 failed**; lifecycle **216 paths / 60 admitted owners**; tasks **72 -> 70 selectable + 2 event-only**; `MultipleAnswerData` **7 verified menu uses across 4 weekday NPCs**.
+- Independent compile-only gate before handoff: run `35888795428`, job `107275743866` — Release build **0 warnings / 0 errors**.
+- Candidate CI build: run `35889346658`, job `107277566386`, success on `windows-latest`; Release build **0 warnings / 0 errors**.
+- Artifact: `DayWheelQuestMarkers-1.1.8`, artifact ID `10764123303`, archive digest `sha256:7e1b3d6a3e243ab6f089507bf013c98685cbdcaabf65951d9805b694f088b753`.
+- Raw DLL: **101,376 bytes**.
+- Raw DLL SHA-256: `d1a6aa0f5241577ad3c214326903c7f5b141a94bb32c99dfbed8ccf7b1cbfc8c`. Local extraction/hash exactly matches CI.
+- Candidate-only push trigger was removed from `dev/1.1.8` immediately after the frozen build; canonical build workflow is manual-only again.
+- Requested player test:
+  1. remove all research DLLs used for this investigation (Souls s33 probe, Souls weekday AnswerData audit, MultipleAnswerData semantics audit);
+  2. replace accepted Day Wheel Quest Markers 1.1.6 with this single production candidate 1.1.8;
+  3. load the preserved save where `npc_cultist/dlc_souls_s29_3` is Visible and Snake offers `@souls_s_s33_ask`;
+  4. before talking to Snake, the Snake/Envy weekday must show the Souls task marker **only when both verified native child requirements are currently sufficient**; on the preserved state used for research both were sufficient;
+  5. complete the Snake rumor interaction; after the task/interaction is consumed, this contribution must disappear on the next normal refresh unless another independent Snake interaction legitimately contributes;
+  6. return one fresh `BepInEx/LogOutput.log` and report the Snake marker count before and after.
+- First-load log control: schema 5 should rebuild to schema 6 during loading. Expected candidate summary is owner `79/2`, cross `8/6/0`, dialogue-lifecycle `65/65/0`, lifecycle census unchanged, navigation `210/270/151/0`. A later reload should report schema-6 manifest load with FlowCanvas parsing skipped.
+- Player result: **pending**.
+- Status: **candidate / frozen / do not merge or release until explicit player acceptance**.
