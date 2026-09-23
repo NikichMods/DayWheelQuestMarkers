@@ -558,3 +558,29 @@ Every handed DLL is immutable and tied to exact committed source plus build arti
 - Player result: **failed on 2026-09-23 before marker evaluation**. The supplied log shows schema-6 bootstrap actually produced `owner=81/0, cross=8/6/0, self-consuming=65/65/0`, but the incorrect 1.1.8 integrity guard expected `79/2`. The manifest therefore rejected the otherwise valid bootstrap as non-canonical. Gameplay then correctly refused to run the graph parser as a fallback, leaving the runtime cache unavailable and producing no weekday markers at all.
 - Root cause: expected-count arithmetic used the four unique affected task routes instead of the six owner rule variants that were previously unsupported. Total owner-rule cardinality remained exactly 81; only the supported/unsupported partition changed from `75/6` to `81/0`.
 - Status: **failed / frozen / superseded by 1.1.9 / do not merge or release**.
+
+
+## 1.1.9 — corrected schema 6 candidate
+
+- Date built: 2026-09-23.
+- Development branch: `dev/1.1.9`, created fresh from stable `main` at `5ab41ae3378862da4ef8f50765fbf129ced48cc0`.
+- Exact executable/build source: `73b35a3bffcb440bf644dd03532fbf2cf6ce4b11`.
+- Candidate ref: `candidate/1.1.9` at the exact build-bearing source above. Later workflow/docs commits do not change the handed binary identity.
+- Trigger: 1.1.8's generic `MultipleAnswerData` compiler successfully converted all six previously unsupported owner rule variants to supported, but its manifest integrity guard incorrectly expected `79/2` instead of the runtime-produced `81/0`. The valid schema-6 bootstrap was therefore rejected before any marker evaluation, leaving the wheel with no markers.
+- Fix: no classifier or gate semantics changed from the verified 1.1.8 implementation. The only runtime correction is the canonical owner partition: **81 supported / 0 unsupported**. Total owner-rule cardinality remains 81, exactly matching 1.1.6's 75 supported + 6 unsupported.
+- Generic `MultipleAnswerData` behavior remains evidence-backed: the complete seven menu-use census and native AND semantics are unchanged; unknown/ambiguous structures still fail closed; gameplay still performs no FlowCanvas graph parsing.
+- Persistent manifest: schema **6**. Expected first bootstrap summary: owner **81/0**, cross-owner **8/6/0**, dialogue-lifecycle **65/65/0**, navigation **210/270/151/0**.
+- Interaction-universe validator on the exact build-bearing source: run `35894904798`, job `107296291101` — **PASS 68 / 0 failed**; lifecycle **216 paths / 60 admitted owners**; tasks **72 -> 70 selectable + 2 event-only**; `MultipleAnswerData` **7 verified menu uses across 4 weekday NPCs**.
+- Candidate CI build: run `35894899505`, job `107296273964`, success on `windows-latest`; Release build **0 warnings / 0 errors**.
+- Artifact: `DayWheelQuestMarkers-1.1.9`, artifact ID `10766711402`, archive digest `sha256:6265ba553f5e61a1706c3ba850fa255bd22111d8b0a9129e3e19a3739467a00e`.
+- Raw DLL: **101,376 bytes**.
+- Raw DLL SHA-256: `069f9e1533f42fb4c4673effb5069de4354d72aeeb32e48818b14a752cb6359e`. Local extraction/hash exactly matches CI.
+- Candidate-only push trigger was removed from `dev/1.1.9` immediately after the frozen build; canonical build workflow is manual-only again.
+- Requested player test:
+  1. replace failed Day Wheel Quest Markers 1.1.8 with this single 1.1.9 DLL; keep research probes removed;
+  2. load the same preserved save;
+  3. confirm the two previously expected non-Snake weekday markers return and the Snake/Envy marker for the currently actionable `dlc_souls_s29_3 / @souls_s_s33_ask` interaction also appears;
+  4. before progressing anything, return a fresh log so the schema-6 bootstrap and canonical `81/0` summary can be verified;
+  5. if all three expected markers are present, complete the Snake rumor interaction and confirm only that contribution disappears on the next normal refresh unless another independent Snake interaction remains.
+- Player result: **pending**.
+- Status: **candidate / frozen / do not merge or release until explicit player acceptance**.
