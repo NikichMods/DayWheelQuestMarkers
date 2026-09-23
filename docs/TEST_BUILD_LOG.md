@@ -494,3 +494,30 @@ Every handed DLL is immutable and tied to exact committed source plus build arti
   3. load any developed save where all six weekday NPCs are available;
   4. no dialogue/quest interaction is required; after normal gameplay finishes loading, return `BepInEx/LogOutput.log`;
   5. expected snapshot includes `TASKSNAP_SUMMARY`, `UNIVERSE_RAW_SUMMARY`, and `NAVSNAP_SUMMARY`. The strict importer will reject incomplete/non-canonical output.
+
+
+## 1.1.7 — Souls s33 nested-completion candidate
+
+- Date built: 2026-09-23.
+- Development branch: `dev/1.1.7`.
+- Exact executable/build source: `48dfb66410ebe25e6d3aeb8fbfb9eada0f6bd300`.
+- Candidate ref: `candidate/1.1.7` at the exact build-bearing source above.
+- Trigger: accepted production 1.1.6 omitted Snake's Better Save Soul completion reminder for visible task `dlc_souls_s29_3` because `@souls_s_s33_ask` is supplied through an unsupported `RelayValueOutput<MultipleAnswerData>` rather than direct `Flow_Answer`.
+- Runtime evidence: research probe 0.1.1 on the preserved save proved the exact parent is unlocked/not blacklisted and navigation-reachable; its parent `MultipleAnswerData` has no top-level price/lock; child 0 is `AnswerData` locked by `Item:note_with_rumors x1`; child 1 is `AnswerData` locked by `Item:sin_shard x1`; both children were live `can_be_picked=True` and game-owned `Player.IsEnough` returned `True` for both.
+- Production change: complete the already-existing `VerifiedCompletionReminderRules` route for `npc_cultist/dlc_souls_s29_3 -> @souls_s_s33_ask`. Require the exact phrase/navigation boundary and then accept either verified child requirement through game-owned `Player.IsEnough(SmartRes)`. No generic `MultipleAnswerData`/relay classifier is introduced; unknown nested shapes remain fail-closed.
+- Performance/cache impact: two SmartRes objects are cached for this exact route and rebound only if the linked Snake WGO changes. Normal schema-5 manifest data is unchanged; existing `rules-1.407.bin` remains valid; no gameplay FlowCanvas parsing is added.
+- Interaction-universe validator: PR #4 run `35857753393`, job `107170243708`, **PASS 52 / 0 failed**; lifecycle **216 / 60 admitted owners**; tasks **72 -> 70 selectable + 2 event-only**. No baseline semantic delta.
+- CI build: run `35857798151`, job `107170389156`, success on `windows-latest`; Release build completed with **0 warnings / 0 errors**.
+- Artifact: `DayWheelQuestMarkers-1.1.7` (artifact ID `10747264793`), archive digest `sha256:c983780ab57f82c06c55ab94fd77940031b202fe610b447f65107ff7fd66434b`.
+- Raw DLL: 98,816 bytes.
+- Raw DLL SHA-256: `53ec00e9982e11edad59ea9953faefc450cfdfaac5881742a919b286663b282d`.
+- Candidate-only push trigger was removed from `dev/1.1.7` after freezing `candidate/1.1.7`; the frozen candidate source remains exact.
+- Requested test:
+  1. remove the research Souls s33 probe DLL;
+  2. install only production candidate 1.1.7 over 1.1.6;
+  3. load the same preserved save where `dlc_souls_s29_3` is Visible and Snake offers “Рассказать о слухах...”;
+  4. before speaking to Snake, the Envy/Snake weekday must show one Souls-category marker attributable to this task (unless another independent Snake interaction adds additional markers);
+  5. open Snake and complete the rumor interaction using either currently available verified child route; after the task/interaction is consumed, this contribution must disappear on the next normal refresh;
+  6. return one fresh `LogOutput.log` and report the marker count before and after.
+- Player result: **pending**.
+- Status: **candidate / not accepted / do not merge or release**.
