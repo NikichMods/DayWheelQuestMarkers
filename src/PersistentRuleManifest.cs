@@ -22,8 +22,8 @@ namespace CalendarQuestsPins
         private const string Magic = "DWQM_RULE_MANIFEST";
         private const int SchemaVersion = 6;
 
-        private const int ExpectedOwnerSupported = 79;
-        private const int ExpectedOwnerUnsupported = 2;
+        private const int ExpectedOwnerSupported = 81;
+        private const int ExpectedOwnerUnsupported = 0;
         private const int ExpectedCrossTasks = 8;
         private const int ExpectedCrossSupported = 6;
         private const int ExpectedCrossUnsupported = 0;
