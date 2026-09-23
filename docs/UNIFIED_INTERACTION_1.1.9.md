@@ -78,7 +78,7 @@ Accepted integrity counts:
 
 ## Accepted runtime evidence
 
-Candidate 1.1.9 was built from exact source `73b35a3bffcb440bf644dd03532fbf2cf6ce4b11`.
+Accepted 1.1.9 was built and tested from exact source `73b35a3bffcb440bf644dd03532fbf2cf6ce4b11`.
 
 Runtime evidence:
 
