@@ -209,7 +209,7 @@ The accepted direct owner-task classifier does not represent every verified comp
 - promoted task/topic pairs reuse existing persisted exact-self-consuming topic/navigation predicates;
 - `npc_cultist/snake_trap` uses the verified `snake_stone_ready` answer plus `_rel >= 10` through game-owned SmartRes sufficiency;
 - `npc_inquisitor/inquisitor_talk` and `npc_cultist/snake_back` are exact mandatory interaction-event stages whose visible task is the verified actionability boundary;
-- unsupported `@souls_s_s33_ask` remains fail-closed;
+- accepted 1.1.6 keeps `@souls_s_s33_ask` fail-closed because relay-backed `MultipleAnswerData` was not yet represented; candidate 1.1.8 removes that limitation through the verified generic compound-gate compiler rather than a Snake-specific rule;
 - there is no broad `Visible task`, `CustomEvent`, or `AddInteractionEvent` classifier.
 
 Research after accepted 1.0.35 shows that several answer-backed supplemental routes are candidates for future consolidation into a common graph compiler, but the two mandatory event-only stages remain a genuinely distinct evidence type unless a broader event contract is separately proved.
