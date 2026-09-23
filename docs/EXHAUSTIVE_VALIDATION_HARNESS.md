@@ -1,6 +1,6 @@
 # Exhaustive Interaction Validation Harness
 
-Status: **research/tooling implementation, validated against accepted 1.1.6**.
+Status: **accepted validation tooling, current baseline 1.1.9**.
 
 This harness exists to reduce dependence on full manual Graveyard Keeper playthroughs after structural reminder changes.
 
@@ -24,7 +24,7 @@ The workflow runs automatically on pull requests that change interaction-semanti
 
 ### Independent lifecycle oracle
 
-The accepted 1.1.6 read-only lifecycle census produced **216 path records**:
+The retained accepted 1.1.6 read-only lifecycle census produced **216 path records** and remains the independent lifecycle oracle for 1.1.9:
 
 - 204 self-owned path instances;
 - 12 ancestor-owned path instances;
@@ -109,28 +109,29 @@ Workflow run `35449940018`:
 - tasks: **72 completion nodes -> 70 selectable + 2 event-only**;
 - report artifact: `interaction-universe-report`.
 
-## Explicit remaining coverage gaps
+## Closed coverage layers
 
-The harness reports these as coverage notes rather than pretending they are solved.
+The former per-route owner-task and standalone-navigation fixture gaps are closed by the accepted interaction-universe snapshot:
 
-### 1. Per-route owner-task fixture
+- **72/72** owner completion routes are classified: 70 selectable + 2 event-only;
+- **270/270** authored navigation paths are stored in the production-derived navigation fixture;
+- the raw six-NPC universe contains **243 authored answer occurrences** with exact accepted dispositions and **UNKNOWN=0**;
+- the 14 no-normal-root occurrences are independently classified as event-invoked non-reminders;
+- relay-backed `MultipleAnswerData` has an exact **7-use** fixture covering Inquisitor 2, Snake 1, Merchant 1, Bishop 3;
+- the complete compound family has runtime-proven native AND semantics.
 
-The historical 0.1.1 probe proved the complete 72-node census but logged individual route rows only for selected controls plus the four unresolved roots. It did not emit a compact row for every one of the 70 final selectable task routes.
+The lifecycle fixture remains an independent oracle rather than being replaced by production-derived navigation data.
 
-A one-time read-only snapshot probe can close this without replaying quests: the six NPC graphs are structural assets and can be inspected from any loaded developed save.
+## Current accepted 1.1.9 validator result
 
-### 2. Standalone navigation fixture
+Exact accepted build-bearing source `73b35a3bffcb440bf644dd03532fbf2cf6ce4b11` was validated in workflow run `35894904798`, job `107296291101`:
 
-Accepted production evidence is:
-
-- 210 answers;
-- 270 authored root paths;
-- 151 persisted ancestor predicates;
-- 0 unsupported paths.
-
-The 216 lifecycle fixture exercises a large part of that navigation structure, and production has verified control contracts, but a complete independent 270-path fixture is not yet committed.
-
-A one-time read-only snapshot can close this layer as well.
+- result: **PASS**;
+- **68 checks / 0 failed**;
+- lifecycle: **216 path records / 60 unique admitted owners**;
+- tasks: **72 completion nodes -> 70 selectable + 2 event-only**;
+- `MultipleAnswerData`: **7 verified menu uses across 4 weekday NPCs**;
+- canonical schema-6 owner partition: **81 supported / 0 unsupported**.
 
 ## What the validator proves
 
@@ -138,7 +139,7 @@ Once a structural change enters a PR, the automatic validator can catch unexplai
 
 It is strongest for dialogue lifecycle classification because that layer already has complete path-level independent evidence.
 
-It also guards the complete task census partition and exact residual special/event set.
+It also guards the complete task census partition, complete snapshot/navigation identities, exact live-answer dispositions, the `MultipleAnswerData` usage set, and the exact residual special/event set.
 
 ## What it cannot prove by itself
 
