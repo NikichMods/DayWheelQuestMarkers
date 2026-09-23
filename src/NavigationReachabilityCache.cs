@@ -191,10 +191,19 @@ namespace CalendarQuestsPins
                 if (!PhraseOpen(variant.AnswerId, unlockedPhrases, blacklistedPhrases)) continue;
                 if (variant.Price != null && !IsEnough(variant.Price)) continue;
                 if (variant.Lock != null && !IsEnough(variant.Lock)) continue;
+                if (!AreAdditionalRequirementsEnough(variant.AdditionalRequirements)) continue;
                 if (!IsNavigationReachable(npcId, variant.AnswerId, unlockedPhrases, blacklistedPhrases)) continue;
                 return true;
             }
             return false;
+        }
+
+        private bool AreAdditionalRequirementsEnough(List<WeekdayInteractionRuleCache.Requirement> requirements)
+        {
+            if (requirements == null) return true;
+            for (var i = 0; i < requirements.Count; i++)
+                if (requirements[i] == null || !IsEnough(requirements[i])) return false;
+            return true;
         }
 
         internal bool IsNavigationReachable(string npcId, string answerId, object unlockedPhrases, object blacklistedPhrases)
