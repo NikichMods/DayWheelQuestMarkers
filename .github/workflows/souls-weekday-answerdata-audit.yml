@@ -1,0 +1,45 @@
+name: Build Souls weekday AnswerData audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'research/souls-weekday-answerdata-audit'
+    paths:
+      - 'SoulsWeekdayAnswerDataAudit.csproj'
+      - 'src/SoulsWeekdayAnswerDataAudit.cs'
+      - 'src/ReflectionUtil.cs'
+      - '.github/workflows/souls-weekday-answerdata-audit.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: souls-weekday-answerdata-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Build Release
+        run: dotnet build SoulsWeekdayAnswerDataAudit.csproj -c Release --nologo
+      - name: Hash DLL
+        shell: bash
+        run: |
+          sha256sum bin/SoulsWeekdayAnswerDataAudit/DayWheelQuestMarkers.SoulsWeekdayAnswerDataAudit.dll
+          stat -c '%s bytes' bin/SoulsWeekdayAnswerDataAudit/DayWheelQuestMarkers.SoulsWeekdayAnswerDataAudit.dll
+      - name: Upload DLL
+        uses: actions/upload-artifact@v4
+        with:
+          name: DayWheelQuestMarkers-SoulsWeekdayAnswerDataAudit-0.1.0
+          path: bin/SoulsWeekdayAnswerDataAudit/DayWheelQuestMarkers.SoulsWeekdayAnswerDataAudit.dll
+          if-no-files-found: error
+          retention-days: 7
