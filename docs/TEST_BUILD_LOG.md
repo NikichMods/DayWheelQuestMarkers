@@ -586,5 +586,7 @@ Every handed DLL is immutable and tied to exact committed source plus build arti
 - Runtime integrity/performance: Day Wheel Quest Markers 1.1.9 loaded normally with schema 6 and reached `Ready`; the follow-up process loaded the persisted schema-6 manifest in **10.62 ms** with `FlowCanvas graph parse skipped`. Canonical counts remained exactly `owner=81/0, cross=8/6/0, dialogue-lifecycle=65/65/0, navigation=210/270/151/0`. No Day Wheel Quest Markers warning/error was observed.
 - Acceptance: **explicitly approved for stable promotion on 2026-09-23** (`фиксируем, сливай`).
 - Accepted baseline ref: `baseline/1.1.9-accepted` -> exact tested runtime source `73b35a3bffcb440bf644dd03532fbf2cf6ce4b11`.
-- Stable release: `v1.1.9`, using the exact accepted DLL bytes without rebuilding.
-- Status: **accepted stable**.
+- Stable release: `v1.1.9`, release ID `394913370`, target exact tested runtime source `73b35a3bffcb440bf644dd03532fbf2cf6ce4b11`.
+- Published asset: `DayWheelQuestMarkers.dll`, release asset ID `584295078`, **101,376 bytes**, SHA-256 `069f9e1533f42fb4c4673effb5069de4354d72aeeb32e48818b14a752cb6359e`.
+- Publication: one-shot exact-artifact promotion run `35897935850` succeeded. The pre-existing generic publisher initially exposed an artifact-filename/install-filename contract mismatch; it was corrected to keep those identities separate and made idempotent. Verification run `35898105166`, job `107307017584`, succeeded and revalidated the exact published hash/target without replacing the release.
+- Status: **accepted stable / merged / released**.
