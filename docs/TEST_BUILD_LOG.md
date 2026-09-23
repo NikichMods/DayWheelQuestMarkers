@@ -595,3 +595,21 @@ Every handed DLL is immutable and tied to exact committed source plus build arti
 - Expected evidence: `S33_STATIC_RELAY_*`, `S33_LIVE_OPTION`, `S33_LIVE_CHILD*`, and the existing task/phrase state lines. If the child list is populated at render time, no dialogue selection is required.
 - Player result: **captured 2026-09-23**. Runtime confirms the exact parent is `MultipleAnswerData`; child 0 is a normal `AnswerData` locked by `Item:note_with_rumors x1` and child 1 by `Item:sin_shard x1`. Both children report `can_be_picked=True`, and game-owned `Player.IsEnough` returns `True` for both on the supplied save. The parent itself has no top-level price/lock. Static relay resolution also proves `2644 RelayValueOutput<MultipleAnswerData> -> 2574 RelayValueInput<MultipleAnswerData> -> 2560 Flow_MultipleAnswer`.
 - Status: **research diagnostic complete / production evidence accepted / not production**.
+
+
+## Research — MultipleAnswerData semantics audit 0.1.0
+
+- Date built: 2026-09-23.
+- Research branch: `research/multiple-answerdata-semantics-audit`.
+- Exact frozen source: `00d29cf9d5449adeef7218931b99dfa170c581d6`.
+- Frozen ref: `frozen/multiple-answerdata-semantics-audit-0.1.0`.
+- Purpose: close the remaining semantic and blast-radius evidence gap before adding generic production support for relay-backed `MultipleAnswerData`. The previous six-NPC audit proved the authored child gates but did not independently prove how `MultipleAnswerData.FillVisualData` combines them or enumerate every such relay use in the six weekday graphs.
+- Behavior: read-only one-shot after runtime readiness. Reflectively disassembles `MultipleAnswerData.FillVisualData` (plus the comparable `AnswerData.FillVisualData` surface) using the loaded game's own method body and metadata, and enumerates every `RelayValueOutput<MultipleAnswerData>` node plus every direct weekday `Flow_MultiAnswer` menu-slot use across all six NPC graphs. No save/UI mutation and no recurring scan after the snapshot.
+- CI: run `35867653946`, job `107203247544`, success on `ubuntu-latest`; **0 warnings / 0 errors**.
+- Artifact: `DayWheelQuestMarkers-MultipleAnswerDataSemanticsAudit-0.1.0`, artifact ID `10752856851`, archive digest `sha256:ea2e9a31b27daf59aa5b5377f849c5d2303b76d5e77d7ce4a1e8a567ff032a1c`.
+- Raw DLL: 19,968 bytes.
+- Raw DLL SHA-256: `b6cf0eb8c52ab8d1dd1bf640429ad709c88f3ed5dbf3bc0b2fe0a687b3d259d1`.
+- Requested test: remove the previous `SoulsWeekdayAnswerDataAudit` DLL, install this audit DLL alongside accepted production 1.1.6, load the same developed save once, wait until gameplay is fully loaded, quit, and return the fresh `LogOutput.log`. No NPC dialogue or inventory manipulation is required.
+- Expected decisive lines: `MAD_METHOD begin=MultipleAnswerData.FillVisualData...`, its `MAD_IL` sequence, `MAD_RELAY`, `MAD_MENU_USE`, six `MAD_UNIVERSE` summaries, `MAD_UNIVERSE_TOTAL`, then `MAD_DONE`.
+- Player result: **pending**.
+- Status: **research-only / frozen / not production**.
