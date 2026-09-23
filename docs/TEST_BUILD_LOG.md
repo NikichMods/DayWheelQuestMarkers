@@ -593,5 +593,5 @@ Every handed DLL is immutable and tied to exact committed source plus build arti
 - Raw DLL SHA-256: `f58bfacc5f8ce7a86ee24339c4882b13b2ab3c5d027e0023cd80562b0261f865`.
 - Requested test: remove probe 0.1.0, keep accepted production 1.1.6, install only probe 0.1.1, load the same preserved tester save, open Snake's main dialogue once so “Рассказать о слухах...” is rendered, do not select it, quit, and return fresh `LogOutput.log`.
 - Expected evidence: `S33_STATIC_RELAY_*`, `S33_LIVE_OPTION`, `S33_LIVE_CHILD*`, and the existing task/phrase state lines. If the child list is populated at render time, no dialogue selection is required.
-- Player result: **pending**.
-- Status: **research diagnostic only / not production / awaiting one narrow runtime capture**.
+- Player result: **captured 2026-09-23**. Runtime confirms the exact parent is `MultipleAnswerData`; child 0 is a normal `AnswerData` locked by `Item:note_with_rumors x1` and child 1 by `Item:sin_shard x1`. Both children report `can_be_picked=True`, and game-owned `Player.IsEnough` returns `True` for both on the supplied save. The parent itself has no top-level price/lock. Static relay resolution also proves `2644 RelayValueOutput<MultipleAnswerData> -> 2574 RelayValueInput<MultipleAnswerData> -> 2560 Flow_MultipleAnswer`.
+- Status: **research diagnostic complete / production evidence accepted / not production**.
