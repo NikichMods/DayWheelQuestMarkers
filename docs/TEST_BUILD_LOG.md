@@ -584,4 +584,7 @@ Every handed DLL is immutable and tied to exact committed source plus build arti
   5. if all three expected markers are present, complete the Snake rumor interaction and confirm only that contribution disappears on the next normal refresh unless another independent Snake interaction remains.
 - Player result: **full requested runtime pass captured 2026-09-23**. On the preserved save the wheel initially showed the expected **3 markers total**, including the previously missing Snake/Envy Souls marker. The player selected `@souls_s_s33_ask`; the game completed `npc_cultist/dlc_souls_s29_3`, and the authored answer disappeared from Snake's menu. The wheel then changed **3 -> 2**, exactly removing the consumed Snake contribution while preserving the two unrelated markers.
 - Runtime integrity/performance: Day Wheel Quest Markers 1.1.9 loaded normally with schema 6 and reached `Ready`; the follow-up process loaded the persisted schema-6 manifest in **10.62 ms** with `FlowCanvas graph parse skipped`. Canonical counts remained exactly `owner=81/0, cross=8/6/0, dialogue-lifecycle=65/65/0, navigation=210/270/151/0`. No Day Wheel Quest Markers warning/error was observed.
-- Status: **candidate / requested behavior passed / awaiting explicit stable-promotion acceptance; do not merge or release until the user explicitly approves promotion**.
+- Acceptance: **explicitly approved for stable promotion on 2026-09-23** (`фиксируем, сливай`).
+- Accepted baseline ref: `baseline/1.1.9-accepted` -> exact tested runtime source `73b35a3bffcb440bf644dd03532fbf2cf6ce4b11`.
+- Stable release: `v1.1.9`, using the exact accepted DLL bytes without rebuilding.
+- Status: **accepted stable**.
