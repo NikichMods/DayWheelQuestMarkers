@@ -39,7 +39,7 @@ jobs:
       - name: Upload DLL
         uses: actions/upload-artifact@v4
         with:
-          name: DayWheelQuestMarkers-SoulsS33AnswerDataProbe-0.1.0
+          name: DayWheelQuestMarkers-SoulsS33AnswerDataProbe-0.1.1
           path: bin/SoulsS33AnswerDataProbe/DayWheelQuestMarkers.SoulsS33AnswerDataProbe.dll
           if-no-files-found: error
           retention-days: 7
