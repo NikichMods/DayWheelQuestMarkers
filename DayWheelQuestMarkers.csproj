@@ -4,7 +4,7 @@
     <LangVersion>7.3</LangVersion>
     <AssemblyName>DayWheelQuestMarkers</AssemblyName>
     <RootNamespace>DayWheelQuestMarkers</RootNamespace>
-    <Version>1.1.6</Version>
+    <Version>1.1.7</Version>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <Optimize>true</Optimize>
     <DebugType>none</DebugType>
