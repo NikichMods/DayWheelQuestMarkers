@@ -1,43 +1,50 @@
 # Adversarial Negative Interaction Audit — 2026-09-23
 
-Status: **research evidence complete; production runtime unchanged**.
+Status: **Point 1 complete; research evidence only; production runtime unchanged**.
 
 Branch: `research/adversarial-negative-audit`.
 
 ## Question
 
-For every interaction occurrence that the exhaustive GK 1.407 weekday-NPC universe currently treats as non-reminder, ask:
+For every interaction occurrence that the exhaustive Graveyard Keeper 1.407 weekday-NPC universe previously treated as a non-reminder, ask:
 
 > Can a real game state require the player to make a separate visit to this weekday NPC for that interaction?
 
-The audit deliberately attacks previous negative decisions instead of trusting them. It uses the accepted raw interaction universe, task-route snapshot, no-root frontier, navigation snapshot, and the current lifecycle census before considering any new runtime probe.
+This audit deliberately attacks previous negative decisions instead of trusting them. It uses existing accepted exhaustive fixtures, historical authored-graph probes, and current 1.1.9 lifecycle/task behavior. No new production code or runtime probe is introduced.
 
 ## Evidence reviewed
 
-Canonical current production evidence:
+Current production/canonical evidence:
 
 - `AGENTS.md`;
 - `docs/VERIFIED_RUNTIME_DATA.md`;
 - `docs/UNIFIED_INTERACTION_1.1.9.md`;
 - `docs/EXHAUSTIVE_VALIDATION_HARNESS.md`;
+- `docs/MIGRATION_PROVENANCE.md`;
 - `validator/baseline-1.1.9.json`;
-- `validator/fixtures/lifecycle-paths-1.1.6.tsv` (the accepted lifecycle fixture retained by 1.1.9).
+- accepted 1.1.9 source at `73b35a3bffcb440bf644dd03532fbf2cf6ce4b11`.
 
-Historical exhaustive research evidence retained on `research/interaction-universe-snapshot`:
+Historical exhaustive evidence retained on `research/interaction-universe-snapshot`:
 
 - `validator/fixtures/raw-interaction-universe-1.1.6.tsv`;
 - `validator/fixtures/live-answer-dispositions-1.1.6.tsv`;
 - `validator/fixtures/navigation-paths-1.1.6.tsv`;
 - `validator/fixtures/task-routes-1.1.6.tsv`;
 - `validator/fixtures/no-root-frontier-1.1.6.tsv`;
+- `validator/fixtures/lifecycle-paths-1.1.6.tsv`;
 - `docs/INTERACTION_UNIVERSE_COVERAGE.md`;
 - `docs/RUNTIME_WATCHDOG.md`.
 
-The historical live-disposition table is evidence for the raw 243-occurrence universe, but it is **not** current semantic canon after the accepted 1.1.6 nearest-ancestor lifecycle work. That distinction matters below.
+Additional archived authored-graph evidence reviewed:
 
-## Negative-class map
+- strict action-chain probe 0.1.24;
+- persisted-topic audit 0.1.25;
+- topic-provenance audits 0.1.26–0.1.29;
+- archived runtime logs used by the earlier intermediate-progression research.
 
-The historical Watchdog 0.2 table classified all 243 authored answer occurrences as:
+## Historical negative-class map
+
+Watchdog 0.2 classified the 243 authored answer occurrences as:
 
 - 88 `REMINDER_TASK_OWNED`;
 - 58 `REMINDER_DIALOGUE_OWNER`;
@@ -48,179 +55,389 @@ The historical Watchdog 0.2 table classified all 243 authored answer occurrences
 - 14 `EVENT_INVOKED_NON_REMINDER`;
 - 0 unknown.
 
-That table was derived before the runtime watchdog learned how to assign semantic ownership back to a selectable ancestor. The current production lifecycle census is stronger evidence.
+Therefore the old table contained 97 negative occurrences.
 
-### 1. Event-invoked no-root interactions — 14 occurrences
+The central adversarial finding is that `UNKNOWN=0` did **not** prove that those 97 semantic decisions were correct. The old disposition table was a useful exhaustive occurrence inventory, but it was not a safe semantic oracle.
+
+## Why Watchdog 0.2's semantic oracle was wrong
+
+Three independent weaknesses were found.
+
+### 1. Ancestor-owner projection was missing
+
+The later accepted lifecycle model can assign the semantic visit to the nearest persistently consumed selectable ancestor.
+
+The old live-disposition table classified the individual rendered occurrence. It did not project descendant lifecycle evidence back onto the ancestor's own menu occurrence.
+
+That made real semantic owners such as `@snake_1с` look like ordinary navigation entries.
+
+### 2. Exact answer IDs were not preserved across one fixture join
+
+The raw interaction universe contains the literal answer ID:
+
+`@actress_ jewelry`
+
+with an embedded space.
+
+The lifecycle snapshot represented the same owner as:
+
+`@actress__jewelry`
+
+The exact join therefore failed even though authored evidence proves that `@actress_ jewelry` is a gated, self-consuming one-time topic.
+
+Watchdog 0.3 must preserve authored answer IDs exactly. Normalized/log-safe spellings must never become semantic keys.
+
+### 3. The compact task-route snapshot stored a representative answer, not every equivalent answer variant
+
+For a completion node with several incoming answer variants, the compact snapshot could retain one representative answer even though multiple siblings converge on the same completion topology.
+
+Examples include:
+
+- `inquisitor_dark_hart` / `inquisitor_dark_brain` / `inquisitor_dark_intestine`;
+- `merchant_2e_1a` / `merchant_2e_1b` / `merchant_2e_1c`;
+- the singing-charm answer family around `tr_quest_8_singing_charm_7a/7b/7c`.
+
+Current production does not depend on that one-row simplification: its task compiler enumerates authored anchors around the completion topology.
+
+Watchdog 0.3 must likewise avoid treating absence from the compact representative table as proof of non-reminder semantics.
+
+## Corrected audit of the 67 historical utility occurrences
+
+The full 67-row historical `NAVIGATION_UTILITY_REPEATABLE_NON_REMINDER` set partitions cleanly as:
+
+- **6 stale negatives that are actually semantic reminder owners**;
+- **8 same-visit descendants**;
+- **7 progression starters that create the next objective only after selection**;
+- **4 relationship/magic follow-up topics with no independent progression ownership**;
+- **42 genuine menu/navigation/no-progress occurrences**.
+
+Total: **67 / 67 classified**.
+
+### A. Six stale negatives — semantic reminder owners
+
+These six must not remain in the semantic-negative bucket:
+
+1. Ms Charm — `@actress_ jewelry`
+   - exact authored ID contains a space;
+   - requires `bijouterie_gold=1`;
+   - persistently blacklists itself;
+   - activates the Merchant handoff;
+   - semantic class: dialogue-lifecycle owner.
+
+2. Astrologer — `@tr_quest_13_research_1`
+   - nearest persistently consumed selectable ancestor;
+   - semantic class: dialogue-lifecycle owner.
+
+3. Bishop — `bishop_2_1a`
+   - nearest persistently consumed selectable ancestor;
+   - descendants `bishop_2_1a_6a/6b` consume the visit owner;
+   - semantic class: dialogue-lifecycle owner.
+
+4. Snake — `@snake_1с`
+   - nearest persistently consumed selectable ancestor;
+   - descendants `snake_1с_4a/4b` consume the visit owner;
+   - semantic class: dialogue-lifecycle owner.
+
+5. Merchant — `@merchant_2b`
+   - not utility;
+   - authored effect completes the cross-owner `horadric_garden` task route;
+   - semantic class: task-owned reminder owner, suppressed only from the generic dialogue layer.
+
+6. Merchant — `@merchant_2e_1e`
+   - nearest persistently consumed selectable ancestor;
+   - descendant `merchant_2e_1d_4a` consumes the visit owner;
+   - semantic class: dialogue-lifecycle owner.
+
+Important production result:
+
+**All six are already represented by the accepted 1.1.9 production architecture.**
+
+The audit therefore found a research-oracle defect, not a new stable-runtime false negative.
+
+### B. Eight same-visit descendants — remain non-reminders
+
+These are actionable only after the player has already entered the visit that owns the reminder:
+
+- Ms Charm:
+  - `tr_quest_8_singing_charm_7b`;
+  - `tr_quest_8_singing_charm_7c`.
+- Bishop:
+  - `bishop_2_1e_4a`;
+  - `bishop_2_1e_4b`;
+  - `bishop_2_1e_4c`.
+- Snake:
+  - `snake_aple_get_3a`;
+  - `snake_aple_get_4b`.
+- Merchant:
+  - `merchant_2e_1d_4b`.
+
+The singing-charm alternatives are especially important: authored action-chain evidence reaches the same progression topology, but the choices live under the already-entered `@tr_quest_8_singing_charm_1` conversation owner. They do not justify a second weekday reminder.
+
+Adversarial result: **retain all eight as same-visit non-reminders**.
+
+### C. Seven progression starters — remain non-reminders until after selection
+
+These choices create or expose the next task/objective. The new objective is not active before the player selects them:
+
+- Bishop:
+  - `bishop_2_1e`.
+- Inquisitor:
+  - `inquisitor_burn_3a_1a`;
+  - `inquisitor_burn_3a_1b`.
+- Merchant:
+  - `merchant_on_deal_done_4b`;
+  - `merchant_70_7a` at multi 1121;
+  - `merchant_70_7a` at multi 1126;
+  - `merchant_70_7b_2b` at multi 1126.
+
+Examples from the authored effects:
+
+- the Merchant 70 branch creates `merchant_support Visible` and activates the Ms Charm handoff;
+- `merchant_on_deal_done_4b` creates `merchant_trade Visible`;
+- the Inquisitor burn choices advance into the subsequent task state.
+
+These are progression transitions, not pre-existing “come back to this NPC” obligations.
+
+Adversarial result: **retain all seven as non-reminders at the pre-selection state**.
+
+### D. Four `*_magic_100` follow-up topics — remain non-reminders
+
+- Bishop — `@bishop_magic_100`;
+- Snake — `@snake_magic_100`;
+- Inquisitor — `@inquisitor_magic_100`;
+- Merchant — `@merchant_magic_100`.
+
+The preceding `*_magic_item` interaction is the one-time self-consuming transition that activates the corresponding `*_magic_100` topic.
+
+The `*_magic_100` rows themselves:
+
+- are gated by relationship 100;
+- do not complete/create a task;
+- do not activate another progression topic;
+- do not persistently consume themselves;
+- behave as relationship follow-up/menu content.
+
+Adversarial result: **retain all four as non-reminders**.
+
+### E. Forty-two genuine menu/navigation/no-progress occurrences
+
+These have no independent task ownership, no admitted lifecycle ownership, no verified event-only visit ownership, and no authored progression effect that makes them a separate weekday obligation.
+
+#### Ms Charm — 4
+
+- `actress_2b`;
+- `@actress_trade`;
+- `Leave`;
+- `actress_no_question`.
+
+#### Astrologer — 7
+
+- `astrologer_2a`;
+- `@astrologer_trade`;
+- `Leave`;
+- `@astrologer_2a_1b_1`;
+- `Back` at multi 67;
+- `Back` at multi 104;
+- `Leave` at multi 1384.
+
+#### Bishop — 9
+
+- `bishop_2_1b`;
+- `@bishop_trade` at multi 75;
+- `bishop_2_1d`;
+- `@bishop_trade` at multi 679;
+- `Leave` at multi 679;
+- `about_cathedral`;
+- `Trade`;
+- `Leave` at multi 1030;
+- `Back` at multi 1068.
+
+#### Snake — 6
+
+- `@snake_about_nacklase`;
+- `@snake_ritual_help`;
+- `Leave` at multi 106;
+- `Leave` at multi 763;
+- `Leave` at multi 985;
+- `Leave` at multi 1520.
+
+#### Inquisitor — 5
+
+- `Leave` at multi 736;
+- `@inquisitor_burn_again`;
+- `@inquisitor_dark`;
+- `Leave` at multi 843;
+- `Back` at multi 1556.
+
+#### Merchant — 11
+
+- `@merchant_2e`;
+- `@merchant_business`;
+- `merchant_2c`;
+- `@merchant_new_trade`;
+- `merchant_2d`;
+- `merchant_2b_5b`;
+- `merchant_2b_5b_2b`;
+- `merchant_2e_1d`;
+- `merchant_2e_1g`;
+- `merchant_business_back`;
+- `merchant_70_7b`.
+
+Adversarial result: **retain all 42 as genuine utility/navigation/no-progress occurrences**.
+
+## Other historical negative classes
+
+### Event-invoked no-root interactions — 14 occurrences
 
 Evidence strength: **strong / direct topology**.
 
-All 14 have no normal player interaction-root navigation path. Probe 0.1.3 established exactly one scripted `CustomEvent` root family for each occurrence:
+All 14 lack a normal player interaction-root navigation path. Existing no-root research maps them to already-running scripted event/cutscene families:
 
 - Inquisitor `first_meet_under_mountains`: 7 answers;
 - Inquisitor `on_came_to_mountain_for_witch_burning`: 2 answers;
 - Inquisitor `inquisitor_after_dark_event`: 3 answers;
 - Snake `player_back_to_cultist`: 2 answers.
 
-These are choices inside already-running scripted visits/cutscenes, not reasons to initiate a fresh weekday-NPC visit.
+These are choices made after the scripted visit has already started, not reasons to initiate another weekday visit.
 
-Adversarial result: **retain `EVENT_INVOKED_NON_REMINDER` for all 14**.
+Adversarial result: **retain all 14 as event-invoked non-reminders**.
 
-No new probe is required.
+### Explicit same-visit classes — 16 occurrences
 
-### 2. Same-visit suppression
+Historical table:
 
-Evidence strength: **strong / concrete authored path + persistent effects**.
+- 4 `SAME_VISIT_NON_REMINDER`;
+- 6 `SAME_VISIT_DESCENDANT_OF_DIALOGUE_OWNER`;
+- 6 `SAME_VISIT_DESCENDANT_OF_TASK_OWNER`.
 
-Current lifecycle census contains:
-
-- 6 path records suppressed as `SUPPRESS_SAME_VISIT`;
-- 6 descendants owned by admitted dialogue ancestors;
-- 6 descendants owned by task-owned ancestors.
-
-The exact `SUPPRESS_SAME_VISIT` rows are the Astrologer diary follow-up tree:
+The four direct same-visit rows are the Astrologer diary follow-up family:
 
 - `astrologer_diary_9a`;
 - `astrologer_diary_9b`;
-- `@astrologer_about_acid` through either diary branch;
-- `@astrologer_about_tools` through either diary branch.
+- `@astrologer_about_acid`;
+- `@astrologer_about_tools`.
 
-They have `independentOwnerRoot=False` in the accepted lifecycle evidence: they exist only after entering the already-owned visit and therefore cannot independently justify another weekday reminder.
+The accepted lifecycle evidence gives them no independent owner root.
 
-The descendant classes are likewise not separate visits: the persistent effect consumes the nearest selectable ancestor that owns the visit.
+The six dialogue-owner descendants are:
 
-Adversarial result: **retain all same-visit suppressions**.
+- `tr_quest_13_research_2` under `@tr_quest_13_research_1`;
+- `bishop_2_1a_6a/6b` under `bishop_2_1a`;
+- `snake_1с_4a/4b` under `@snake_1с`;
+- `merchant_2e_1d_4a` under `@merchant_2e_1e`.
 
-### 3. Exact task-owned lifecycle suppressions
+The six task-owner descendants are:
 
-Evidence strength: **strong / task completion ownership**.
+- `merchant_2b_5a`;
+- `merchant_2b_5b_2a`;
+- `merchant_2b_5b_2b_4a`;
+- `merchant_2b_5b_2b_4b`;
+- `merchant_favore_done_12a`;
+- `merchant_favore_done_12b`.
 
-The accepted non-`@` lifecycle census has exactly 9 task/completion exclusions:
+Adversarial result: **retain all 16 as same-visit suppressions**.
 
-- Astrologer: `astrologer_2b`;
-- Inquisitor: `inquisitor_dark_brain`, `inquisitor_dark_hart`, `inquisitor_dark_intestine`;
-- Merchant: `merchant_2e_1a`, `merchant_2e_1b`, `merchant_2e_1c`;
-- Ms Charm: `actress_2a_2`;
-- Bishop: `bishop_2_1c`.
+## Task-layer suppressions and completion exclusions
 
-These are not negative product decisions. They are deduplication: the visit is already represented by a task-owned contributor.
+These cases are important because “suppressed from dialogue lifecycle” must not be mistaken for “semantic non-reminder”.
 
-Adversarial result: **retain all 9 task/completion exclusions**.
+### Nine non-`@` completion exclusions
 
-### 4. Ancestor task exclusions
+Current lifecycle evidence has exactly nine task-owned non-`@` self candidates:
 
-Evidence strength: **strong / nearest persistent owner + task ownership**.
+- Astrologer — `astrologer_2b`;
+- Inquisitor — `inquisitor_dark_brain`;
+- Inquisitor — `inquisitor_dark_hart`;
+- Inquisitor — `inquisitor_dark_intestine`;
+- Merchant — `merchant_2e_1a`;
+- Merchant — `merchant_2e_1b`;
+- Merchant — `merchant_2e_1c`;
+- Ms Charm — `actress_2a_2`;
+- Bishop — `bishop_2_1c`.
 
-The complete ancestor-owner census has exactly six unique candidates. Two are task-owned and therefore excluded only from the generic dialogue layer:
+For the sibling Inquisitor-dark and Merchant-crop choices, the compact task-route fixture stores one representative completion answer, but the raw authored topology shows the sibling choices converging on the same task-completion node. Production's task compiler enumerates the authored completion anchors instead of relying on the representative fixture row.
+
+Adversarial result: **retain all nine dialogue-layer completion exclusions; the task layer owns the reminder semantics**.
+
+### Two task-owned ancestor owners
+
+The complete ancestor-owner census has six unique ancestor candidates. Four are admitted dialogue owners and two are task-owned suppressions:
 
 - Merchant `@merchant_2b`;
 - Merchant `@merchant_favore_done`.
 
-They still represent reminder semantics when their owning task route is actionable; they are not utility interactions.
+Independent authored-effect evidence confirms both task relationships:
 
-Adversarial result: **retain task-owned suppression, but never classify these owners as semantic non-reminders**.
+- `@merchant_2b` completes the cross-owner `horadric_garden` route;
+- `@merchant_favore_done` completes `merchant_grass`, creates `merchant_curse Visible`, activates the Clotho handoff, and consumes itself.
 
-### 5. Historical `NAVIGATION_UTILITY_REPEATABLE_NON_REMINDER` — discovered stale negatives
+Adversarial result: **retain task-layer suppression; neither owner is a semantic non-reminder**.
 
-Evidence strength of the historical label: **insufficient for five occurrences**.
+## Corrected semantic accounting
 
-The historical Watchdog 0.2 derivation used a fallback:
+Old Watchdog 0.2 negative count:
 
-`no exact lifecycle row + no direct task completion at this exact occurrence -> NAVIGATION_UTILITY_REPEATABLE_NON_REMINDER`
+- 67 utility;
+- 4 same-visit;
+- 6 dialogue-owner descendants;
+- 6 task-owner descendants;
+- 14 event-invoked;
+- total = **97 negative occurrences**.
 
-That fallback does not assign an admitted nearest-ancestor owner back to the ancestor's own menu occurrence. The current lifecycle census proves five historical utility labels are stale:
+This audit moves six stale utility rows into semantic reminder ownership.
 
-1. Astrologer main menu `@tr_quest_13_research_1`
-   - current evidence: admitted nearest persistent dialogue owner;
-   - descendants consume this ancestor;
-   - semantic class: reminder dialogue owner.
+Corrected result:
 
-2. Snake main menu `@snake_1с`
-   - current evidence: admitted nearest persistent dialogue owner;
-   - descendants `snake_1с_4a` / `snake_1с_4b` consume this ancestor;
-   - semantic class: reminder dialogue owner.
+- 6 stale negatives -> reminder semantics already represented by production;
+- 61 true negatives remain from the historical utility bucket;
+- the other 30 historical negative rows remain negative;
+- total supported semantic negatives = **91 occurrences**;
+- unresolved frontier = **0** within the audited 243-occurrence universe.
 
-3. Merchant submenu `@merchant_2e_1e`
-   - current evidence: admitted nearest persistent dialogue owner;
-   - descendant `merchant_2e_1d_4a` consumes this ancestor;
-   - semantic class: reminder dialogue owner.
-
-4. Bishop main menu `bishop_2_1a`
-   - current evidence: admitted nearest persistent dialogue owner;
-   - descendants `bishop_2_1a_6a` / `bishop_2_1a_6b` consume this ancestor;
-   - semantic class: reminder dialogue owner.
-
-5. Merchant main menu `@merchant_2b`
-   - current evidence: nearest persistent ancestor owner, but task-owned;
-   - semantic class: task-owned reminder owner / dialogue-layer suppression;
-   - it is not a utility/non-reminder.
-
-This is the same failure mode that originally made `@snake_1с` look like navigation-only UI: the negative decision was made at the owner occurrence without propagating descendant lifecycle evidence back to it.
-
-### 6. Remaining historical utility set
-
-After removing the five stale negatives above, **62 historical utility occurrences remain**.
-
-Their evidence is materially stronger than the stale five:
-
-- none is one of the six finite ancestor-owner candidates in the accepted complete lifecycle census;
-- none has a direct selectable task-completion route in the complete 70-selectable task snapshot;
-- none belongs to the 14 no-root event frontier;
-- none is an exact persistent self-owner admitted by the lifecycle census;
-- the accepted navigation census has no unsupported paths.
-
-This rules out the known ways an authored answer in the bounded six-NPC universe becomes an independently actionable visit:
-
-- direct task ownership;
-- exact persistent dialogue ownership;
-- nearest persistent ancestor ownership;
-- verified mandatory event-only stage.
-
-The remaining rows are therefore supported as repeatable navigation/utility/non-owning choices under the current evidence model.
-
-Adversarial result: **retain the remaining 62 as non-reminders**.
-
-## Corrected semantic accounting for Watchdog 0.3
-
-The old Watchdog 0.2 disposition table must not be copied unchanged into 0.3.
-
-At minimum, the five stale owner occurrences above must be reclassified from the semantic-negative bucket:
-
-- four -> reminder dialogue owner;
-- one -> task-owned reminder owner/suppression.
-
-This audit does not require changing production 1.1.9: production already contains the accepted nearest-ancestor lifecycle model and its four admitted ancestor topics plus the two task-owned ancestor suppressions.
-
-The defect is in the **research watchdog's semantic accounting**, not in accepted production behavior.
+This does **not** redefine production around a fixed 91-row hardcoded list. The count is audit evidence for the current authored universe, not a shipping classification table.
 
 ## Production conclusion
 
-No new production false-negative hole was found after applying the current 1.1.9 lifecycle evidence.
+**No new production false-negative hole was found in Point 1.**
 
-The adversarial audit found one research/tooling hole:
+The accepted 1.1.9 architecture already represents all six occurrences that the historical Watchdog 0.2 table had wrongly put in the negative utility bucket.
 
-> Watchdog 0.2's exact live-answer disposition table is stale for five ancestor-owner occurrences and therefore cannot be the semantic oracle for Watchdog 0.3.
+Therefore:
 
-All other reviewed negative classes have a direct evidence reason that excludes a separate weekday visit.
+- no production source change is justified;
+- no version bump is justified;
+- no DLL is produced;
+- no hosted CI run is justified;
+- stable `main` remains untouched.
+
+The concrete defect discovered by Point 1 is in the **research semantic oracle** used by Watchdog 0.2.
+
+## Canonical consequence for Watchdog 0.3
+
+Watchdog 0.3 must **not** copy `live-answer-dispositions-1.1.6.tsv` as a semantic truth table.
+
+Its independent runtime invariant should be:
+
+`live rendered + pickable interaction`
+-> accepted semantic disposition
+-> semantic reminder owner when applicable
+-> production contributor obligation.
+
+Implementation constraints established by this audit:
+
+1. preserve authored answer IDs exactly, including spaces and non-ASCII characters;
+2. project admitted descendant lifecycle evidence back to its semantic selectable owner;
+3. distinguish task-layer suppression from semantic non-reminder;
+4. do not infer “non-reminder” merely because an exact occurrence is absent from the compact representative task-route snapshot;
+5. keep event-invoked and same-visit cases explicitly explainable;
+6. remain research-only and avoid reimplementing the production classifier wholesale.
 
 ## Runtime-test decision
 
 **No player runtime test is required for Point 1.**
 
-Reason:
-
-- the newly found issue is a contradiction between two already accepted repository evidence sets;
-- the stronger/current lifecycle census already contains the required proof;
-- no unknown runtime topology remains in the audited negative classes;
-- no production code changed.
-
-A new runtime diagnostic would duplicate evidence rather than resolve an uncertainty.
+Existing repository and archived authored-graph/runtime evidence is sufficient to close every negative frontier examined here. A new probe would duplicate established evidence rather than resolve an uncertainty.
 
 ## Next step
 
-Point 1 is complete.
-
-Point 2 should build **Runtime Watchdog 0.3** from the frozen 0.2.0 research state, but update its invariant from “every rendered occurrence has any accepted disposition” to the stronger semantic obligation:
-
-`live rendered + pickable -> accepted semantic disposition -> reminder owner (when applicable) -> production contributor obligation`
-
-The watchdog must remain research-only and must not duplicate the production classifier wholesale.
+**Point 1 complete. Next: Point 2 — Runtime Watchdog 0.3.**
