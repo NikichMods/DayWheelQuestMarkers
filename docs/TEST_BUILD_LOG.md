@@ -494,3 +494,33 @@ Every handed DLL is immutable and tied to exact committed source plus build arti
   3. load any developed save where all six weekday NPCs are available;
   4. no dialogue/quest interaction is required; after normal gameplay finishes loading, return `BepInEx/LogOutput.log`;
   5. expected snapshot includes `TASKSNAP_SUMMARY`, `UNIVERSE_RAW_SUMMARY`, and `NAVSNAP_SUMMARY`. The strict importer will reject incomplete/non-canonical output.
+
+
+## Research — Souls weekday AnswerData audit 0.1.0
+
+- Date built: 2026-09-23.
+- Research branch: `research/souls-weekday-answerdata-audit`.
+- Exact frozen source: `c14903e453b112fd1adfbf5a5650417ce320a22d`.
+- Frozen ref: `frozen/souls-weekday-answerdata-audit-0.1.0`.
+- Purpose: audit the six Better Save Soul task-owned weekday-NPC completion answers as one structural family before generalizing production handling.
+- CI: run `35864841246`, job `107193696773`, success on `ubuntu-latest`; **0 warnings / 0 errors**.
+- Artifact: `DayWheelQuestMarkers-SoulsWeekdayAnswerDataAudit-0.1.0`, artifact ID `10752610814`, archive digest `sha256:c5e96db767e2a130e7fb2a996d9d1e9a9c6e98b05fc3bd641e02b481d55303af`.
+- Raw DLL: 22,016 bytes; SHA-256 `cd5cb3e2f9c02e847a75b786b9de59cb0f507d8b9fb5d6137349e85718410c2f`.
+- Player result: **captured 2026-09-23**. `SOULS6_DONE completeTargets=6/6`. Astrologer and Ms. Charm resolve as direct `Flow_Answer` gates with `Item:sin_shard x1`. Inquisitor, Snake, Merchant, and Bishop resolve through `RelayValueOutput<MultipleAnswerData> -> RelayValueInput -> Flow_MultipleAnswer -> Flow_AnswersArray -> child Flow_Answer` with two verified child locks each: `ash_on_shawl + sin_shard`, `note_with_rumors + sin_shard`, `sauce_for_meal + sin_shard`, and `ode_for_bishop + sin_shard` respectively. Bishop has three menu occurrences sharing the same compound producer; Inquisitor has two.
+- Status: **research complete / evidence accepted / not production**.
+
+
+
+## Research — MultipleAnswerData semantics audit 0.1.0
+
+- Date built: 2026-09-23.
+- Research branch: `research/multiple-answerdata-semantics-audit`.
+- Exact frozen source: `00d29cf9d5449adeef7218931b99dfa170c581d6`.
+- Frozen ref: `frozen/multiple-answerdata-semantics-audit-0.1.0`.
+- Purpose: prove the native `MultipleAnswerData.FillVisualData` combination semantics and enumerate the complete six-NPC relay-backed usage universe before production generalization.
+- CI: run `35867653946`, job `107203247544`, success on `ubuntu-latest`; **0 warnings / 0 errors**.
+- Artifact: `DayWheelQuestMarkers-MultipleAnswerDataSemanticsAudit-0.1.0`, artifact ID `10752856851`, archive digest `sha256:ea2e9a31b27daf59aa5b5377f849c5d2303b76d5e77d7ce4a1e8a567ff032a1c`.
+- Raw DLL: 19,968 bytes; SHA-256 `b6cf0eb8c52ab8d1dd1bf640429ad709c88f3ed5dbf3bc0b2fe0a687b3d259d1`.
+- Player result: **captured 2026-09-23**. The loaded GK 1.407 IL initializes aggregate lock/price flags true, iterates every child `AnswerData`, calls `WorldGameObject.IsEnough` on each child `d_lock` and `d_price`, and sets parent `can_be_picked=false` if either aggregate becomes false. Canonical semantics are therefore **AND across every child lock and every child price**. The same run enumerated exactly **7** `RelayValueOutput<MultipleAnswerData>` menu uses: Inquisitor 2, Snake 1, Merchant 1, Bishop 3, Astrologer 0, Ms. Charm 0; every relay resolves to `Flow_MultipleAnswer`. `MAD_DONE` completed without audit failure.
+- Status: **research complete / evidence accepted / not production**.
+
