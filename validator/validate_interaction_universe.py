@@ -18,9 +18,10 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_BASELINE = ROOT / "validator" / "baseline-1.1.6.json"
+DEFAULT_BASELINE = ROOT / "validator" / "baseline-1.1.8.json"
 DEFAULT_LIFECYCLE = ROOT / "validator" / "fixtures" / "lifecycle-paths-1.1.6.tsv"
 DEFAULT_TASKS = ROOT / "validator" / "fixtures" / "task-census-1.1.6.tsv"
+DEFAULT_MULTIPLE_ANSWER = ROOT / "validator" / "fixtures" / "multiple-answerdata-1.407.tsv"
 DEFAULT_REPORT = ROOT / "validator" / "out" / "validation-report.json"
 
 
@@ -61,6 +62,16 @@ def load_lifecycle(path: Path) -> list[dict[str, str]]:
         return []
     reader = csv.DictReader(lines, delimiter="\t")
     return list(reader)
+
+
+def load_tsv(path: Path) -> list[dict[str, str]]:
+    lines = [
+        line for line in path.read_text(encoding="utf-8").splitlines()
+        if line and not line.startswith("#")
+    ]
+    if not lines:
+        return []
+    return list(csv.DictReader(lines, delimiter="\t"))
 
 
 def derive_lifecycle_owner(row: dict[str, str]) -> tuple[str | None, str | None]:
@@ -272,6 +283,52 @@ def validate_task_census(sections: dict, baseline: dict, log: CheckLog) -> dict:
     }
 
 
+def validate_multiple_answerdata(rows: list[dict[str, str]], baseline: dict, log: CheckLog) -> dict:
+    expected = baseline["multiple_answerdata"]
+    observed_set = {
+        (row["npc"], int(row["multi"]), int(row["index"]), row["answer"], row["producer"], row["requirements"])
+        for row in rows
+    }
+    expected_set = {
+        ("npc_inquisitor", 736, 9, "@souls_s_s22_ask", "2118", "Item:ash_on_shawl=1,Item:sin_shard=1"),
+        ("npc_inquisitor", 843, 15, "@souls_s_s22_ask", "2118", "Item:ash_on_shawl=1,Item:sin_shard=1"),
+        ("npc_cultist", 106, 29, "@souls_s_s33_ask", "2560", "Item:note_with_rumors=1,Item:sin_shard=1"),
+        ("npc_merchant", 38, 20, "@souls_s_s24_ask", "1701", "Item:sauce_for_meal=1,Item:sin_shard=1"),
+        ("npc_bishop", 75, 8, "@souls_s_s15_ask", "2097", "Item:ode_for_bishop=1,Item:sin_shard=1"),
+        ("npc_bishop", 679, 5, "@souls_s_s15_ask", "2097", "Item:ode_for_bishop=1,Item:sin_shard=1"),
+        ("npc_bishop", 1030, 9, "@souls_s_s15_ask", "2097", "Item:ode_for_bishop=1,Item:sin_shard=1"),
+    }
+    log.check("multiple_answerdata.menu_use_count", len(rows) == expected["menu_uses"],
+              f"observed={len(rows)} expected={expected['menu_uses']}")
+    log.check("multiple_answerdata.exact_menu_use_set", observed_set == expected_set,
+              f"observed={sorted(observed_set)} expected={sorted(expected_set)}")
+
+    per_npc = Counter(row["npc"] for row in rows)
+    expected_per_npc = {item["npc"]: item["uses"] for item in expected["per_npc"]}
+    observed_per_npc = {npc: per_npc.get(npc, 0) for npc in expected_per_npc}
+    log.check("multiple_answerdata.per_npc", observed_per_npc == expected_per_npc,
+              f"observed={observed_per_npc} expected={expected_per_npc}")
+
+    task_routes = {
+        ("npc_inquisitor", "dlc_souls_s21_2", "@souls_s_s22_ask"),
+        ("npc_cultist", "dlc_souls_s29_3", "@souls_s_s33_ask"),
+        ("npc_merchant", "dlc_souls_s23_2", "@souls_s_s24_ask"),
+        ("npc_bishop", "dlc_souls_s12_1", "@souls_s_s15_ask"),
+    }
+    expected_task_routes = {(x["npc"], x["task"], x["answer"]) for x in expected["task_routes"]}
+    log.check("multiple_answerdata.task_route_set", task_routes == expected_task_routes,
+              f"observed={sorted(task_routes)} expected={sorted(expected_task_routes)}")
+    log.check("multiple_answerdata.native_semantics",
+              expected["native_semantics"] == "AND across every child d_lock and d_price via WorldGameObject.IsEnough",
+              expected["native_semantics"])
+
+    return {
+        "menu_uses": len(rows),
+        "per_npc": observed_per_npc,
+        "task_routes": sorted(task_routes),
+    }
+
+
 def extract_int_constant(text: str, name: str) -> int | None:
     match = re.search(rf"\b{name}\s*=\s*(\d+)\s*;", text)
     return int(match.group(1)) if match else None
@@ -279,11 +336,15 @@ def extract_int_constant(text: str, name: str) -> int | None:
 
 def validate_production_source(baseline: dict, log: CheckLog) -> dict:
     manifest_path = ROOT / "src" / "PersistentRuleManifest.cs"
+    rules_path = ROOT / "src" / "WeekdayInteractionRuleCache.cs"
+    navigation_path = ROOT / "src" / "NavigationReachabilityCache.cs"
     lifecycle_path = ROOT / "src" / "UnifiedDialogueLifecycleCompiler.cs"
     completion_path = ROOT / "src" / "VerifiedCompletionReminderRules.cs"
     plugin_path = ROOT / "src" / "CalendarQuestsPinsPlugin.cs"
 
     manifest = manifest_path.read_text(encoding="utf-8")
+    rules = rules_path.read_text(encoding="utf-8")
+    navigation = navigation_path.read_text(encoding="utf-8")
     lifecycle = lifecycle_path.read_text(encoding="utf-8")
     completion = completion_path.read_text(encoding="utf-8")
     plugin = plugin_path.read_text(encoding="utf-8")
@@ -372,6 +433,30 @@ def validate_production_source(baseline: dict, log: CheckLog) -> dict:
     log.check("source.manifest.uses_lifecycle_validation", manifest_uses_lifecycle_validation,
               "manifest must reject lifecycle-universe drift")
 
+    multiple_answer_needles = [
+        "TryBuildVariantFromAnswerDataSource",
+        "BuildMultipleAnswerVariant",
+        "\"_sourceInputUID\"",
+        "\"Flow_MultipleAnswer\"",
+        "\"Flow_AnswersArray\"",
+        "AdditionalRequirements",
+    ]
+    for needle in multiple_answer_needles:
+        log.check("source.multiple_answer.guard." + str(abs(hash(needle))),
+                  needle in rules, f"required MultipleAnswerData compiler guard missing: {needle}")
+
+    log.check("source.multiple_answer.runtime_and_evaluation",
+              "AreAdditionalRequirementsEnough" in navigation and
+              "variant.AdditionalRequirements" in navigation,
+              "compound requirements must be AND-evaluated through the normal live requirement path")
+
+    forbidden_specifics = ["note_with_rumors", "ash_on_shawl", "sauce_for_meal", "ode_for_bishop"]
+    combined_production = rules + navigation + completion + plugin
+    for token in forbidden_specifics:
+        log.check("source.multiple_answer.no_specific_item." + token,
+                  token not in combined_production,
+                  f"generic production compiler must not hard-code {token}")
+
     return {
         "manifest_constants": observed_constants,
         "lifecycle_constants": observed_lifecycle_constants,
@@ -385,6 +470,7 @@ def main() -> int:
     parser.add_argument("--baseline", type=Path, default=DEFAULT_BASELINE)
     parser.add_argument("--lifecycle", type=Path, default=DEFAULT_LIFECYCLE)
     parser.add_argument("--tasks", type=Path, default=DEFAULT_TASKS)
+    parser.add_argument("--multiple-answer", type=Path, default=DEFAULT_MULTIPLE_ANSWER)
     parser.add_argument("--report", type=Path, default=DEFAULT_REPORT)
     args = parser.parse_args()
 
@@ -395,6 +481,8 @@ def main() -> int:
     lifecycle_report = validate_lifecycle(lifecycle_rows, baseline, log)
     task_sections = parse_task_fixture(args.tasks)
     task_report = validate_task_census(task_sections, baseline, log)
+    multiple_answer_rows = load_tsv(args.multiple_answer)
+    multiple_answer_report = validate_multiple_answerdata(multiple_answer_rows, baseline, log)
     source_report = validate_production_source(baseline, log)
 
     # This is an explicit coverage boundary, not a hidden pass condition.
@@ -427,6 +515,7 @@ def main() -> int:
         },
         "lifecycle": lifecycle_report,
         "tasks": task_report,
+        "multiple_answerdata": multiple_answer_report,
         "production_source": source_report,
         "checks": log.checks,
     }
@@ -445,6 +534,11 @@ def main() -> int:
         "Tasks: "
         f"{task_report['owner_complete_nodes']} completion nodes -> "
         f"{task_report['final_selectable']} selectable + {task_report['final_event_only']} event-only"
+    )
+    print(
+        "MultipleAnswerData: "
+        f"{multiple_answer_report['menu_uses']} verified menu uses across "
+        f"{sum(1 for x in multiple_answer_report['per_npc'].values() if x > 0)} weekday NPCs"
     )
     for warning in log.warnings:
         print("COVERAGE NOTE:", warning)
