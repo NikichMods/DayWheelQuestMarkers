@@ -1,6 +1,8 @@
 # Unified Interaction Architecture — accepted 1.1.6
 
-Status: **accepted stable architecture for Graveyard Keeper 1.407**.
+> Historical accepted architecture. Superseded by `docs/UNIFIED_INTERACTION_1.1.9.md`, which adds generic relay-backed `MultipleAnswerData` compound gates and schema-6 persistence.
+
+Status: **historical accepted architecture for Graveyard Keeper 1.407**.
 
 ## Product meaning
 
