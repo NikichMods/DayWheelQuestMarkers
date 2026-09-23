@@ -18,7 +18,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_BASELINE = ROOT / "validator" / "baseline-1.1.8.json"
+DEFAULT_BASELINE = ROOT / "validator" / "baseline-1.1.9.json"
 DEFAULT_LIFECYCLE = ROOT / "validator" / "fixtures" / "lifecycle-paths-1.1.6.tsv"
 DEFAULT_TASKS = ROOT / "validator" / "fixtures" / "task-census-1.1.6.tsv"
 DEFAULT_MULTIPLE_ANSWER = ROOT / "validator" / "fixtures" / "multiple-answerdata-1.407.tsv"
