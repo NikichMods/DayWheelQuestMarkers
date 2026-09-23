@@ -92,6 +92,8 @@ Production must not hard-code those item IDs. The verified structural contract i
 
 Candidate 1.1.9 implements this during loading/bootstrap only and persists the resulting compact compound requirements in manifest schema 6. This candidate behavior is not stable until player acceptance.
 
+Candidate 1.1.9 canonical schema-6 partition, derived from the failed 1.1.8 runtime bootstrap and the complete audited structure: owner **81 supported / 0 unsupported**, cross-owner **8 tasks / 6 supported / 0 unsupported**, base persisted topics **55 / 55 supported / 0 unsupported**, dialogue-lifecycle **65 / 65 / 0**, navigation **210 / 270 / 151 / 0**. The owner total remains 81; the generic compiler changes the previous 1.1.6 partition from 75/6 to 81/0.
+
 ## Verified persistent dialogue-lifecycle semantics
 
 Graveyard Keeper has authored dialogue branches that persistently consume selectable entries through the phrase blacklist:
