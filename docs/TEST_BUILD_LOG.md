@@ -519,5 +519,5 @@ Every handed DLL is immutable and tied to exact committed source plus build arti
   4. before speaking to Snake, the Envy/Snake weekday must show one Souls-category marker attributable to this task (unless another independent Snake interaction adds additional markers);
   5. open Snake and complete the rumor interaction using either currently available verified child route; after the task/interaction is consumed, this contribution must disappear on the next normal refresh;
   6. return one fresh `LogOutput.log` and report the marker count before and after.
-- Player result: **pending**.
-- Status: **candidate / not accepted / do not merge or release**.
+- Player result: **not run**. Before player testing, broader repository evidence confirmed this is a six-weekday-NPC Better Save Soul structural family; the Snake-only production candidate was therefore superseded rather than accepted.
+- Status: **superseded / frozen candidate / do not test, merge, or release**.
