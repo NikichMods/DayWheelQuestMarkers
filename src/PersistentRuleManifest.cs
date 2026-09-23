@@ -468,7 +468,7 @@ namespace CalendarQuestsPins
             }
             catch (Exception ex)
             {
-                failure = "could not persist schema-5 manifest: " + ex.GetType().Name + ": " + ex.Message;
+                failure = "could not persist schema-6 manifest: " + ex.GetType().Name + ": " + ex.Message;
                 try { if (File.Exists(_path + ".tmp")) File.Delete(_path + ".tmp"); } catch { }
                 return false;
             }
