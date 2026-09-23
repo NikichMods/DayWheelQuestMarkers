@@ -137,6 +137,7 @@ Use these as long-lived sources of truth:
 - `docs/TEST_BUILD_LOG.md`
 - `docs/UNIFIED_INTERACTION_1.1.9.md`
 - `docs/EXHAUSTIVE_VALIDATION_HARNESS.md`
+- `docs/ADVERSARIAL_NEGATIVE_INTERACTION_AUDIT.md`
 - `docs/MIGRATION_PROVENANCE.md`
 - current production source and project file
 
@@ -157,6 +158,8 @@ For compound AnswerData, the accepted structural evidence is the exact verified 
 Do not broaden either model to arbitrary dialogue visibility, `fh=True` alone, or translated-text heuristics.
 
 For any future structural change to task/dialogue/navigation classification, run the interaction-universe validator before handing a player DLL. An unexplained baseline delta is a failed regression, even if aggregate counts still look plausible. Baseline updates require interaction-level evidence; do not merely change expected numbers to make CI green.
+
+The accepted 2026-09-23 adversarial negative audit closes the known negative frontier for the six weekday NPCs and establishes that historical Watchdog 0.2 `UNKNOWN=0` was not a sufficient semantic oracle. **Do not build or maintain Watchdog 0.3 as a permanent parallel classifier.** If normal play later produces a concrete contradiction (missing marker, extra marker, or unexpected transition), investigate that exact state with the narrowest read-only diagnostic that can resolve it.
 
 The remaining narrow completion/event supplement is not permission to accumulate ad-hoc fixes. Before adding an exact rule, first test whether the state can be represented by the task compiler or dialogue-lifecycle compiler. Exact mappings are allowed only when runtime evidence proves a genuinely different host mechanism.
 
