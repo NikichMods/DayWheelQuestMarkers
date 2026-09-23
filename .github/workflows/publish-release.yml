@@ -29,6 +29,7 @@ jobs:
           echo "title=$(jq -r '.title' release/manifest.json)" >> "$GITHUB_OUTPUT"
           echo "source_sha=$(jq -r '.source_sha' release/manifest.json)" >> "$GITHUB_OUTPUT"
           echo "artifact_id=$(jq -r '.artifact_id' release/manifest.json)" >> "$GITHUB_OUTPUT"
+          echo "artifact_file_name=$(jq -r '.artifact_file_name // .asset_name' release/manifest.json)" >> "$GITHUB_OUTPUT"
           echo "asset_name=$(jq -r '.asset_name' release/manifest.json)" >> "$GITHUB_OUTPUT"
           echo "sha256=$(jq -r '.sha256' release/manifest.json)" >> "$GITHUB_OUTPUT"
           echo "notes_file=$(jq -r '.notes_file' release/manifest.json)" >> "$GITHUB_OUTPUT"
@@ -44,21 +45,24 @@ jobs:
           mkdir accepted-artifact
           unzip -q accepted-artifact.zip -d accepted-artifact
 
-      - name: Verify exact accepted DLL
+      - name: Verify and stage exact accepted DLL
         env:
+          ARTIFACT_FILE_NAME: ${{ steps.manifest.outputs.artifact_file_name }}
           ASSET_NAME: ${{ steps.manifest.outputs.asset_name }}
           EXPECTED_SHA256: ${{ steps.manifest.outputs.sha256 }}
         shell: bash
         run: |
           set -euo pipefail
-          ASSET_PATH="accepted-artifact/${ASSET_NAME}"
-          test -f "$ASSET_PATH"
-          ACTUAL_SHA256=$(sha256sum "$ASSET_PATH" | awk '{print $1}')
+          SOURCE_PATH="accepted-artifact/${ARTIFACT_FILE_NAME}"
+          test -f "$SOURCE_PATH"
+          ACTUAL_SHA256=$(sha256sum "$SOURCE_PATH" | awk '{print $1}')
           echo "Expected SHA-256: $EXPECTED_SHA256"
           echo "Actual SHA-256:   $ACTUAL_SHA256"
           test "$ACTUAL_SHA256" = "$EXPECTED_SHA256"
+          mkdir -p release-stage
+          cp "$SOURCE_PATH" "release-stage/${ASSET_NAME}"
 
-      - name: Publish GitHub Release
+      - name: Publish GitHub Release if missing
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.manifest.outputs.tag }}
@@ -70,11 +74,34 @@ jobs:
         run: |
           set -euo pipefail
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            echo "Release $TAG already exists; refusing to replace an existing stable release."
-            exit 1
+            echo "Release $TAG already exists; verifying existing asset instead of replacing it."
+          else
+            gh release create "$TAG" "release-stage/${ASSET_NAME}" \
+              --repo "$GITHUB_REPOSITORY" \
+              --target "$SOURCE_SHA" \
+              --title "$TITLE" \
+              --notes-file "$NOTES_FILE"
           fi
-          gh release create "$TAG" "accepted-artifact/${ASSET_NAME}" \
+
+      - name: Verify published release identity
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.manifest.outputs.tag }}
+          SOURCE_SHA: ${{ steps.manifest.outputs.source_sha }}
+          ASSET_NAME: ${{ steps.manifest.outputs.asset_name }}
+          EXPECTED_SHA256: ${{ steps.manifest.outputs.sha256 }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json targetCommitish --jq '.targetCommitish')
+          echo "Expected target: $SOURCE_SHA"
+          echo "Actual target:   $TARGET"
+          test "$TARGET" = "$SOURCE_SHA"
+          mkdir -p published
+          gh release download "$TAG" \
             --repo "$GITHUB_REPOSITORY" \
-            --target "$SOURCE_SHA" \
-            --title "$TITLE" \
-            --notes-file "$NOTES_FILE"
+            --pattern "$ASSET_NAME" \
+            --dir published
+          ACTUAL_SHA256=$(sha256sum "published/${ASSET_NAME}" | awk '{print $1}')
+          echo "Published SHA-256: $ACTUAL_SHA256"
+          test "$ACTUAL_SHA256" = "$EXPECTED_SHA256"
