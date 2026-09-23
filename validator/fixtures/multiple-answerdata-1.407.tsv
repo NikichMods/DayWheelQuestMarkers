@@ -1,0 +1,10 @@
+# Verified GK 1.407 RelayValueOutput<MultipleAnswerData> menu-use census.
+# Evidence: six-NPC AnswerData audit + MultipleAnswerData semantics audit, 2026-09-23.
+npc	multi	index	answer	producer	requirements
+npc_inquisitor	736	9	@souls_s_s22_ask	2118	Item:ash_on_shawl=1,Item:sin_shard=1
+npc_inquisitor	843	15	@souls_s_s22_ask	2118	Item:ash_on_shawl=1,Item:sin_shard=1
+npc_cultist	106	29	@souls_s_s33_ask	2560	Item:note_with_rumors=1,Item:sin_shard=1
+npc_merchant	38	20	@souls_s_s24_ask	1701	Item:sauce_for_meal=1,Item:sin_shard=1
+npc_bishop	75	8	@souls_s_s15_ask	2097	Item:ode_for_bishop=1,Item:sin_shard=1
+npc_bishop	679	5	@souls_s_s15_ask	2097	Item:ode_for_bishop=1,Item:sin_shard=1
+npc_bishop	1030	9	@souls_s_s15_ask	2097	Item:ode_for_bishop=1,Item:sin_shard=1
