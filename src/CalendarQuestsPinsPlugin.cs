@@ -10,7 +10,7 @@ namespace CalendarQuestsPins
     {
         public const string PluginGuid = "nikich.gyk.calendarquestspins";
         public const string PluginName = "Day Wheel Quest Markers";
-        public const string PluginVersion = "1.1.9";
+        public const string PluginVersion = "1.1.10";
 
         private const float TickSeconds = 1f;
         private const float StructureCheckSeconds = 30f;
@@ -200,8 +200,7 @@ namespace CalendarQuestsPins
                             string taskId;
                             if (!WeekdayInteractionRuleCache.IsVisibleTask(task, out taskId)) continue;
                             var actionable = _reachability.IsOwnerTaskActionable(target, taskId, unlocked, blacklisted) ||
-                                             _verifiedCompletionRules.IsOwnerTaskActionable(target, taskId, unlocked, blacklisted,
-                                                 _reachability, _mainGame);
+                                             _verifiedCompletionRules.IsOwnerTaskActionable(target, taskId);
                             if (!actionable) continue;
                             AddMarker(sinTypeValue, GetMarkerStyle(taskId));
                         }
@@ -210,7 +209,7 @@ namespace CalendarQuestsPins
                     for (var i = 0; i < target.Topics.Count; i++)
                     {
                         var topic = target.Topics[i];
-                        if (topic == null || VerifiedCompletionReminderRules.IsPromotedCompletionTopic(target.NpcId, topic.AnswerId)) continue;
+                        if (topic == null) continue;
                         if (!_reachability.IsTopicActionable(target, topic, unlocked, blacklisted)) continue;
                         AddMarker(sinTypeValue, MarkerStyle.Base);
                     }

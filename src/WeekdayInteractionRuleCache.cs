@@ -337,6 +337,11 @@ namespace CalendarQuestsPins
                 list.Add(c);
             }
 
+            // Owner-local task completion has three additional exact same-graph flow edges
+            // verified by the exhaustive 72-node task census. Keep them scoped to this
+            // derivation so cross-owner and dialogue-lifecycle semantics do not broaden.
+            var ownerTaskIncomingFlow = BuildOwnerTaskIncomingFlow(nodes, connections, serialized);
+
             if (target.KnownNpc != null)
                 RegisterZoneQualityMirrors(serialized, nodes, incomingValue);
 
@@ -348,15 +353,18 @@ namespace CalendarQuestsPins
                 if (!node.Type.EndsWith("Flow_SetTaskState", StringComparison.Ordinal)) continue;
                 if (!string.Equals(ReadNodeContent(serialized, node, "State"), "Complete", StringComparison.Ordinal)) continue;
 
-                var anchors = FindAnchors(nodes, incomingFlow, serialized, node.Id, 64);
+                var taskId = ReadNodeContent(serialized, node, "Task");
+                var ownerNpcId = ReadNodeContent(serialized, node, "NPC id");
+                var ownerLocal = !string.IsNullOrEmpty(taskId) &&
+                    (string.IsNullOrEmpty(ownerNpcId) || string.Equals(ownerNpcId, target.NpcId, StringComparison.Ordinal));
+                var anchorFlow = ownerLocal ? ownerTaskIncomingFlow : incomingFlow;
+                var anchors = FindAnchors(nodes, anchorFlow, serialized, node.Id, 64, ownerLocal);
                 for (var i = 0; i < anchors.Count; i++)
                     AddAnchorAnswerIds(completionAnswerIds, anchors[i], serialized, nodes);
 
-                var taskId = ReadNodeContent(serialized, node, "Task");
                 if (string.IsNullOrEmpty(taskId)) continue;
-                var ownerNpcId = ReadNodeContent(serialized, node, "NPC id");
 
-                if (string.IsNullOrEmpty(ownerNpcId) || string.Equals(ownerNpcId, target.NpcId, StringComparison.Ordinal))
+                if (ownerLocal)
                 {
                     if (target.KnownNpc == null) continue;
                     for (var i = 0; i < anchors.Count; i++)
@@ -1076,8 +1084,129 @@ namespace CalendarQuestsPins
             return false;
         }
 
+        private static Dictionary<string, List<Connection>> BuildOwnerTaskIncomingFlow(
+            Dictionary<string, Node> nodes, List<Connection> connections, string serialized)
+        {
+            var result = new Dictionary<string, List<Connection>>(StringComparer.Ordinal);
+            for (var i = 0; i < connections.Count; i++)
+            {
+                var c = connections[i];
+                Node target;
+                if (!nodes.TryGetValue(c.TargetNode, out target)) continue;
+                var isFlow = IsFlowConnection(c);
+                if (!isFlow && target.Type.EndsWith("Flow_WaitForFlow", StringComparison.Ordinal) &&
+                    IsIntegerPort(c.TargetPort))
+                    isFlow = true;
+                if (isFlow) AddIncoming(result, c);
+            }
+
+            AddOwnerTaskFunctionLinks(serialized, nodes, result);
+            AddOwnerTaskEventLinks(serialized, nodes, result);
+            return result;
+        }
+
+        private static void AddOwnerTaskFunctionLinks(string serialized, Dictionary<string, Node> nodes,
+            Dictionary<string, List<Connection>> incomingFlow)
+        {
+            var eventsByUid = new Dictionary<string, string>(StringComparer.Ordinal);
+            var calls = new List<Tuple<string, string>>();
+            foreach (var node in nodes.Values)
+            {
+                if (node.Type.EndsWith("CustomFunctionEvent", StringComparison.Ordinal))
+                {
+                    var uid = ReadNodeDirectString(serialized, node, "_UID", 3500);
+                    if (!string.IsNullOrEmpty(uid)) eventsByUid[uid] = node.Id;
+                }
+                else if (node.Type.EndsWith("CustomFunctionCall", StringComparison.Ordinal))
+                {
+                    var uid = ReadNodeDirectString(serialized, node, "_sourceOutputUID", 3500);
+                    if (!string.IsNullOrEmpty(uid)) calls.Add(Tuple.Create(node.Id, uid));
+                }
+            }
+
+            for (var i = 0; i < calls.Count; i++)
+            {
+                string eventNode;
+                if (!eventsByUid.TryGetValue(calls[i].Item2, out eventNode)) continue;
+                AddIncoming(incomingFlow, new Connection
+                {
+                    SourceNode = calls[i].Item1,
+                    TargetNode = eventNode,
+                    SourcePort = "uid",
+                    TargetPort = "uid"
+                });
+            }
+        }
+
+        private static void AddOwnerTaskEventLinks(string serialized, Dictionary<string, Node> nodes,
+            Dictionary<string, List<Connection>> incomingFlow)
+        {
+            var eventsByName = new Dictionary<string, List<string>>(StringComparer.Ordinal);
+            var fires = new List<Tuple<string, string>>();
+            foreach (var node in nodes.Values)
+            {
+                if (node.Type.EndsWith("CustomEvent", StringComparison.Ordinal) &&
+                    !node.Type.EndsWith("CustomFunctionEvent", StringComparison.Ordinal))
+                {
+                    var eventName = ReadNodeNestedDirectString(serialized, node, "eventName", "_value", 3500);
+                    if (string.IsNullOrEmpty(eventName)) continue;
+                    List<string> ids;
+                    if (!eventsByName.TryGetValue(eventName, out ids))
+                        eventsByName[eventName] = ids = new List<string>();
+                    ids.Add(node.Id);
+                }
+                else if (node.Type.EndsWith("Flow_FireEvent", StringComparison.Ordinal))
+                {
+                    var eventName = ReadNodeContent(serialized, node, "event") ??
+                                    ReadNodeContent(serialized, node, "Event");
+                    if (!string.IsNullOrEmpty(eventName)) fires.Add(Tuple.Create(node.Id, eventName));
+                }
+            }
+
+            for (var i = 0; i < fires.Count; i++)
+            {
+                List<string> targets;
+                if (!eventsByName.TryGetValue(fires[i].Item2, out targets)) continue;
+                for (var j = 0; j < targets.Count; j++)
+                {
+                    AddIncoming(incomingFlow, new Connection
+                    {
+                        SourceNode = fires[i].Item1,
+                        TargetNode = targets[j],
+                        SourcePort = "event",
+                        TargetPort = "event"
+                    });
+                }
+            }
+        }
+
+        private static void AddIncoming(Dictionary<string, List<Connection>> incomingFlow, Connection connection)
+        {
+            List<Connection> list;
+            if (!incomingFlow.TryGetValue(connection.TargetNode, out list))
+                incomingFlow[connection.TargetNode] = list = new List<Connection>();
+            list.Add(connection);
+        }
+
+        private static bool HasExactFunctionIncoming(Dictionary<string, List<Connection>> incomingFlow, string nodeId)
+        {
+            List<Connection> incoming;
+            if (!incomingFlow.TryGetValue(nodeId, out incoming)) return false;
+            for (var i = 0; i < incoming.Count; i++)
+                if (string.Equals(incoming[i].TargetPort, "uid", StringComparison.Ordinal)) return true;
+            return false;
+        }
+
+        private static bool IsIntegerPort(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return false;
+            for (var i = 0; i < value.Length; i++)
+                if (!char.IsDigit(value[i])) return false;
+            return true;
+        }
+
         private static List<Anchor> FindAnchors(Dictionary<string, Node> nodes, Dictionary<string, List<Connection>> incomingFlow,
-            string serialized, string startNodeId, int maxDepth)
+            string serialized, string startNodeId, int maxDepth, bool followExactFunctionLinks = false)
         {
             var result = new List<Anchor>();
             var queue = new Queue<Tuple<string, int>>();
@@ -1095,6 +1224,11 @@ namespace CalendarQuestsPins
                     if (!nodes.TryGetValue(c.SourceNode, out source)) continue;
                     if (source.Type.EndsWith("CustomFunctionEvent", StringComparison.Ordinal))
                     {
+                        if (followExactFunctionLinks && HasExactFunctionIncoming(incomingFlow, source.Id))
+                        {
+                            if (seen.Add(source.Id)) queue.Enqueue(Tuple.Create(source.Id, current.Item2 + 1));
+                            continue;
+                        }
                         AddAnchor(result, new Anchor { EventIdentifier = ReadNodeIdentifier(serialized, source) });
                         continue;
                     }
@@ -1178,6 +1312,20 @@ namespace CalendarQuestsPins
                 start = dstEnd + 1;
             }
             return result;
+        }
+
+        private static string ReadNodeNestedDirectString(string serialized, Node node, string outerKey,
+            string innerKey, int lookBehind)
+        {
+            if (string.IsNullOrEmpty(serialized) || node == null || string.IsNullOrEmpty(outerKey) ||
+                string.IsNullOrEmpty(innerKey)) return null;
+            var begin = Math.Max(0, node.TypePosition - Math.Max(100, lookBehind));
+            var window = serialized.Substring(begin, node.TypePosition - begin);
+            var marker = "\"" + outerKey + "\":{\"" + innerKey + "\":\"";
+            var pos = window.LastIndexOf(marker, StringComparison.Ordinal);
+            if (pos < 0) return null;
+            int end;
+            return ReadJsonString(window, pos + marker.Length, out end);
         }
 
         private static string ReadNodeContent(string serialized, Node node, string key)

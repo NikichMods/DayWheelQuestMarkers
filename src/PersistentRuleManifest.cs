@@ -20,15 +20,15 @@ namespace CalendarQuestsPins
     {
         internal const string VerifiedGameVersion = "1.407";
         private const string Magic = "DWQM_RULE_MANIFEST";
-        private const int SchemaVersion = 6;
+        private const int SchemaVersion = 7;
 
-        private const int ExpectedOwnerSupported = 81;
+        private const int ExpectedOwnerSupported = 87;
         private const int ExpectedOwnerUnsupported = 0;
         private const int ExpectedCrossTasks = 8;
         private const int ExpectedCrossSupported = 6;
         private const int ExpectedCrossUnsupported = 0;
-        private const int ExpectedAtTopics = 55;
-        private const int ExpectedAtTopicSupported = 55;
+        private const int ExpectedAtTopics = 50;
+        private const int ExpectedAtTopicSupported = 50;
         private const int ExpectedAtTopicUnsupported = 0;
 
         private static readonly string[] NpcIds =
@@ -143,7 +143,7 @@ namespace CalendarQuestsPins
                     if (!string.Equals(reader.ReadString(), Magic, StringComparison.Ordinal))
                     { failure = "manifest magic mismatch"; return false; }
                     if (reader.ReadInt32() != SchemaVersion)
-                    { failure = "manifest schema mismatch; schema 6 rebuild required"; return false; }
+                    { failure = "manifest schema mismatch; schema 7 rebuild required"; return false; }
                     if (!string.Equals(reader.ReadString(), VerifiedGameVersion, StringComparison.Ordinal))
                     { failure = "manifest game version mismatch"; return false; }
                     var gameVersion = ReadGameVersion(save);

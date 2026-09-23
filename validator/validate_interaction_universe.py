@@ -18,9 +18,10 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_BASELINE = ROOT / "validator" / "baseline-1.1.9.json"
+DEFAULT_BASELINE = ROOT / "validator" / "baseline-1.1.10.json"
 DEFAULT_LIFECYCLE = ROOT / "validator" / "fixtures" / "lifecycle-paths-1.1.6.tsv"
 DEFAULT_TASKS = ROOT / "validator" / "fixtures" / "task-census-1.1.6.tsv"
+DEFAULT_TASK_ROUTES = ROOT / "validator" / "fixtures" / "task-routes-1.1.6.tsv"
 DEFAULT_MULTIPLE_ANSWER = ROOT / "validator" / "fixtures" / "multiple-answerdata-1.407.tsv"
 DEFAULT_REPORT = ROOT / "validator" / "out" / "validation-report.json"
 
@@ -283,6 +284,41 @@ def validate_task_census(sections: dict, baseline: dict, log: CheckLog) -> dict:
     }
 
 
+def validate_task_routes(rows: list[dict[str, str]], baseline: dict, log: CheckLog) -> dict:
+    expected = baseline["task_census"]
+    selectable = [row for row in rows if row["kind"] == "SELECTABLE"]
+    event_only = [row for row in rows if row["kind"] == "EVENT_OR_UNRESOLVED"]
+
+    log.check("task_routes.total", len(rows) == expected["owner_complete_nodes"],
+              f"observed={len(rows)} expected={expected['owner_complete_nodes']}")
+    log.check("task_routes.selectable",
+              len(selectable) == expected["final_selectable_task_completions"],
+              f"observed={len(selectable)} expected={expected['final_selectable_task_completions']}")
+    log.check("task_routes.event_only",
+              len(event_only) == expected["final_event_only_task_stages"],
+              f"observed={len(event_only)} expected={expected['final_event_only_task_stages']}")
+
+    actual_event_only = {(row["npc"], row["task"]) for row in event_only}
+    expected_event_only = {(row["npc"], row["task"]) for row in expected["event_only"]}
+    log.check("task_routes.event_only_exact_set", actual_event_only == expected_event_only,
+              f"observed={sorted(actual_event_only)} expected={sorted(expected_event_only)}")
+
+    selectable_set = {(row["npc"], row["task"], row["answer"]) for row in selectable}
+    derived_expected = {
+        (row["npc"], row["task"], row["answer"])
+        for row in baseline["verified_completion_supplement"]["derived_owner_routes"]
+    }
+    log.check("task_routes.derived_owner_routes", derived_expected.issubset(selectable_set),
+              f"missing={sorted(derived_expected - selectable_set)}")
+
+    return {
+        "records": len(rows),
+        "selectable": len(selectable),
+        "event_only": len(event_only),
+        "derived_owner_routes": sorted(derived_expected),
+    }
+
+
 def validate_multiple_answerdata(rows: list[dict[str, str]], baseline: dict, log: CheckLog) -> dict:
     expected = baseline["multiple_answerdata"]
     observed_set = {
@@ -416,13 +452,33 @@ def validate_production_source(baseline: dict, log: CheckLog) -> dict:
     log.check("source.completion.event_only_exact_set", event_actual == event_expected,
               f"observed={sorted(event_actual)} expected={sorted(event_expected)}")
 
-    snake_trap_ok = (
-        '"snake_trap"' in completion
-        and 'const string answerId = "snake_stone_ready";' in completion
-        and 'CreateSmartRes("GameRes", "_rel", 10f' in completion
-    )
-    log.check("source.completion.snake_trap_exact_route", snake_trap_ok,
-              "expected snake_trap -> snake_stone_ready with GameRes:_rel 10")
+    answer_backed_special_tokens = [
+        "PromotedRoute",
+        "IsPromotedCompletionTopic",
+        '"snake_trap"',
+        '"snake_stone_ready"',
+        'CreateSmartRes("GameRes", "_rel", 10f',
+    ]
+    leaked_specials = [token for token in answer_backed_special_tokens if token in completion or token in plugin]
+    log.check("source.completion.no_answer_backed_specials", not leaked_specials,
+              f"answer-backed completion specials must be generic owner-task rules; leaked={leaked_specials}")
+
+    owner_task_topology_needles = [
+        "BuildOwnerTaskIncomingFlow",
+        "Flow_WaitForFlow",
+        "IsIntegerPort(c.TargetPort)",
+        '"_sourceOutputUID"',
+        '"_UID"',
+        "AddOwnerTaskFunctionLinks",
+        "Flow_FireEvent",
+        "CustomEvent",
+        "eventName",
+        "AddOwnerTaskEventLinks",
+        "var anchorFlow = ownerLocal ? ownerTaskIncomingFlow : incomingFlow;",
+    ]
+    for needle in owner_task_topology_needles:
+        log.check("source.owner_task_topology.guard." + str(abs(hash(needle))),
+                  needle in rules, f"required bounded owner-task topology guard missing: {needle}")
 
     retired_snake_special = ("@snake_1с" in completion or "quest_fake_coins" in completion or
                              "@snake_1с" in plugin or "quest_fake_coins" in plugin)
@@ -470,6 +526,7 @@ def main() -> int:
     parser.add_argument("--baseline", type=Path, default=DEFAULT_BASELINE)
     parser.add_argument("--lifecycle", type=Path, default=DEFAULT_LIFECYCLE)
     parser.add_argument("--tasks", type=Path, default=DEFAULT_TASKS)
+    parser.add_argument("--task-routes", type=Path, default=DEFAULT_TASK_ROUTES)
     parser.add_argument("--multiple-answer", type=Path, default=DEFAULT_MULTIPLE_ANSWER)
     parser.add_argument("--report", type=Path, default=DEFAULT_REPORT)
     args = parser.parse_args()
@@ -481,16 +538,13 @@ def main() -> int:
     lifecycle_report = validate_lifecycle(lifecycle_rows, baseline, log)
     task_sections = parse_task_fixture(args.tasks)
     task_report = validate_task_census(task_sections, baseline, log)
+    task_route_rows = load_tsv(args.task_routes)
+    task_route_report = validate_task_routes(task_route_rows, baseline, log)
     multiple_answer_rows = load_tsv(args.multiple_answer)
     multiple_answer_report = validate_multiple_answerdata(multiple_answer_rows, baseline, log)
     source_report = validate_production_source(baseline, log)
 
     # This is an explicit coverage boundary, not a hidden pass condition.
-    log.warn(
-        "Owner-task census is complete at the 72-node classification level, but the historical "
-        "0.1.1 evidence did not emit a row for every one of the 70 selectable completion routes. "
-        "A one-time read-only route exporter is required to make that layer route-by-route exhaustive."
-    )
     log.warn(
         "Navigation has accepted runtime totals 210 answers / 270 paths / 151 predicates / 0 unsupported, "
         "but no complete path fixture is yet stored. Lifecycle fixture coverage exercises many of those paths "
@@ -508,13 +562,14 @@ def main() -> int:
         "warnings": log.warnings,
         "coverage": {
             "dialogue_lifecycle": "path-level exhaustive for accepted census",
-            "owner_task_completion": "complete census/classification; individual selectable-route fixture partial",
+            "owner_task_completion": "route-level exhaustive: 72 completion routes = 70 selectable + 2 event-only",
             "navigation": "accepted totals plus lifecycle-path coverage; complete standalone path fixture pending",
             "event_only": "exact accepted set",
             "production_contract": "static bounded contract checks",
         },
         "lifecycle": lifecycle_report,
         "tasks": task_report,
+        "task_routes": task_route_report,
         "multiple_answerdata": multiple_answer_report,
         "production_source": source_report,
         "checks": log.checks,
@@ -534,6 +589,11 @@ def main() -> int:
         "Tasks: "
         f"{task_report['owner_complete_nodes']} completion nodes -> "
         f"{task_report['final_selectable']} selectable + {task_report['final_event_only']} event-only"
+    )
+    print(
+        "Task routes: "
+        f"{task_route_report['records']} exact routes -> "
+        f"{task_route_report['selectable']} selectable + {task_route_report['event_only']} event-only"
     )
     print(
         "MultipleAnswerData: "
