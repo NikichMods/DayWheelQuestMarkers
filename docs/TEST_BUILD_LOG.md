@@ -611,5 +611,5 @@ Every handed DLL is immutable and tied to exact committed source plus build arti
 - Raw DLL SHA-256: `cd5cb3e2f9c02e847a75b786b9de59cb0f507d8b9fb5d6137349e85718410c2f`.
 - Requested test: install this audit DLL alongside accepted production 1.1.6 (the Souls s33 probe is not required), load any developed save once, wait until gameplay is fully loaded, quit, and return the fresh `LogOutput.log`. No dialogue interaction or progression to the six quests is required.
 - Expected decisive lines: `SOULS6_BEGIN`, per-target `SOULS6_OCCURRENCE` / `SOULS6_TRACE` / `SOULS6_ALTERNATIVE` / `SOULS6_SHAPE`, six `SOULS6_TARGET_SUMMARY` lines, then `SOULS6_DONE completeTargets=6/6`.
-- Player result: **pending**.
-- Status: **research-only / frozen / not production**.
+- Player result: **captured 2026-09-23**. `SOULS6_DONE completeTargets=6/6`. Astrologer and Ms. Charm resolve as direct `Flow_Answer` gates with `Item:sin_shard x1`. Inquisitor, Snake, Merchant, and Bishop resolve through `RelayValueOutput<MultipleAnswerData> -> RelayValueInput -> Flow_MultipleAnswer -> Flow_AnswersArray -> child Flow_Answer` with two verified child locks each: `ash_on_shawl + sin_shard`, `note_with_rumors + sin_shard`, `sauce_for_meal + sin_shard`, and `ode_for_bishop + sin_shard` respectively. Bishop has three menu occurrences sharing the same compound producer; Inquisitor has two.
+- Status: **research complete / evidence accepted / not production**.
