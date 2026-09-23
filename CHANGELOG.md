@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.9
+
+- Adds generic Graveyard Keeper 1.407 support for relay-backed `MultipleAnswerData` gates used by Better Save Soul weekday-NPC interactions.
+- Resolves the verified authored chain `RelayValueOutput<MultipleAnswerData> -> RelayValueInput -> Flow_MultipleAnswer -> Flow_AnswersArray -> child Flow_Answer` during loading only.
+- Mirrors the game's native AND semantics: every child lock and price requirement must be satisfied through the game's own SmartRes sufficiency path before the reminder is actionable.
+- Covers the complete audited seven menu uses across Inquisitor, Snake, Merchant, and Bishop without quest-, NPC-, or item-specific production mappings.
+- Upgrades the persistent interaction manifest to schema 6; existing schema-5 caches rebuild automatically during loading and gameplay still performs no FlowCanvas graph parsing.
+
+
 ## 1.1.6
 
 - Generalizes one-time dialogue reminders from exact-self consumption to **nearest persistent lifecycle ownership**: when a progressing child persistently consumes its selectable parent on the same authored path, that parent can now represent the reminder interaction.
