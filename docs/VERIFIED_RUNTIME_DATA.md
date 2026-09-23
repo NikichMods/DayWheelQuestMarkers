@@ -90,7 +90,7 @@ Verified child lock sets:
 
 Production must not hard-code those item IDs. The verified structural contract is the relay/compound chain plus native AND semantics. Missing relay ownership, ambiguous producers, unknown intermediate node types, unsupported child gates, or an empty/unresolved child set fail closed. Live sufficiency continues to delegate to the game's own SmartRes/Player path.
 
-Candidate 1.1.8 implements this during loading/bootstrap only and persists the resulting compact compound requirements in manifest schema 6. This candidate behavior is not stable until player acceptance.
+Candidate 1.1.9 implements this during loading/bootstrap only and persists the resulting compact compound requirements in manifest schema 6. This candidate behavior is not stable until player acceptance.
 
 ## Verified persistent dialogue-lifecycle semantics
 
@@ -209,7 +209,7 @@ The accepted direct owner-task classifier does not represent every verified comp
 - promoted task/topic pairs reuse existing persisted exact-self-consuming topic/navigation predicates;
 - `npc_cultist/snake_trap` uses the verified `snake_stone_ready` answer plus `_rel >= 10` through game-owned SmartRes sufficiency;
 - `npc_inquisitor/inquisitor_talk` and `npc_cultist/snake_back` are exact mandatory interaction-event stages whose visible task is the verified actionability boundary;
-- accepted 1.1.6 keeps `@souls_s_s33_ask` fail-closed because relay-backed `MultipleAnswerData` was not yet represented; candidate 1.1.8 removes that limitation through the verified generic compound-gate compiler rather than a Snake-specific rule;
+- accepted 1.1.6 keeps `@souls_s_s33_ask` fail-closed because relay-backed `MultipleAnswerData` was not yet represented; candidate 1.1.9 removes that limitation through the verified generic compound-gate compiler rather than a Snake-specific rule;
 - there is no broad `Visible task`, `CustomEvent`, or `AddInteractionEvent` classifier.
 
 Research after accepted 1.0.35 shows that several answer-backed supplemental routes are candidates for future consolidation into a common graph compiler, but the two mandatory event-only stages remain a genuinely distinct evidence type unless a broader event contract is separately proved.
