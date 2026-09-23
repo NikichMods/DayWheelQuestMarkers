@@ -20,6 +20,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_BASELINE = ROOT / "validator" / "baseline-1.1.10.json"
 DEFAULT_LIFECYCLE = ROOT / "validator" / "fixtures" / "lifecycle-paths-1.1.6.tsv"
+DEFAULT_RAW_UNIVERSE = ROOT / "validator" / "fixtures" / "raw-interaction-universe-1.1.6.tsv"
+DEFAULT_NAVIGATION = ROOT / "validator" / "fixtures" / "navigation-paths-1.1.6.tsv"
+DEFAULT_NO_ROOT = ROOT / "validator" / "fixtures" / "no-root-frontier-1.1.6.tsv"
 DEFAULT_TASKS = ROOT / "validator" / "fixtures" / "task-census-1.1.6.tsv"
 DEFAULT_TASK_ROUTES = ROOT / "validator" / "fixtures" / "task-routes-1.1.6.tsv"
 DEFAULT_MULTIPLE_ANSWER = ROOT / "validator" / "fixtures" / "multiple-answerdata-1.407.tsv"
@@ -73,6 +76,91 @@ def load_tsv(path: Path) -> list[dict[str, str]]:
     if not lines:
         return []
     return list(csv.DictReader(lines, delimiter="\t"))
+
+
+def validate_interaction_partition(
+    raw_rows: list[dict[str, str]],
+    navigation_rows: list[dict[str, str]],
+    no_root_rows: list[dict[str, str]],
+    baseline: dict,
+    log: CheckLog,
+) -> dict:
+    expected_raw = baseline["raw_universe"]
+    expected_navigation = baseline["navigation"]
+    expected_no_root = baseline["no_root_frontier"]
+
+    kind_counts = Counter(row["kind"] for row in raw_rows)
+    expected_kinds = expected_raw["kinds"]
+    log.check("universe.raw_rows", len(raw_rows) == expected_raw["rows"],
+              f"observed={len(raw_rows)} expected={expected_raw['rows']}")
+    log.check("universe.kind_counts", dict(kind_counts) == expected_kinds,
+              f"observed={dict(kind_counts)} expected={expected_kinds}")
+
+    answers = [row for row in raw_rows if row["kind"] == "answer"]
+    occurrence_keys = {
+        (row["npc"], row["node"], row["index"], row["id"])
+        for row in answers
+    }
+    raw_unique = {(row["npc"], row["id"]) for row in answers}
+    log.check("universe.answer_occurrences",
+              len(answers) == expected_raw["answer_occurrences"] == len(occurrence_keys),
+              f"rows={len(answers)} uniqueOccurrences={len(occurrence_keys)} "
+              f"expected={expected_raw['answer_occurrences']}")
+    log.check("universe.unique_npc_answers", len(raw_unique) == expected_raw["unique_npc_answers"],
+              f"observed={len(raw_unique)} expected={expected_raw['unique_npc_answers']}")
+
+    navigation_unique = {(row["npc"], row["answer"]) for row in navigation_rows}
+    unsupported = [row for row in navigation_rows if row["unsupported"] != "False"]
+    log.check("navigation.path_count", len(navigation_rows) == expected_navigation["paths"],
+              f"observed={len(navigation_rows)} expected={expected_navigation['paths']}")
+    log.check("navigation.answer_count", len(navigation_unique) == expected_navigation["answers"],
+              f"observed={len(navigation_unique)} expected={expected_navigation['answers']}")
+    log.check("navigation.unsupported_paths", len(unsupported) == expected_navigation["unsupported_paths"],
+              f"observed={len(unsupported)} expected={expected_navigation['unsupported_paths']}")
+
+    path_index_errors = []
+    paths_by_answer: dict[tuple[str, str], list[int]] = defaultdict(list)
+    for row in navigation_rows:
+        paths_by_answer[(row["npc"], row["answer"])].append(int(row["pathIndex"]))
+    for key, indices in paths_by_answer.items():
+        ordered = sorted(indices)
+        if ordered != list(range(len(ordered))):
+            path_index_errors.append(f"{key}={ordered}")
+    log.check("navigation.path_indices_contiguous", not path_index_errors,
+              "all path indices contiguous" if not path_index_errors else "; ".join(path_index_errors[:8]))
+
+    no_root_unique = {(row["npc"], row["answer"]) for row in no_root_rows}
+    no_root_classes = {row["classification"] for row in no_root_rows}
+    root_events = Counter(row["rootEvent"] for row in no_root_rows)
+    log.check("no_root.row_count", len(no_root_rows) == expected_no_root["rows"],
+              f"observed={len(no_root_rows)} expected={expected_no_root['rows']}")
+    log.check("no_root.unique_count", len(no_root_unique) == expected_no_root["rows"],
+              f"observed={len(no_root_unique)} expected={expected_no_root['rows']}")
+    log.check("no_root.classification",
+              no_root_classes == {expected_no_root["classification"]},
+              f"observed={sorted(no_root_classes)} expected={expected_no_root['classification']}")
+    log.check("no_root.root_events", dict(root_events) == expected_no_root["root_events"],
+              f"observed={dict(root_events)} expected={expected_no_root['root_events']}")
+
+    overlap = navigation_unique & no_root_unique
+    covered = navigation_unique | no_root_unique
+    log.check("universe.navigation_no_root_disjoint", not overlap,
+              "disjoint" if not overlap else f"overlap={sorted(overlap)}")
+    log.check("universe.unique_answer_partition", covered == raw_unique,
+              f"missing={sorted(raw_unique - covered)} extra={sorted(covered - raw_unique)}")
+    log.check("universe.partition_arithmetic",
+              len(raw_unique) == len(navigation_unique) + len(no_root_unique),
+              f"raw={len(raw_unique)} navigation={len(navigation_unique)} noRoot={len(no_root_unique)}")
+
+    return {
+        "raw_rows": len(raw_rows),
+        "answer_occurrences": len(answers),
+        "unique_npc_answers": len(raw_unique),
+        "navigation_answers": len(navigation_unique),
+        "navigation_paths": len(navigation_rows),
+        "no_root_answers": len(no_root_unique),
+        "partition": f"{len(raw_unique)} = {len(navigation_unique)} + {len(no_root_unique)}",
+    }
 
 
 def derive_lifecycle_owner(row: dict[str, str]) -> tuple[str | None, str | None]:
@@ -524,6 +612,9 @@ def validate_production_source(baseline: dict, log: CheckLog) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--baseline", type=Path, default=DEFAULT_BASELINE)
+    parser.add_argument("--raw-universe", type=Path, default=DEFAULT_RAW_UNIVERSE)
+    parser.add_argument("--navigation", type=Path, default=DEFAULT_NAVIGATION)
+    parser.add_argument("--no-root", type=Path, default=DEFAULT_NO_ROOT)
     parser.add_argument("--lifecycle", type=Path, default=DEFAULT_LIFECYCLE)
     parser.add_argument("--tasks", type=Path, default=DEFAULT_TASKS)
     parser.add_argument("--task-routes", type=Path, default=DEFAULT_TASK_ROUTES)
@@ -534,6 +625,10 @@ def main() -> int:
     baseline = load_json(args.baseline)
     log = CheckLog()
 
+    raw_rows = load_tsv(args.raw_universe)
+    navigation_rows = load_tsv(args.navigation)
+    no_root_rows = load_tsv(args.no_root)
+    universe_report = validate_interaction_partition(raw_rows, navigation_rows, no_root_rows, baseline, log)
     lifecycle_rows = load_lifecycle(args.lifecycle)
     lifecycle_report = validate_lifecycle(lifecycle_rows, baseline, log)
     task_sections = parse_task_fixture(args.tasks)
@@ -543,13 +638,6 @@ def main() -> int:
     multiple_answer_rows = load_tsv(args.multiple_answer)
     multiple_answer_report = validate_multiple_answerdata(multiple_answer_rows, baseline, log)
     source_report = validate_production_source(baseline, log)
-
-    # This is an explicit coverage boundary, not a hidden pass condition.
-    log.warn(
-        "Navigation has accepted runtime totals 210 answers / 270 paths / 151 predicates / 0 unsupported, "
-        "but no complete path fixture is yet stored. Lifecycle fixture coverage exercises many of those paths "
-        "but is not a complete navigation oracle."
-    )
 
     report = {
         "validator_format": 1,
@@ -563,10 +651,11 @@ def main() -> int:
         "coverage": {
             "dialogue_lifecycle": "path-level exhaustive for accepted census",
             "owner_task_completion": "route-level exhaustive: 72 completion routes = 70 selectable + 2 event-only",
-            "navigation": "accepted totals plus lifecycle-path coverage; complete standalone path fixture pending",
+            "navigation": "route-level exhaustive: 210 unique answers / 270 exact root paths / 0 unsupported",
             "event_only": "exact accepted set",
             "production_contract": "static bounded contract checks",
         },
+        "interaction_universe": universe_report,
         "lifecycle": lifecycle_report,
         "tasks": task_report,
         "task_routes": task_route_report,
@@ -580,6 +669,11 @@ def main() -> int:
 
     print(f"Day Wheel interaction validator: {report['status']}")
     print(f"Checks: {report['checks_total']} total, {report['checks_failed']} failed")
+    print(
+        "Interaction universe: "
+        f"{universe_report['answer_occurrences']} occurrences / "
+        f"{universe_report['partition']} unique answer partition"
+    )
     print(
         "Lifecycle: "
         f"{lifecycle_report['records']} path records, "
