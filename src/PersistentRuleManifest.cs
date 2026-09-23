@@ -12,7 +12,7 @@ using UnityEngine;
 namespace CalendarQuestsPins
 {
     /// <summary>
-    /// Schema-5 persistent manifest. It stores the accepted structural reminder rules, the unified
+    /// Schema-6 persistent manifest. It stores the accepted structural reminder rules, the unified
     /// exact-self-consuming dialogue rules, and compact root-to-answer navigation predicates derived
     /// from the same six Graveyard Keeper 1.407 graphs. Graph parsing remains loading-screen-only.
     /// </summary>
@@ -20,16 +20,16 @@ namespace CalendarQuestsPins
     {
         internal const string VerifiedGameVersion = "1.407";
         private const string Magic = "DWQM_RULE_MANIFEST";
-        private const int SchemaVersion = 5;
+        private const int SchemaVersion = 6;
 
-        private const int ExpectedOwnerSupported = 75;
-        private const int ExpectedOwnerUnsupported = 6;
+        private const int ExpectedOwnerSupported = 79;
+        private const int ExpectedOwnerUnsupported = 2;
         private const int ExpectedCrossTasks = 8;
         private const int ExpectedCrossSupported = 6;
         private const int ExpectedCrossUnsupported = 0;
         private const int ExpectedAtTopics = 55;
-        private const int ExpectedAtTopicSupported = 54;
-        private const int ExpectedAtTopicUnsupported = 1;
+        private const int ExpectedAtTopicSupported = 55;
+        private const int ExpectedAtTopicUnsupported = 0;
 
         private static readonly string[] NpcIds =
         {
@@ -143,7 +143,7 @@ namespace CalendarQuestsPins
                     if (!string.Equals(reader.ReadString(), Magic, StringComparison.Ordinal))
                     { failure = "manifest magic mismatch"; return false; }
                     if (reader.ReadInt32() != SchemaVersion)
-                    { failure = "manifest schema mismatch; schema 5 rebuild required"; return false; }
+                    { failure = "manifest schema mismatch; schema 6 rebuild required"; return false; }
                     if (!string.Equals(reader.ReadString(), VerifiedGameVersion, StringComparison.Ordinal))
                     { failure = "manifest game version mismatch"; return false; }
                     var gameVersion = ReadGameVersion(save);
@@ -551,6 +551,22 @@ namespace CalendarQuestsPins
                 if (!valid) { failure = "invalid price requirement for " + variant.AnswerId; return false; }
                 variant.Lock = ReadRequirement(reader, linkedWgo, out valid);
                 if (!valid) { failure = "invalid lock requirement for " + variant.AnswerId; return false; }
+                var additionalCount = reader.ReadInt32();
+                if (additionalCount < 0 || additionalCount > 32)
+                {
+                    failure = "additional requirement count out of range for " + variant.AnswerId;
+                    return false;
+                }
+                for (var r = 0; r < additionalCount; r++)
+                {
+                    var requirement = ReadRequirement(reader, linkedWgo, out valid);
+                    if (!valid || requirement == null)
+                    {
+                        failure = "invalid additional requirement for " + variant.AnswerId;
+                        return false;
+                    }
+                    variant.AdditionalRequirements.Add(requirement);
+                }
                 destination.Add(variant);
             }
             return true;
@@ -583,6 +599,9 @@ namespace CalendarQuestsPins
                 writer.Write(variant.Unsupported);
                 WriteRequirement(writer, variant.Price);
                 WriteRequirement(writer, variant.Lock);
+                writer.Write(variant.AdditionalRequirements.Count);
+                for (var r = 0; r < variant.AdditionalRequirements.Count; r++)
+                    WriteRequirement(writer, variant.AdditionalRequirements[r]);
             }
         }
 
