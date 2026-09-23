@@ -94,6 +94,8 @@ Candidate 1.1.9 implements this during loading/bootstrap only and persists the r
 
 Candidate 1.1.9 canonical schema-6 partition, derived from the failed 1.1.8 runtime bootstrap and the complete audited structure: owner **81 supported / 0 unsupported**, cross-owner **8 tasks / 6 supported / 0 unsupported**, base persisted topics **55 / 55 supported / 0 unsupported**, dialogue-lifecycle **65 / 65 / 0**, navigation **210 / 270 / 151 / 0**. The owner total remains 81; the generic compiler changes the previous 1.1.6 partition from 75/6 to 81/0.
 
+First player runtime evidence for candidate 1.1.9 (2026-09-23) confirms schema 6 bootstrapped successfully behind loading in **923.35 ms**, reported the exact canonical counts above, reached the normal `Ready` state, and restored all three expected current weekday markers including the new Snake/Envy Souls marker. Post-consumption disappearance remains the final behavior check before acceptance.
+
 ## Verified persistent dialogue-lifecycle semantics
 
 Graveyard Keeper has authored dialogue branches that persistently consume selectable entries through the phrase blacklist:
