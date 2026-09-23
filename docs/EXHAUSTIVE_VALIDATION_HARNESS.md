@@ -115,7 +115,7 @@ The former per-route owner-task and standalone-navigation fixture gaps are close
 
 - **72/72** owner completion routes are classified: 70 selectable + 2 event-only;
 - **270/270** authored navigation paths are stored in the production-derived navigation fixture;
-- the raw six-NPC universe contains **243 authored answer occurrences** with exact accepted dispositions and **UNKNOWN=0**;
+- the raw six-NPC universe contains **243 authored answer occurrences**; the historical Watchdog 0.2 table reached **UNKNOWN=0**, but its exact disposition labels are retained only as historical occurrence accounting, not as the current semantic oracle;
 - the 14 no-normal-root occurrences are independently classified as event-invoked non-reminders;
 - relay-backed `MultipleAnswerData` has an exact **7-use** fixture covering Inquisitor 2, Snake 1, Merchant 1, Bishop 3;
 - the complete compound family has runtime-proven native AND semantics.
@@ -139,7 +139,7 @@ Once a structural change enters a PR, the automatic validator can catch unexplai
 
 It is strongest for dialogue lifecycle classification because that layer already has complete path-level independent evidence.
 
-It also guards the complete task census partition, complete snapshot/navigation identities, exact live-answer dispositions, the `MultipleAnswerData` usage set, and the exact residual special/event set.
+It also guards the complete task census partition, complete snapshot/navigation identities, the `MultipleAnswerData` usage set, and the exact residual special/event set. The historical live-answer disposition table is not treated as semantic truth after the accepted adversarial negative audit.
 
 ## What it cannot prove by itself
 
@@ -153,7 +153,7 @@ Static CI cannot execute Graveyard Keeper's live runtime:
 
 Those remain runtime concerns.
 
-The planned second layer is therefore a separate **read-only runtime sentinel**. During ordinary play it should remain invisible while contracts agree and show an unmistakable FAIL indicator only when a detectable invariant is violated. It must not ship in the public production DLL.
+An always-on second semantic classifier is **not** planned. The accepted post-1.1.9 adversarial audit found that Watchdog 0.2 could report `UNKNOWN=0` while still carrying six wrong semantic-negative decisions; a Watchdog 0.3 would therefore duplicate production-domain logic without providing a reliably independent oracle. For future runtime contradictions, use a narrow read-only diagnostic targeted at the concrete save/state instead.
 
 ## Acceptance policy for future structural changes
 
