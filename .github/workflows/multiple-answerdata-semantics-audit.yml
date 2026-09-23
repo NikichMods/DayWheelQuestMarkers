@@ -1,0 +1,45 @@
+name: Build MultipleAnswerData semantics audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'research/multiple-answerdata-semantics-audit'
+    paths:
+      - 'MultipleAnswerDataSemanticsAudit.csproj'
+      - 'src/MultipleAnswerDataSemanticsAudit.cs'
+      - 'src/ReflectionUtil.cs'
+      - '.github/workflows/multiple-answerdata-semantics-audit.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: multiple-answerdata-semantics-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Build Release
+        run: dotnet build MultipleAnswerDataSemanticsAudit.csproj -c Release --nologo
+      - name: Hash DLL
+        shell: bash
+        run: |
+          sha256sum bin/MultipleAnswerDataSemanticsAudit/DayWheelQuestMarkers.MultipleAnswerDataSemanticsAudit.dll
+          stat -c '%s bytes' bin/MultipleAnswerDataSemanticsAudit/DayWheelQuestMarkers.MultipleAnswerDataSemanticsAudit.dll
+      - name: Upload DLL
+        uses: actions/upload-artifact@v4
+        with:
+          name: DayWheelQuestMarkers-MultipleAnswerDataSemanticsAudit-0.1.0
+          path: bin/MultipleAnswerDataSemanticsAudit/DayWheelQuestMarkers.MultipleAnswerDataSemanticsAudit.dll
+          if-no-files-found: error
+          retention-days: 7
