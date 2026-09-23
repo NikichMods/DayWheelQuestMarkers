@@ -91,9 +91,10 @@ The validator also checks current source for:
 - lifecycle-universe guard constants;
 - self-first and nearest-ancestor semantic guards;
 - task-owned/navigation/reversible suppressions;
-- exact promoted completion routes;
-- exact event-only whitelist;
-- exact `snake_trap` relation-gated route;
+- the exact six former answer-backed supplement routes in the complete selectable task-route fixture;
+- the three bounded owner-task topology edges that derive those routes generically;
+- absence of promoted-route / `snake_trap` answer-backed production specials;
+- exact two-stage event-only whitelist;
 - absence of the retired 1.1.5 Snake fake-coins hard-code;
 - manifest use of `UnifiedDialogueLifecycleCompiler.Validate`.
 
@@ -133,13 +134,31 @@ Exact accepted build-bearing source `73b35a3bffcb440bf644dd03532fbf2cf6ce4b11` w
 - `MultipleAnswerData`: **7 verified menu uses across 4 weekday NPCs**;
 - canonical schema-6 owner partition: **81 supported / 0 unsupported**.
 
+## Current 1.1.10 candidate validator result
+
+Candidate source `7e7b429ca9d8c9b6d10c7a236f546809f2589378` was validated in workflow run `35907144881`, job `107337542683`:
+
+- result: **PASS**;
+- **99 checks / 0 failed**;
+- raw interaction universe: **243 authored occurrences**;
+- unique answer partition: **224 = 210 normal interaction-root answers + 14 event-invoked no-root answers**;
+- navigation: **270 exact paths / 0 unsupported**;
+- lifecycle: **216 path records / 60 unique admitted owners**;
+- tasks: **72 completion nodes -> 70 selectable + 2 event-only**;
+- task routes: **72 exact routes -> 70 selectable + 2 event-only**;
+- `MultipleAnswerData`: **7 verified menu uses across 4 weekday NPCs**;
+- candidate schema-7 declared owner partition: **87 supported / 0 unsupported**;
+- answer-backed completion supplement: **0**; only the two verified event-only stages remain.
+
+This run closes the previously documented standalone navigation and selectable task-route fixture gaps.
+
 ## What the validator proves
 
 Once a structural change enters a PR, the automatic validator can catch unexplained changes to the accepted interaction universe before a player build is accepted.
 
 It is strongest for dialogue lifecycle classification because that layer already has complete path-level independent evidence.
 
-It also guards the complete task census partition, complete snapshot/navigation identities, the `MultipleAnswerData` usage set, and the exact residual special/event set. The historical live-answer disposition table is not treated as semantic truth after the accepted adversarial negative audit.
+It also guards the complete **243-occurrence raw interaction universe**, the exact **224 = 210 normal-root + 14 event-invoked** unique-answer partition, all **270 navigation paths**, the complete **72-route task census**, the `MultipleAnswerData` usage set, and the exact two-stage event-only residual set. The historical live-answer disposition table is not treated as semantic truth after the accepted adversarial negative audit.
 
 ## What it cannot prove by itself
 
