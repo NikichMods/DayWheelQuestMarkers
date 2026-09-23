@@ -582,5 +582,5 @@ Every handed DLL is immutable and tied to exact committed source plus build arti
   3. confirm the two previously expected non-Snake weekday markers return and the Snake/Envy marker for the currently actionable `dlc_souls_s29_3 / @souls_s_s33_ask` interaction also appears;
   4. before progressing anything, return a fresh log so the schema-6 bootstrap and canonical `81/0` summary can be verified;
   5. if all three expected markers are present, complete the Snake rumor interaction and confirm only that contribution disappears on the next normal refresh unless another independent Snake interaction remains.
-- Player result: **pending**.
-- Status: **candidate / frozen / do not merge or release until explicit player acceptance**.
+- Player result: **partial pass captured 2026-09-23**. On the preserved save, the wheel shows the expected **3 markers total**, including the previously missing Snake/Envy marker. Fresh runtime log confirms Day Wheel Quest Markers 1.1.9 loaded, schema 6 bootstrapped successfully behind loading in **923.35 ms**, canonical counts are exactly `owner=81/0, cross=8/6/0, dialogue-lifecycle=65/65/0, navigation=210/270/151/0`, and the plugin reached its normal `Ready` state. No Day Wheel Quest Markers warning/error appears after bootstrap. Post-consumption disappearance test is still pending.
+- Status: **candidate / pre-interaction runtime pass / post-consumption test pending / do not merge or release until explicit player acceptance**.
