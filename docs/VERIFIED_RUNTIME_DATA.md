@@ -171,8 +171,8 @@ The accepted direct owner-task classifier does not represent every verified comp
 - promoted task/topic pairs reuse existing persisted exact-self-consuming topic/navigation predicates;
 - `npc_cultist/snake_trap` uses the verified `snake_stone_ready` answer plus `_rel >= 10` through game-owned SmartRes sufficiency;
 - `npc_inquisitor/inquisitor_talk` and `npc_cultist/snake_back` are exact mandatory interaction-event stages whose visible task is the verified actionability boundary;
-- unsupported `@souls_s_s33_ask` remains fail-closed;
-- there is no broad `Visible task`, `CustomEvent`, or `AddInteractionEvent` classifier.
+- Better Save Soul `npc_cultist/dlc_souls_s29_3 -> @souls_s_s33_ask` uses a separately verified `MultipleAnswerData` completion route. Runtime probe 0.1.1 proved the parent has no top-level price/lock and exposes two child `AnswerData` alternatives: `Item:note_with_rumors x1` or `Item:sin_shard x1`. Production preserves the exact phrase/navigation boundary and delegates either child requirement to game-owned `Player.IsEnough(SmartRes)`;
+- there is no broad `Visible task`, `CustomEvent`, `AddInteractionEvent`, or generic `MultipleAnswerData` classifier. Unknown nested/relay shapes still fail closed.
 
 Research after accepted 1.0.35 shows that several answer-backed supplemental routes are candidates for future consolidation into a common graph compiler, but the two mandatory event-only stages remain a genuinely distinct evidence type unless a broader event contract is separately proved.
 
