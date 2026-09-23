@@ -54,6 +54,44 @@ Verified direct `Flow_Answer` price/lock requirements are evaluated by Graveyard
 
 If a route uses an unsupported answer/gate shape, no reminder is emitted.
 
+## Verified MultipleAnswerData compound-gate semantics
+
+Research completed on 2026-09-23 closed the previously unsupported Better Save Soul `MultipleAnswerData` family in Graveyard Keeper 1.407.
+
+Direct IL from the loaded game's own `MultipleAnswerData.FillVisualData` proves native actionability semantics:
+
+- `MultipleAnswerData` inherits `AnswerData` and iterates its `datas` child list;
+- for every child, the game checks `child.d_lock` through `WorldGameObject.IsEnough`;
+- only when that lock is sufficient does it check `child.d_price` through the same game-owned sufficiency path;
+- any insufficient child lock clears the aggregate lock flag;
+- any insufficient child price clears the aggregate price flag;
+- after all children, the parent answer is pickable only when **all child locks and all child prices are sufficient**;
+- therefore child requirements are an **AND set**, not alternative OR routes.
+
+The complete six-weekday-NPC census found exactly **7** `RelayValueOutput<MultipleAnswerData>` menu uses, all resolving through the same authored structure:
+
+`RelayValueOutput<MultipleAnswerData> -> RelayValueInput<MultipleAnswerData> -> Flow_MultipleAnswer -> Flow_AnswersArray -> child Flow_Answer`
+
+Distribution:
+
+- Astrologer: 0;
+- Inquisitor: 2 menu uses of `@souls_s_s22_ask`, one compound producer;
+- Snake: 1 menu use of `@souls_s_s33_ask`, one compound producer;
+- Merchant: 1 menu use of `@souls_s_s24_ask`, one compound producer;
+- Ms. Charm: 0;
+- Bishop: 3 menu uses of `@souls_s_s15_ask`, one shared compound producer.
+
+Verified child lock sets:
+
+- Inquisitor: `Item:ash_on_shawl x1` AND `Item:sin_shard x1`;
+- Snake: `Item:note_with_rumors x1` AND `Item:sin_shard x1`;
+- Merchant: `Item:sauce_for_meal x1` AND `Item:sin_shard x1`;
+- Bishop: `Item:ode_for_bishop x1` AND `Item:sin_shard x1`.
+
+Production must not hard-code those item IDs. The verified structural contract is the relay/compound chain plus native AND semantics. Missing relay ownership, ambiguous producers, unknown intermediate node types, unsupported child gates, or an empty/unresolved child set fail closed. Live sufficiency continues to delegate to the game's own SmartRes/Player path.
+
+Candidate 1.1.8 implements this during loading/bootstrap only and persists the resulting compact compound requirements in manifest schema 6. This candidate behavior is not stable until player acceptance.
+
 ## Verified persistent dialogue-lifecycle semantics
 
 Graveyard Keeper has authored dialogue branches that persistently consume selectable entries through the phrase blacklist:
@@ -171,7 +209,7 @@ The accepted direct owner-task classifier does not represent every verified comp
 - promoted task/topic pairs reuse existing persisted exact-self-consuming topic/navigation predicates;
 - `npc_cultist/snake_trap` uses the verified `snake_stone_ready` answer plus `_rel >= 10` through game-owned SmartRes sufficiency;
 - `npc_inquisitor/inquisitor_talk` and `npc_cultist/snake_back` are exact mandatory interaction-event stages whose visible task is the verified actionability boundary;
-- unsupported `@souls_s_s33_ask` remains fail-closed;
+- accepted 1.1.6 keeps `@souls_s_s33_ask` fail-closed because relay-backed `MultipleAnswerData` was not yet represented; candidate 1.1.8 removes that limitation through the verified generic compound-gate compiler rather than a Snake-specific rule;
 - there is no broad `Visible task`, `CustomEvent`, or `AddInteractionEvent` classifier.
 
 Research after accepted 1.0.35 shows that several answer-backed supplemental routes are candidates for future consolidation into a common graph compiler, but the two mandatory event-only stages remain a genuinely distinct evidence type unless a broader event contract is separately proved.
