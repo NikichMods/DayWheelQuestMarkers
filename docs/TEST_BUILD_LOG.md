@@ -574,5 +574,24 @@ Every handed DLL is immutable and tied to exact committed source plus build arti
 - Raw DLL SHA-256: `edca9b60490a2a48517e5cfbf9427aa032a5e593a517326d607cdc0e83262362`.
 - Requested test: keep production 1.1.6 installed, add this probe DLL, load the current save where Snake offers “Рассказать о слухах...”, open Snake's main dialogue menu once, then quit and provide the fresh `LogOutput.log`. No dialogue option needs to be selected.
 - Expected evidence: `S33_STATIC_*`, `S33_TASK_STATE`, `S33_PHRASE_STATE`, and after opening Snake `S33_LIVE_OPTION` / `S33_LIVE_PRICE` / `S33_LIVE_LOCK`.
+- Player result: **captured 2026-09-23**. The returned log confirms: task `dlc_souls_s29_3` is `Visible`; `@souls_s_s33_ask` is unlocked and not blacklisted; main-menu slot 106/#29 is supplied through `RelayValueOutput<MultipleAnswerData>` node 2644; the rendered parent option is `can_be_picked=True` with no top-level price/lock. The vanilla UI then logs nested lock icons, proving that parent clickability alone is not sufficient evidence for the mod's actionable-interaction contract.
+- Status: **research diagnostic complete / superseded by 0.1.1 for nested MultipleAnswerData evidence / not production**.
+
+
+## Research probe 0.1.1 — Souls s33 nested MultipleAnswerData
+
+- Date built: 2026-09-23.
+- Research branch: `research/souls-s33-answerdata-probe`.
+- Frozen source: `frozen/souls-s33-answerdata-probe-0.1.1`.
+- Exact build-bearing source: `b0be227177ac6f6ba1a8ee0e25bf6ddd87f3fdab`.
+- Goal: resolve the remaining ambiguity from 0.1.0 before any production change: determine whether Snake's rendered `@souls_s_s33_ask` parent merely opens a nested `MultipleAnswerData` menu or whether an actual progression child is currently actionable, and resolve the authored relay producer chain without guessing.
+- Diagnostic scope: retains all 0.1.0 read-only evidence; additionally enumerates the live `answer_visual_datas` children with exact IDs/translations, `can_be_picked`, price/lock presentation, linked AnswerData, and read-only `Player.IsEnough` results; statically follows `RelayValueOutput._sourceInputUID -> RelayValueInput._UID -> incoming Value producer`.
+- Runtime behavior: read-only; no save, quest, UI, or production-manifest mutation. Static graph/save inspection still runs once and disables its Update; the live hook ignores all options except exact `@souls_s_s33_ask`.
+- CI: run `35856343527`, job `107165608536`, success; Release build completed with **0 warnings / 0 errors**.
+- Artifact: `DayWheelQuestMarkers-SoulsS33AnswerDataProbe-0.1.1` (artifact ID `10748185612`), archive digest `sha256:1e4fa129c1409b224e24bacdec41d56aa4d60f9bab9c6c1048282c300c87eb51`.
+- Raw DLL: 25,088 bytes.
+- Raw DLL SHA-256: `f58bfacc5f8ce7a86ee24339c4882b13b2ab3c5d027e0023cd80562b0261f865`.
+- Requested test: remove probe 0.1.0, keep accepted production 1.1.6, install only probe 0.1.1, load the same preserved tester save, open Snake's main dialogue once so “Рассказать о слухах...” is rendered, do not select it, quit, and return fresh `LogOutput.log`.
+- Expected evidence: `S33_STATIC_RELAY_*`, `S33_LIVE_OPTION`, `S33_LIVE_CHILD*`, and the existing task/phrase state lines. If the child list is populated at render time, no dialogue selection is required.
 - Player result: **pending**.
 - Status: **research diagnostic only / not production / awaiting one narrow runtime capture**.
