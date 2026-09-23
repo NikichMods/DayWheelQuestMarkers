@@ -48,6 +48,7 @@ namespace CalendarQuestsPins
             internal bool Unsupported;
             internal Requirement Price;
             internal Requirement Lock;
+            internal readonly List<Requirement> AdditionalRequirements = new List<Requirement>();
         }
 
         internal sealed class Requirement
@@ -242,6 +243,7 @@ namespace CalendarQuestsPins
                 if (variant == null || variant.Unsupported) continue;
                 if (variant.Price != null && !IsEnough(variant.Price)) continue;
                 if (variant.Lock != null && !IsEnough(variant.Lock)) continue;
+                if (!AreAdditionalRequirementsEnough(variant.AdditionalRequirements)) continue;
                 return true;
             }
             return false;
@@ -307,9 +309,18 @@ namespace CalendarQuestsPins
                 if (!PhraseOpen(rule.AnswerId, unlockedPhrases, blacklistedPhrases)) continue;
                 if (rule.Price != null && !IsEnough(rule.Price)) continue;
                 if (rule.Lock != null && !IsEnough(rule.Lock)) continue;
+                if (!AreAdditionalRequirementsEnough(rule.AdditionalRequirements)) continue;
                 return true;
             }
             return false;
+        }
+
+        private bool AreAdditionalRequirementsEnough(List<Requirement> requirements)
+        {
+            if (requirements == null) return true;
+            for (var i = 0; i < requirements.Count; i++)
+                if (requirements[i] == null || !IsEnough(requirements[i])) return false;
+            return true;
         }
 
         private void ParseGraph(TargetRules target, string serialized, Dictionary<string, object> knownNpcMap)
@@ -483,8 +494,9 @@ namespace CalendarQuestsPins
             {
                 Node answerNode;
                 if (!nodes.TryGetValue(c.SourceNode, out answerNode)) continue;
-                if (answerNode.Type.IndexOf("Flow_Answer", StringComparison.Ordinal) < 0) continue;
-                var rule = BuildVariant(answerId, serialized, answerNode, target.WorldObject, nodes, incomingValue, true);
+                RuleVariant rule;
+                if (!TryBuildVariantFromAnswerDataSource(answerId, serialized, answerNode, target.WorldObject,
+                        nodes, connections, incomingValue, true, out rule)) continue;
                 taskRules.Add(rule);
                 if (rule.Unsupported) OwnerUnsupportedRuleCount++;
                 else { OwnerSupportedRuleCount++; anySupported = true; }
@@ -541,8 +553,9 @@ namespace CalendarQuestsPins
             {
                 Node answerNode;
                 if (!nodes.TryGetValue(c.SourceNode, out answerNode)) continue;
-                if (answerNode.Type.IndexOf("Flow_Answer", StringComparison.Ordinal) < 0) continue;
-                var rule = BuildVariant(answerId, serialized, answerNode, target.WorldObject, nodes, incomingValue, false);
+                RuleVariant rule;
+                if (!TryBuildVariantFromAnswerDataSource(answerId, serialized, answerNode, target.WorldObject,
+                        nodes, connections, incomingValue, false, out rule)) continue;
                 task.Rules.Add(rule);
                 if (rule.Unsupported) CrossUnsupportedRuleCount++;
                 else { CrossSupportedRuleCount++; anySupported = true; }
@@ -611,9 +624,10 @@ namespace CalendarQuestsPins
             {
                 Node answerNode;
                 if (!nodes.TryGetValue(c.SourceNode, out answerNode)) continue;
-                if (answerNode.Type.IndexOf("Flow_Answer", StringComparison.Ordinal) < 0) continue;
+                RuleVariant variant;
+                if (!TryBuildVariantFromAnswerDataSource(answerId, serialized, answerNode, target.WorldObject,
+                        nodes, connections, incomingValue, false, out variant)) continue;
                 foundAnswerData = true;
-                var variant = BuildVariant(answerId, serialized, answerNode, target.WorldObject, nodes, incomingValue, false);
                 if (!AddTopicVariant(topic, variant)) continue;
                 if (variant.Unsupported) OneShotUnsupportedRuleCount++; else OneShotSupportedRuleCount++;
             }
@@ -623,6 +637,148 @@ namespace CalendarQuestsPins
                 var unsupported = new RuleVariant { AnswerId = answerId, Unsupported = true };
                 if (AddTopicVariant(topic, unsupported)) OneShotUnsupportedRuleCount++;
             }
+        }
+
+        private bool TryBuildVariantFromAnswerDataSource(string answerId, string serialized, Node sourceNode,
+            object linkedWgo, Dictionary<string, Node> nodes, List<Connection> connections,
+            Dictionary<string, List<Connection>> incomingValue, bool allowAuthoritativeZone, out RuleVariant rule)
+        {
+            rule = null;
+            if (sourceNode == null || string.IsNullOrEmpty(sourceNode.Type)) return false;
+
+            if (sourceNode.Type.IndexOf("Flow_Answer", StringComparison.Ordinal) >= 0 &&
+                sourceNode.Type.IndexOf("Flow_AnswersArray", StringComparison.Ordinal) < 0)
+            {
+                rule = BuildVariant(answerId, serialized, sourceNode, linkedWgo, nodes, incomingValue, allowAuthoritativeZone);
+                return true;
+            }
+
+            if (sourceNode.Type.IndexOf("RelayValueOutput", StringComparison.Ordinal) >= 0 &&
+                sourceNode.Type.IndexOf("MultipleAnswerData", StringComparison.Ordinal) >= 0)
+            {
+                rule = BuildMultipleAnswerVariant(answerId, serialized, sourceNode, linkedWgo,
+                    nodes, connections, incomingValue, allowAuthoritativeZone);
+                return true;
+            }
+
+            return false;
+        }
+
+        private RuleVariant BuildMultipleAnswerVariant(string answerId, string serialized, Node relayOutput,
+            object linkedWgo, Dictionary<string, Node> nodes, List<Connection> connections,
+            Dictionary<string, List<Connection>> incomingValue, bool allowAuthoritativeZone)
+        {
+            var rule = new RuleVariant { AnswerId = answerId };
+            var uid = ReadNodeDirectString(serialized, relayOutput, "_sourceInputUID", 1400);
+            if (string.IsNullOrEmpty(uid))
+            {
+                rule.Unsupported = true;
+                return rule;
+            }
+
+            Node relayInput = null;
+            foreach (var pair in nodes)
+            {
+                var candidate = pair.Value;
+                if (candidate == null || string.IsNullOrEmpty(candidate.Type) ||
+                    candidate.Type.IndexOf("RelayValueInput", StringComparison.Ordinal) < 0 ||
+                    candidate.Type.IndexOf("MultipleAnswerData", StringComparison.Ordinal) < 0) continue;
+                if (!string.Equals(ReadNodeDirectString(serialized, candidate, "_UID", 1400), uid, StringComparison.Ordinal)) continue;
+                if (relayInput != null)
+                {
+                    rule.Unsupported = true;
+                    return rule;
+                }
+                relayInput = candidate;
+            }
+            if (relayInput == null)
+            {
+                rule.Unsupported = true;
+                return rule;
+            }
+
+            Node multipleAnswer = null;
+            for (var i = 0; i < connections.Count; i++)
+            {
+                var connection = connections[i];
+                if (!string.Equals(connection.TargetNode, relayInput.Id, StringComparison.Ordinal) || IsFlowConnection(connection)) continue;
+                Node source;
+                if (!nodes.TryGetValue(connection.SourceNode, out source) || source == null) continue;
+                if (multipleAnswer != null && !string.Equals(multipleAnswer.Id, source.Id, StringComparison.Ordinal))
+                {
+                    rule.Unsupported = true;
+                    return rule;
+                }
+                multipleAnswer = source;
+            }
+            if (multipleAnswer == null || multipleAnswer.Type.IndexOf("Flow_MultipleAnswer", StringComparison.Ordinal) < 0)
+            {
+                rule.Unsupported = true;
+                return rule;
+            }
+
+            Node answersArray = null;
+            for (var i = 0; i < connections.Count; i++)
+            {
+                var connection = connections[i];
+                if (!string.Equals(connection.TargetNode, multipleAnswer.Id, StringComparison.Ordinal) || IsFlowConnection(connection)) continue;
+                if (string.Equals(connection.TargetPort, "reward", StringComparison.OrdinalIgnoreCase)) continue;
+                if (!string.Equals(connection.TargetPort, "datas", StringComparison.OrdinalIgnoreCase))
+                {
+                    rule.Unsupported = true;
+                    return rule;
+                }
+
+                Node source;
+                if (!nodes.TryGetValue(connection.SourceNode, out source) || source == null) continue;
+                if (answersArray != null && !string.Equals(answersArray.Id, source.Id, StringComparison.Ordinal))
+                {
+                    rule.Unsupported = true;
+                    return rule;
+                }
+                answersArray = source;
+            }
+            if (answersArray == null || answersArray.Type.IndexOf("Flow_AnswersArray", StringComparison.Ordinal) < 0)
+            {
+                rule.Unsupported = true;
+                return rule;
+            }
+
+            var childIds = new HashSet<string>(StringComparer.Ordinal);
+            for (var i = 0; i < connections.Count; i++)
+            {
+                var connection = connections[i];
+                if (!string.Equals(connection.TargetNode, answersArray.Id, StringComparison.Ordinal) || IsFlowConnection(connection)) continue;
+                Node child;
+                if (!nodes.TryGetValue(connection.SourceNode, out child) || child == null ||
+                    child.Type.IndexOf("Flow_Answer", StringComparison.Ordinal) < 0 ||
+                    child.Type.IndexOf("Flow_AnswersArray", StringComparison.Ordinal) >= 0)
+                {
+                    rule.Unsupported = true;
+                    return rule;
+                }
+                if (!childIds.Add(child.Id)) continue;
+
+                var childRule = BuildVariant(answerId, serialized, child, linkedWgo, nodes, incomingValue, allowAuthoritativeZone);
+                if (childRule.Unsupported)
+                {
+                    rule.Unsupported = true;
+                    return rule;
+                }
+                AddAdditionalRequirement(rule, childRule.Price);
+                AddAdditionalRequirement(rule, childRule.Lock);
+            }
+
+            if (childIds.Count == 0 || rule.AdditionalRequirements.Count == 0) rule.Unsupported = true;
+            return rule;
+        }
+
+        private static void AddAdditionalRequirement(RuleVariant rule, Requirement requirement)
+        {
+            if (rule == null || requirement == null) return;
+            for (var i = 0; i < rule.AdditionalRequirements.Count; i++)
+                if (SameRequirement(rule.AdditionalRequirements[i], requirement)) return;
+            rule.AdditionalRequirements.Add(requirement);
         }
 
         private RuleVariant BuildVariant(string answerId, string serialized, Node answerNode, object linkedWgo,
@@ -669,6 +825,7 @@ namespace CalendarQuestsPins
                 var existing = topic.Variants[i];
                 if (existing.Unsupported != variant.Unsupported) continue;
                 if (!SameRequirement(existing.Price, variant.Price) || !SameRequirement(existing.Lock, variant.Lock)) continue;
+                if (!SameRequirements(existing.AdditionalRequirements, variant.AdditionalRequirements)) continue;
                 return false;
             }
             topic.Variants.Add(variant);
@@ -682,6 +839,15 @@ namespace CalendarQuestsPins
             return string.Equals(a.ResType, b.ResType, StringComparison.Ordinal) &&
                    string.Equals(a.Id, b.Id, StringComparison.Ordinal) &&
                    Math.Abs(a.Value - b.Value) < 0.0001f;
+        }
+
+        private static bool SameRequirements(List<Requirement> a, List<Requirement> b)
+        {
+            if (ReferenceEquals(a, b)) return true;
+            if (a == null || b == null || a.Count != b.Count) return false;
+            for (var i = 0; i < a.Count; i++)
+                if (!SameRequirement(a[i], b[i])) return false;
+            return true;
         }
 
         private static void AddAnchorAnswerIds(HashSet<string> ids, Anchor anchor, string serialized, Dictionary<string, Node> nodes)
@@ -1072,6 +1238,18 @@ namespace CalendarQuestsPins
             var begin = Math.Max(0, node.TypePosition - 2600);
             var window = serialized.Substring(begin, node.TypePosition - begin);
             const string marker = "\"identifier\":\"";
+            var pos = window.LastIndexOf(marker, StringComparison.Ordinal);
+            if (pos < 0) return null;
+            int end;
+            return ReadJsonString(window, pos + marker.Length, out end);
+        }
+
+        private static string ReadNodeDirectString(string serialized, Node node, string key, int lookBehind)
+        {
+            if (string.IsNullOrEmpty(serialized) || node == null || string.IsNullOrEmpty(key)) return null;
+            var begin = Math.Max(0, node.TypePosition - Math.Max(100, lookBehind));
+            var window = serialized.Substring(begin, node.TypePosition - begin);
+            var marker = "\"" + key + "\":\"";
             var pos = window.LastIndexOf(marker, StringComparison.Ordinal);
             if (pos < 0) return null;
             int end;
