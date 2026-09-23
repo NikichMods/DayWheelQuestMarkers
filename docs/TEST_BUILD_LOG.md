@@ -595,3 +595,21 @@ Every handed DLL is immutable and tied to exact committed source plus build arti
 - Expected evidence: `S33_STATIC_RELAY_*`, `S33_LIVE_OPTION`, `S33_LIVE_CHILD*`, and the existing task/phrase state lines. If the child list is populated at render time, no dialogue selection is required.
 - Player result: **captured 2026-09-23**. Runtime confirms the exact parent is `MultipleAnswerData`; child 0 is a normal `AnswerData` locked by `Item:note_with_rumors x1` and child 1 by `Item:sin_shard x1`. Both children report `can_be_picked=True`, and game-owned `Player.IsEnough` returns `True` for both on the supplied save. The parent itself has no top-level price/lock. Static relay resolution also proves `2644 RelayValueOutput<MultipleAnswerData> -> 2574 RelayValueInput<MultipleAnswerData> -> 2560 Flow_MultipleAnswer`.
 - Status: **research diagnostic complete / production evidence accepted / not production**.
+
+
+## Research — Souls weekday AnswerData audit 0.1.0
+
+- Date built: 2026-09-23.
+- Research branch: `research/souls-weekday-answerdata-audit`.
+- Exact frozen source: `c14903e453b112fd1adfbf5a5650417ce320a22d`.
+- Frozen ref: `frozen/souls-weekday-answerdata-audit-0.1.0`.
+- Purpose: audit the six Better Save Soul task-owned weekday-NPC completion answers as one structural family before generalizing production handling. Targets are the accepted exhaustive routes for Astrologer `@souls_s_s30_ask`, Inquisitor `@souls_s_s22_ask`, Snake `@souls_s_s33_ask`, Merchant `@souls_s_s24_ask`, Ms. Charm `@souls_s_s31_ask`, and Bishop `@souls_s_s15_ask`.
+- Behavior: read-only, one-shot after runtime readiness. Reads each of the six weekday NPC serialized graphs, finds every occurrence of the exact Souls answer ID, traces direct AnswerData and relay-backed `MultipleAnswerData` producer chains, follows `Flow_MultipleAnswer -> Flow_AnswersArray -> Flow_Answer` inputs, and logs each child price/lock SmartRes. No save/UI mutation, no recurring scan after the snapshot, no production behavior.
+- CI: run `35864841246`, job `107193696773`, success on `ubuntu-latest`; **0 warnings / 0 errors**.
+- Artifact: `DayWheelQuestMarkers-SoulsWeekdayAnswerDataAudit-0.1.0`, artifact ID `10752610814`, archive digest `sha256:c5e96db767e2a130e7fb2a996d9d1e9a9c6e98b05fc3bd641e02b481d55303af`.
+- Raw DLL: 22,016 bytes.
+- Raw DLL SHA-256: `cd5cb3e2f9c02e847a75b786b9de59cb0f507d8b9fb5d6137349e85718410c2f`.
+- Requested test: install this audit DLL alongside accepted production 1.1.6 (the Souls s33 probe is not required), load any developed save once, wait until gameplay is fully loaded, quit, and return the fresh `LogOutput.log`. No dialogue interaction or progression to the six quests is required.
+- Expected decisive lines: `SOULS6_BEGIN`, per-target `SOULS6_OCCURRENCE` / `SOULS6_TRACE` / `SOULS6_ALTERNATIVE` / `SOULS6_SHAPE`, six `SOULS6_TARGET_SUMMARY` lines, then `SOULS6_DONE completeTargets=6/6`.
+- Player result: **pending**.
+- Status: **research-only / frozen / not production**.
