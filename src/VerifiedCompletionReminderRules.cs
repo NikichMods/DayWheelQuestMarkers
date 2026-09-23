@@ -33,6 +33,9 @@ namespace CalendarQuestsPins
         private MethodInfo _smartResFactory;
         private object _snakeRelationSmartRes;
         private object _snakeRelationLinkedWgo;
+        private object _soulsS33RumorSmartRes;
+        private object _soulsS33SinShardSmartRes;
+        private object _soulsS33LinkedWgo;
         private object _boundPlayer;
         private MethodInfo _isEnough;
         private readonly object[] _isEnoughArgs = new object[1];
@@ -64,10 +67,23 @@ namespace CalendarQuestsPins
                 return IsSnakeRelationEnough(target.WorldObject, mainGame);
             }
 
-            // The remaining audited routes already exist as persisted one-shot TopicRules in
-            // schema 2. Reuse those exact phrase, SmartRes, and navigation predicates instead of
-            // re-encoding their item/relation semantics here. This also intentionally keeps
-            // @souls_s_s33_ask fail-closed because its AnswerData shape is unsupported.
+            // Better Save Soul: @souls_s_s33_ask is a MultipleAnswerData parent supplied through
+            // RelayValueOutput<MultipleAnswerData>. Runtime probe 0.1.1 verified two child AnswerData
+            // alternatives: Item:note_with_rumors x1 OR Item:sin_shard x1. The parent itself has no
+            // price/lock. Keep the exact phrase/navigation boundary and delegate both child locks to
+            // Player.IsEnough(SmartRes), matching the game's live AnswerVisualData.can_be_picked result.
+            if (string.Equals(target.NpcId, "npc_cultist", StringComparison.Ordinal) &&
+                string.Equals(taskId, "dlc_souls_s29_3", StringComparison.Ordinal))
+            {
+                const string answerId = "@souls_s_s33_ask";
+                if (ContainsString(blacklistedPhrases, answerId) || !ContainsString(unlockedPhrases, answerId)) return false;
+                if (!reachability.IsNavigationReachable(target.NpcId, answerId, unlockedPhrases, blacklistedPhrases)) return false;
+                return IsSoulsS33RequirementEnough(target.WorldObject, mainGame);
+            }
+
+            // The remaining audited routes already exist as persisted TopicRules. Reuse those
+            // exact phrase, SmartRes, and navigation predicates instead of re-encoding their
+            // item/relation semantics here.
             for (var i = 0; i < PromotedRoutes.Length; i++)
             {
                 var route = PromotedRoutes[i];
@@ -96,6 +112,9 @@ namespace CalendarQuestsPins
         {
             _snakeRelationSmartRes = null;
             _snakeRelationLinkedWgo = null;
+            _soulsS33RumorSmartRes = null;
+            _soulsS33SinShardSmartRes = null;
+            _soulsS33LinkedWgo = null;
             _boundPlayer = null;
             _isEnough = null;
             _isEnoughArgs[0] = null;
@@ -125,6 +144,33 @@ namespace CalendarQuestsPins
             try
             {
                 _isEnoughArgs[0] = _snakeRelationSmartRes;
+                var result = _isEnough.Invoke(_boundPlayer, _isEnoughArgs);
+                return result is bool && (bool)result;
+            }
+            catch { return false; }
+        }
+
+        private bool IsSoulsS33RequirementEnough(object linkedWgo, object mainGame)
+        {
+            if (linkedWgo == null || mainGame == null || !ReflectionUtil.IsUnityAlive(linkedWgo)) return false;
+            if (!BindPlayer(mainGame)) return false;
+            if (_soulsS33RumorSmartRes == null || _soulsS33SinShardSmartRes == null ||
+                !ReferenceEquals(_soulsS33LinkedWgo, linkedWgo))
+            {
+                _soulsS33RumorSmartRes = CreateSmartRes("Item", "note_with_rumors", 1f, linkedWgo);
+                _soulsS33SinShardSmartRes = CreateSmartRes("Item", "sin_shard", 1f, linkedWgo);
+                _soulsS33LinkedWgo = linkedWgo;
+            }
+
+            return IsSmartResEnough(_soulsS33RumorSmartRes) || IsSmartResEnough(_soulsS33SinShardSmartRes);
+        }
+
+        private bool IsSmartResEnough(object smartRes)
+        {
+            if (smartRes == null || _isEnough == null || _boundPlayer == null) return false;
+            try
+            {
+                _isEnoughArgs[0] = smartRes;
                 var result = _isEnough.Invoke(_boundPlayer, _isEnoughArgs);
                 return result is bool && (bool)result;
             }
