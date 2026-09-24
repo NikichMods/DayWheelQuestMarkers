@@ -12,7 +12,7 @@ using UnityEngine;
 namespace CalendarQuestsPins
 {
     /// <summary>
-    /// Schema-6 persistent manifest. It stores the accepted structural reminder rules, the unified
+    /// Schema-7 persistent manifest. It stores the accepted structural reminder rules, the unified
     /// exact-self-consuming dialogue rules, and compact root-to-answer navigation predicates derived
     /// from the same six Graveyard Keeper 1.407 graphs. Graph parsing remains loading-screen-only.
     /// </summary>
@@ -20,15 +20,15 @@ namespace CalendarQuestsPins
     {
         internal const string VerifiedGameVersion = "1.407";
         private const string Magic = "DWQM_RULE_MANIFEST";
-        private const int SchemaVersion = 6;
+        private const int SchemaVersion = 7;
 
-        private const int ExpectedOwnerSupported = 81;
+        private const int ExpectedOwnerSupported = 87;
         private const int ExpectedOwnerUnsupported = 0;
         private const int ExpectedCrossTasks = 8;
         private const int ExpectedCrossSupported = 6;
         private const int ExpectedCrossUnsupported = 0;
-        private const int ExpectedAtTopics = 55;
-        private const int ExpectedAtTopicSupported = 55;
+        private const int ExpectedAtTopics = 50;
+        private const int ExpectedAtTopicSupported = 50;
         private const int ExpectedAtTopicUnsupported = 0;
 
         private static readonly string[] NpcIds =
@@ -143,7 +143,7 @@ namespace CalendarQuestsPins
                     if (!string.Equals(reader.ReadString(), Magic, StringComparison.Ordinal))
                     { failure = "manifest magic mismatch"; return false; }
                     if (reader.ReadInt32() != SchemaVersion)
-                    { failure = "manifest schema mismatch; schema 6 rebuild required"; return false; }
+                    { failure = "manifest schema mismatch; schema 7 rebuild required"; return false; }
                     if (!string.Equals(reader.ReadString(), VerifiedGameVersion, StringComparison.Ordinal))
                     { failure = "manifest game version mismatch"; return false; }
                     var gameVersion = ReadGameVersion(save);
@@ -314,7 +314,7 @@ namespace CalendarQuestsPins
                 var counts = CaptureCounts();
                 if (!CountsAreCanonical(counts, _lifecycleStats))
                 {
-                    failure = "bootstrap produced non-canonical rule counts: " + CountsToString(counts, _lifecycleStats);
+                    failure = "bootstrap produced non-canonical rule counts: " + CountsToString(counts, _lifecycleStats) + DescribeTopicDiagnostics();
                     ClearCaches();
                     return false;
                 }
@@ -468,7 +468,7 @@ namespace CalendarQuestsPins
             }
             catch (Exception ex)
             {
-                failure = "could not persist schema-6 manifest: " + ex.GetType().Name + ": " + ex.Message;
+                failure = "could not persist schema-7 manifest: " + ex.GetType().Name + ": " + ex.Message;
                 try { if (File.Exists(_path + ".tmp")) File.Delete(_path + ".tmp"); } catch { }
                 return false;
             }
@@ -782,6 +782,51 @@ namespace CalendarQuestsPins
                    counts.Topics - stats.AdmittedTopics - stats.AncestorAdmittedTopics == ExpectedAtTopics &&
                    counts.TopicSupported - stats.SupportedVariants - stats.AncestorSupportedVariants == ExpectedAtTopicSupported &&
                    counts.TopicUnsupported - stats.UnsupportedVariants - stats.AncestorUnsupportedVariants == ExpectedAtTopicUnsupported;
+        }
+
+        private string DescribeTopicDiagnostics()
+        {
+            var targets = GetTargets();
+            if (targets == null) return ", diagnostics=<targets-null>";
+            var atTopics = new List<string>();
+            var taskAnswers = new List<string>();
+            for (var i = 0; i < targets.Count; i++)
+            {
+                var target = targets[i];
+                if (target == null) continue;
+                var npcId = target.NpcId ?? "<null>";
+                for (var p = 0; p < target.Topics.Count; p++)
+                {
+                    var topic = target.Topics[p];
+                    if (topic == null || string.IsNullOrEmpty(topic.AnswerId) || !topic.AnswerId.StartsWith("@", StringComparison.Ordinal)) continue;
+                    atTopics.Add(npcId + ":" + topic.AnswerId);
+                }
+                foreach (var pair in target.OwnerTaskRules)
+                {
+                    var variants = pair.Value;
+                    if (variants == null) continue;
+                    for (var v = 0; v < variants.Count; v++)
+                    {
+                        var variant = variants[v];
+                        if (variant == null || variant.Unsupported || string.IsNullOrEmpty(variant.AnswerId) || !variant.AnswerId.StartsWith("@", StringComparison.Ordinal)) continue;
+                        taskAnswers.Add(npcId + ":" + pair.Key + "->" + variant.AnswerId);
+                    }
+                }
+                for (var c = 0; c < target.CrossTasks.Count; c++)
+                {
+                    var cross = target.CrossTasks[c];
+                    if (cross == null) continue;
+                    for (var v = 0; v < cross.Rules.Count; v++)
+                    {
+                        var variant = cross.Rules[v];
+                        if (variant == null || variant.Unsupported || string.IsNullOrEmpty(variant.AnswerId) || !variant.AnswerId.StartsWith("@", StringComparison.Ordinal)) continue;
+                        taskAnswers.Add(npcId + ":cross:" + (cross.OwnerNpcId ?? "<null>") + "/" + (cross.TaskId ?? "<null>") + "->" + variant.AnswerId);
+                    }
+                }
+            }
+            atTopics.Sort(StringComparer.Ordinal);
+            taskAnswers.Sort(StringComparer.Ordinal);
+            return ", atTopics=[" + string.Join(",", atTopics.ToArray()) + "], taskAnswers=[" + string.Join(",", taskAnswers.ToArray()) + "]";
         }
 
         private static string CountsToString(Counts counts, UnifiedDialogueLifecycleCompiler.Stats stats)
