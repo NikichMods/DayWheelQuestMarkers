@@ -686,7 +686,7 @@ Every handed DLL is immutable and tied to exact committed source plus build arti
 - Status: **research complete / diagnostic frozen / superseded by production 1.1.14 / do not release**.
 
 
-## 1.1.14 — navigation-backed exact-self lifecycle rebuild candidate
+## 1.1.14 — accepted stable navigation-backed lifecycle compiler
 
 - Date built: 2026-09-24.
 - Development branch: `dev/1.1.14`, created fresh from stable `main` at `9ed3eda8f1a477a469159350a62b42220d5054eb`.
@@ -720,4 +720,7 @@ Every handed DLL is immutable and tied to exact committed source plus build arti
 - Representative Snake semantic smoke (2026-09-24): **PASS**. On the preserved pre-`@souls_s_s33_ask` state the wheel showed **3 markers**. The player selected `@souls_s_s33_ask`; runtime then completed `npc_cultist/dlc_souls_s29_3`, the answer disappeared from the next root menu, and the wheel correctly changed **3 -> 2**. This exactly matches the accepted 1.1.9 behavior and proves only the Snake contribution was removed.
 - Second-load manifest behavior also passed: schema-7 manifest deserialized in **10.43 ms** and skipped FlowCanvas graph parsing, then reached `Ready` with the same canonical counts.
 - Player verdict: **"всё корректно"** for the tested 1.1.14 behavior.
-- Status: **runtime acceptance passed / candidate accepted for tested scope; remains unmerged until explicit merge/release instruction**.
+- Stable promotion (2026-09-24): accepted baseline ref `baseline/1.1.14-accepted` was frozen at exact tested source `0189ecc8ed85fc0b4d57d1ba721d3f5dc1be33ad`; PR #11 merged to `main` as merge commit `30c92e75fcf03c8d95c0b0d178050c44f59973c7`.
+- GitHub Release: `v1.1.14`, publication workflow run `35994789042` / job `107617050689` **PASS**. Release target exactly `0189ecc8ed85fc0b4d57d1ba721d3f5dc1be33ad`; published asset `DayWheelQuestMarkers.dll`, release asset ID `585842882`, **101,888 bytes**, SHA-256 `ac422d1df5d4ff8beb235933cc70db137d83d6334c6c97a5c2230a51e87bd39b`. Workflow verified the downloaded Actions artifact hash and published release hash are identical.
+- Superseded draft PRs #3 (interaction-universe/watchdog research) and #5 (relay-backed MultipleAnswerData candidate) were closed after their accepted evidence/behavior was incorporated into stable production.
+- Status: **accepted stable / merged / released**.
