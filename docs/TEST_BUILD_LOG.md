@@ -661,4 +661,58 @@ Every handed DLL is immutable and tied to exact committed source plus build arti
   3. first gate: schema-7 bootstrap/load must complete without Day Wheel Quest Markers warning/error and runtime cache must reach `Ready`;
   4. report the visible weekday markers on that same save. Zero markers are allowed if the now-valid runtime evaluation finds no actionable weekday-NPC interaction; the previous global-cache failure must no longer be the reason;
   5. if the preserved pre-`@souls_s_s33_ask` Snake state is readily available, use it afterward as the representative changed-route smoke test; do not manufacture progress solely for the first bootstrap gate.
+- Player result: **failed on 2026-09-24 before marker evaluation**. The supplied log loaded the correct 1.1.12 DLL, but schema-7 bootstrap again produced `owner=87/0, cross=8/6/0, self-consuming=61/61/0, nonAt=6/6/0, raw=19, excluded=9`. The manifest correctly failed closed and gameplay refused graph-parser fallback, so the wheel remained empty.
+- Conclusion: compiled task-answer suppression alone was insufficient; the overrun was a composition error inside the base `@` lifecycle set rather than a single missed task-owned answer.
+- Status: **failed / frozen / superseded by targeted diagnostic 1.1.13 / do not merge or release**.
+
+
+## 1.1.13 — targeted schema-7 topic-composition diagnostic
+
+- Date built/tested: 2026-09-24.
+- Development branch: `dev/1.1.13`.
+- Exact executable/build source: `9bf52fe7823bd70ad2f43eba0b72b060f441dfb3`.
+- Frozen diagnostic ref: `candidate/1.1.13`.
+- Purpose: identify the exact runtime composition behind the persistent `61` topic count without changing reminder semantics or canonical counts.
+- Diagnostic behavior: on non-canonical bootstrap only, print every actual `@` topic and every supported compiled `@` task-answer ID.
+- CI before handoff: exact-source validator **101 / 101**, Release build **0 warnings / 0 errors**.
+- Raw DLL: **102,400 bytes**; SHA-256 `92c6aa04ae78e9f89f89419eb7294a3adcafab90f06856338f67f9fb98cb09ff`.
+- Player result: **diagnostic succeeded**. Runtime again produced `owner=87/0, cross=8/6/0, self-consuming=61/61/0, nonAt=6/6/0, raw=19, excluded=9`, but the added dump exposed the exact topic set.
+- Decisive comparison against the accepted lifecycle/navigation fixtures:
+  - Astrologer `@astrologer_about_acid` and `@astrologer_about_tools` were incorrectly present as standalone exact-self topics. Every real root path reaches them through the already task-owned `@astrologer_diary`; the accepted census classifies both as `SUPPRESS_SAME_VISIT`.
+  - Bishop `@bishop_cathidral` was missing from the provisional base `@` parser even though the accepted navigation fixture contains an independent direct-root path and the lifecycle census classifies it `ADMIT`.
+  - Astrologer `@tr_quest_13_research_1`, Snake `@snake_1с`, and Merchant `@merchant_2e_1e` in the runtime dump are valid admitted **ancestor** lifecycle owners, not base-topic errors; Bishop `bishop_2_1a` is the fourth admitted ancestor owner and is non-`@`.
+- Net base-topic error: **+2 false same-visit topics - 1 missed valid topic = +1**, exactly explaining base `51` instead of canonical `50`.
+- Research-history verification: recovered `research/InteractionLifecycleCensusProbe/InteractionLifecycleCensusProbe.cs` from `research/interaction-lifecycle-audit`. Its accepted `HasIndependentOwnerRootPath` rule is structural: an owner is independent iff at least one navigation root path exists without a task-owned selectable ancestor.
+- Status: **research complete / diagnostic frozen / superseded by production 1.1.14 / do not release**.
+
+
+## 1.1.14 — navigation-backed exact-self lifecycle rebuild candidate
+
+- Date built: 2026-09-24.
+- Development branch: `dev/1.1.14`, created fresh from stable `main` at `9ed3eda8f1a477a469159350a62b42220d5054eb`.
+- Exact executable/build source: `0189ecc8ed85fc0b4d57d1ba721d3f5dc1be33ad`.
+- Frozen candidate ref: `candidate/1.1.14` at the exact build-bearing source above. Later documentation commits do not change the handed binary identity.
+- Root cause fixed: the old base `@` self-consuming parser ran before navigation existed. It could neither apply the accepted same-visit/independent-owner-root control nor reliably recover every exact self-consumer reachable through the full exact branch topology.
+- Production change: after navigation is built, `UnifiedDialogueLifecycleCompiler` now discards the provisional `@` topic layer and generically rebuilds exact-self `@` lifecycle owners from exact branch effects plus the accepted navigation model.
+- Admission/suppression order remains evidence-backed:
+  1. selected answer must persistently consume itself;
+  2. reversible and utility-like owners fail closed;
+  3. task-owned answers are suppressed;
+  4. a candidate must have at least one interaction-root path without a task-owned selectable ancestor, using the same `HasInteractionRootPathWithoutAncestors(... completionAnswerIds)` semantics as the accepted census;
+  5. variants with the same answer owner are merged into one reminder interaction.
+- This structurally removes Astrologer `@astrologer_about_acid/tools` as same-visit descendants and recovers Bishop `@bishop_cathidral` through its independent root path. **No quest, NPC, item, relation or answer ID was added to production code.**
+- Non-`@` exact-self compilation and nearest persistent ancestor ownership remain unchanged. The four accepted ancestor owners and the two task-owned ancestor suppressions remain under their existing integrity guards.
+- Persistent manifest remains schema **7**; declared canonical partition remains owner **87/0**, cross **8/6/0**, base `@` **50/50/0**.
+- First PR validator attempt on source `47dce21...` failed only because two new lifecycle source-contract needles had been accidentally placed in the validator block that scans `WeekdayInteractionRuleCache.cs`. Production logic was not changed to satisfy this; the validator was corrected to inspect `UnifiedDialogueLifecycleCompiler.cs`.
+- Exact-source interaction-universe validator: run `35989732485`, job `107600685390` — source identity **PASS** at `0189ecc8ed85fc0b4d57d1ba721d3f5dc1be33ad`; **PASS 103 / 0 failed**; lifecycle **216 paths / 60 unique admitted owners**; tasks/routes **72 = 70 selectable + 2 event-only**; `MultipleAnswerData` **7 verified uses across 4 weekday NPCs**.
+- Exact-source CI build: run `35989732694`, job `107600686887` — source identity **PASS** at `0189ecc8ed85fc0b4d57d1ba721d3f5dc1be33ad`; Release build **0 warnings / 0 errors**.
+- Artifact: `DayWheelQuestMarkers-1.1.14`, artifact ID `10803931565`, archive digest `sha256:d587216fd4cbf38b55b92f08df6861b6c30c28e2cb26fb3f5187baa4763310e9`.
+- Raw DLL: **101,888 bytes**.
+- Raw DLL SHA-256: `ac422d1df5d4ff8beb235933cc70db137d83d6334c6c97a5c2230a51e87bd39b`. Local extraction exactly matches the CI-reported hash.
+- Requested runtime acceptance:
+  1. replace diagnostic 1.1.13 with this single 1.1.14 DLL;
+  2. load the same developed save once and return a fresh `BepInEx/LogOutput.log`;
+  3. first gate: schema-7 bootstrap must pass canonical integrity and the plugin must reach `Ready` without Day Wheel Quest Markers warnings/errors;
+  4. report the visible weekday-marker count/state on that save;
+  5. only after the bootstrap gate passes, use the preserved pre-`@souls_s_s33_ask` Snake save if convenient for the representative **3 -> 2** changed-route smoke test; no need to manufacture progress otherwise.
 - Status: **candidate handed for runtime acceptance; not merged/released**.
