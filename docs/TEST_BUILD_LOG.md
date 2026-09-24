@@ -590,3 +590,26 @@ Every handed DLL is immutable and tied to exact committed source plus build arti
 - Published asset: `DayWheelQuestMarkers.dll`, release asset ID `584295078`, **101,376 bytes**, SHA-256 `069f9e1533f42fb4c4673effb5069de4354d72aeeb32e48818b14a752cb6359e`.
 - Publication: one-shot exact-artifact promotion run `35897935850` succeeded. The pre-existing generic publisher initially exposed an artifact-filename/install-filename contract mismatch; it was corrected to keep those identities separate and made idempotent. Verification run `35898105166`, job `107307017584`, succeeded and revalidated the exact published hash/target without replacing the release.
 - Status: **accepted stable / merged / released**.
+
+
+## 1.1.10 — generic owner-task completion topology candidate
+
+- Date built: 2026-09-24.
+- Development branch: `dev/1.1.10`.
+- Exact executable/build source: `942ecb046fb7eca244767cec3f177c52daea769b`.
+- Frozen candidate ref: `candidate/1.1.10` at the exact build source above.
+- Goal: eliminate the remaining six answer-backed completion exceptions by deriving them through the verified owner-local task topology, while retaining only the two genuinely event-only stages.
+- Runtime change: owner-local completion traversal additionally recognizes the three already-proven same-graph edge families: numbered `Flow_WaitForFlow` inputs, exact `CustomFunctionCall._sourceOutputUID -> CustomFunctionEvent._UID`, and exact `Flow_FireEvent(event) -> CustomEvent(eventName)`. Cross-owner and dialogue-lifecycle derivation are intentionally unchanged.
+- Removed answer-backed specials: five promoted completion mappings plus the exact `snake_trap -> snake_stone_ready` SmartRes special. `VerifiedCompletionReminderRules` now contains only `npc_inquisitor/inquisitor_talk` and `npc_cultist/snake_back`.
+- Persistent manifest: schema **7** so schema-6 1.1.9 caches cannot mask the newly generic owner rules. Candidate declared partition: owner **87 supported / 0 unsupported**, cross-owner unchanged **8 tasks / 6 supported / 0 unsupported**, base `@` topics **50 / 50 supported / 0 unsupported**.
+- Final interaction-universe validator on the exact build source: run `35938963309` — **PASS 99 / 0 failed**; raw answers **243 occurrences**; unique-answer partition **224 = 210 normal-root + 14 event-invoked**; lifecycle **216 paths / 60 admitted owners**; tasks/routes **72 = 70 selectable + 2 event-only**; `MultipleAnswerData` **7 verified menu uses across 4 weekday NPCs**.
+- Candidate CI build: run `35938963361`, job `107442363060` — success on `windows-latest`; Release build **0 warnings / 0 errors**.
+- Artifact: `DayWheelQuestMarkers-1.1.10`, artifact ID `10784167942`, archive digest `sha256:348f13447585c609df3ec8d8212e32ebd88b5e6cccab5fc2a3ef47830fed6efc`.
+- Raw DLL: **100,864 bytes**.
+- Raw DLL SHA-256: `c01c6acaaafd0c438a927e47024a9a3c1100de8979d489e6d6c010bf65ca2967`. Local extraction/hash exactly matches the CI-reported DLL hash.
+- Requested runtime acceptance:
+  1. replace 1.1.9 with this single 1.1.10 DLL and keep research probes removed;
+  2. first load of any developed save: return a fresh `BepInEx/LogOutput.log` so schema-7 bootstrap/integrity and the declared owner/base-topic partition can be verified;
+  3. if the preserved pre-`@souls_s_s33_ask` Snake save is still available, use it as the representative changed-route smoke test: the same three-marker state accepted under 1.1.9 should appear, and consuming `@souls_s_s33_ask` should again remove only the Snake contribution (**3 -> 2**) while unrelated markers remain;
+  4. report any missing/extra weekday marker; if a contradiction appears, investigate that concrete state with a targeted read-only diagnostic rather than reopening a universal watchdog.
+- Status: **candidate handed for runtime acceptance; not merged/released**.
