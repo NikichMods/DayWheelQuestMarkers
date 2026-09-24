@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.14
+
+- Generalizes the remaining answer-backed weekday-NPC task completion routes through the verified local FlowCanvas topology instead of maintaining route-specific completion mappings.
+- Fixes schema-7 topic composition by rebuilding exact-self `@` dialogue owners only after navigation is available, so same-visit descendants are not double-counted and independently reachable one-time interactions are not missed.
+- Keeps the two genuinely event-only stages as narrow verified fallbacks while all selectable answer-backed task completions use the common compiler.
+- Upgrades the persistent interaction manifest to schema 7; older caches rebuild automatically during loading and normal gameplay still performs no FlowCanvas graph parsing.
+- Verified on Graveyard Keeper 1.407: canonical schema-7 bootstrap reaches `Ready`, a cached reload completes in 10.43 ms with graph parsing skipped, and the preserved Snake/Envy regression correctly changes the wheel from **3 markers to 2** after the interaction is consumed.
+
+
 ## 1.1.9
 
 - Adds generic Graveyard Keeper 1.407 support for relay-backed `MultipleAnswerData` gates used by Better Save Soul weekday-NPC interactions.

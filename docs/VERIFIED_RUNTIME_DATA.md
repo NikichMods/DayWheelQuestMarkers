@@ -90,11 +90,11 @@ Verified child lock sets:
 
 Production must not hard-code those item IDs. The verified structural contract is the relay/compound chain plus native AND semantics. Missing relay ownership, ambiguous producers, unknown intermediate node types, unsupported child gates, or an empty/unresolved child set fail closed. Live sufficiency continues to delegate to the game's own SmartRes/Player path.
 
-Accepted 1.1.9 implements this during loading/bootstrap only and persists the resulting compact compound requirements in manifest schema 6.
+The relay-backed compound-gate support introduced in 1.1.9 remains accepted in **1.1.14**. It runs only during loading/bootstrap and persists compact compound requirements in manifest schema 7.
 
-Accepted 1.1.9 canonical schema-6 partition, derived from the complete audited structure and confirmed in player runtime: owner **81 supported / 0 unsupported**, cross-owner **8 tasks / 6 supported / 0 unsupported**, base persisted topics **55 / 55 supported / 0 unsupported**, dialogue-lifecycle **65 / 65 / 0**, navigation **210 / 270 / 151 / 0**. The owner total remains 81; the generic compiler changes the previous 1.1.6 partition from 75/6 to 81/0.
+Accepted 1.1.14 canonical schema-7 partition, derived from the complete audited structure and confirmed in player runtime: owner **87 supported / 0 unsupported**, cross-owner **8 tasks / 6 supported / 0 unsupported**, base standalone `@` topics **50 / 50 supported / 0 unsupported**, total dialogue-lifecycle **60 / 60 / 0**, navigation **210 / 270 / 151 / 0**. The owner-task compiler now derives all answer-backed completion routes through the verified local topology families; only the two event-only stages remain exact fallbacks.
 
-Accepted player runtime evidence for 1.1.9 (2026-09-23) covers the full requested lifecycle. Schema 6 bootstrapped successfully behind loading in **923.35 ms**, reported the exact canonical counts above, reached the normal `Ready` state, and restored all three expected current weekday markers including the Snake/Envy Souls marker. The player then selected `@souls_s_s33_ask`; the game completed `npc_cultist/dlc_souls_s29_3`, the answer disappeared from Snake's menu, and the wheel changed **3 -> 2**, proving the reminder contribution is removed after consumption without disturbing the two unrelated markers. A follow-up process deserialized the persisted schema-6 manifest in **10.62 ms** with `FlowCanvas graph parse skipped`. This behavior is accepted stable.
+Accepted player runtime evidence for 1.1.14 (2026-09-24) covers bootstrap, persistence, and the representative changed route. Schema 7 bootstrapped successfully behind loading in **900.68 ms**, reported the exact canonical counts above, reached the normal `Ready` state, and showed the expected three current weekday markers. The player then selected `@souls_s_s33_ask`; the game completed `npc_cultist/dlc_souls_s29_3`, the answer disappeared from Snake's menu, and the wheel changed **3 -> 2** without disturbing the two unrelated markers. A follow-up process deserialized the persisted schema-7 manifest in **10.43 ms** with `FlowCanvas graph parse skipped`. The player accepted this behavior as correct.
 
 ## Verified persistent dialogue-lifecycle semantics
 
@@ -141,7 +141,7 @@ The 12 ancestor-owned paths collapse to exactly six unique lifecycle owners:
 - Merchant `@merchant_favore_done` — task-owned, suppressed;
 - Bishop `bishop_2_1a` — admitted.
 
-This lifecycle sub-census remains **6 ancestor-owner candidates / 2 task-owned exclusions / 4 admitted / 4 supported / 0 unsupported** under schema 6.
+This lifecycle sub-census remains **6 ancestor-owner candidates / 2 task-owned exclusions / 4 admitted / 4 supported / 0 unsupported** under schema 7.
 
 ### Exact-self/non-`@` retained evidence
 
@@ -250,25 +250,26 @@ Cross-owner and generic dialogue-lifecycle routes retain their accepted SmartRes
 
 ## Accepted persistent loading/performance contract
 
-Accepted runtime architecture as of **1.1.9**:
+Accepted runtime architecture as of **1.1.14**:
 
 - per frame: timer comparison only until the one-second refresh is due;
-- one schema-6 manifest path: `BepInEx/cache/DayWheelQuestMarkers/rules-1.407.bin`;
-- schema 6 stores owner/cross task rules, direct and compound SmartRes requirements, unified dialogue-lifecycle topics, compact navigation predicates, and lifecycle census integrity counts;
-- `UnifiedDialogueLifecycleCompiler` exists only for loading/bootstrap derivation;
+- one schema-7 manifest path: `BepInEx/cache/DayWheelQuestMarkers/rules-1.407.bin`;
+- schema 7 stores owner/cross task rules, direct and compound SmartRes requirements, unified dialogue-lifecycle topics, compact navigation predicates, and lifecycle census integrity counts;
+- the bounded owner-task compiler derives all answer-backed completion routes through verified local topology: normal flow, numbered `Flow_WaitForFlow`, exact CustomFunction UID links, and exact same-graph FireEvent -> CustomEvent links;
+- `UnifiedDialogueLifecycleCompiler` exists only for loading/bootstrap derivation and rebuilds the exact-self `@` layer after navigation so task-owned same-visit descendants can be suppressed structurally;
 - the legacy 1.0.35 `non-at-self-consuming-1.407.bin` file is ignored;
-- when schema 6 is missing/incompatible, graph parsing occurs only during the verified loading window;
+- when schema 7 is missing/incompatible, graph parsing occurs only during the verified loading window;
 - cached loads deserialize compact data and recreate only live runtime bindings; normal gameplay does not invoke the graph parser;
 - once per second: evaluate cached task/interaction state, phrase state, navigation predicates, game-owned gate predicates, and live HUD semantics;
 - approximately every 30 seconds: perform allocation-light runtime/known-NPC validation through cached references and a `ulong` fingerprint;
 - real known-NPC membership changes use cheap rebinding from the manifest;
 - no background worker and no save mutation.
 
-Accepted 1.1.9 runtime evidence:
+Accepted 1.1.14 runtime evidence:
 
-- schema-5 -> schema-6 rebuild behind loading: **923.35 ms**;
-- canonical summary: owner **81/0**, cross-owner **8/6/0**, dialogue-lifecycle **65/65/0**, non-`@` **77 / 19 / 6**, ancestor owners **6 / 2 / 4 / 4 / 0**, navigation **210/270/151/0**;
-- subsequent process load: schema-6 manifest read in **10.62 ms** with `FlowCanvas graph parse skipped`;
+- schema-6 -> schema-7 rebuild behind loading: **900.68 ms**;
+- canonical summary: owner **87/0**, cross-owner **8/6/0**, base `@` **50/50/0**, dialogue-lifecycle **60/60/0**, non-`@` **77 / 19 / 6**, ancestor owners **6 / 2 / 4 / 4 / 0**, navigation **210/270/151/0**;
+- subsequent process load: schema-7 manifest read in **10.43 ms** with `FlowCanvas graph parse skipped`;
 - preserved Better Save Soul Snake regression passed **3 -> 2**, with the consumed Snake contribution disappearing and two unrelated reminders remaining;
 - no Day Wheel Quest Markers warning/error was observed.
 
@@ -282,11 +283,13 @@ Historical performance lineage:
 - 1.0.32 added narrow verified completion-route predicates;
 - 1.0.35 added the audited non-`@` exact-self class;
 - 1.1.3 unified exact-self persistence and independent-path deduplication;
-- 1.1.6 generalized exact-self ownership to nearest persistent lifecycle ownership without adding gameplay graph traversal.
+- 1.1.6 generalized exact-self ownership to nearest persistent lifecycle ownership without adding gameplay graph traversal;
+- 1.1.9 generalized relay-backed `MultipleAnswerData` compound gates;
+- 1.1.14 generalized the remaining answer-backed owner-task topology and aligned exact-self `@` ownership with the accepted navigation-backed lifecycle census.
 
 The rejected universal provenance-parser experiment pushed loading work toward roughly 1.8 seconds and is not an accepted architecture. Do not reintroduce arbitrary external dependency/provenance traversal into production.
 
-## Accepted architecture consolidation through 1.1.9
+## Accepted architecture consolidation through 1.1.14
 
 The accepted architecture is now substantially more general than the historical implementation.
 
@@ -294,20 +297,19 @@ The accepted architecture is now substantially more general than the historical 
 
 - persisted `@` and non-`@` one-time dialogue use one dialogue-lifecycle representation;
 - exact-self and child-consumed-parent cases use one **nearest persistent lifecycle owner** rule;
+- exact-self `@` owners are admitted only when the accepted navigation model proves an independent root path rather than a continuation reachable only through an already task-owned visit;
 - navigation ancestry, phrase state, and supported AnswerData/SmartRes gates are shared predicates;
 - task-owned and same-visit deduplication are part of compilation rather than tactical runtime exceptions;
 - the Snake counterfeit-coins hard-code from 1.1.5 is removed;
 - relay-backed `MultipleAnswerData` is handled generically through the verified authored relay/array structure and native AND semantics;
-- one schema-6 manifest persists the resulting compact runtime model, including compound `MultipleAnswerData` child requirements.
+- all selectable answer-backed owner-task completions are derived by the bounded task compiler; the old promoted answer-backed completion specials are gone;
+- one schema-7 manifest persists the resulting compact runtime model.
 
 ### What intentionally remains separate
 
 1. **Task ownership.** A visible journal task with an authored weekday-NPC route is a different source of evidence from dialogue lifetime. Owner-local and cross-owner are provenance variants inside this class.
-2. **Verified completion supplement.** Five promoted task routes already reuse normal topic/navigation predicates; `snake_trap` remains an exact verified relation-gated completion topology.
-3. **Mandatory event-only stages.** `npc_inquisitor/inquisitor_talk` and `npc_cultist/snake_back` have no selectable answer representing the required visit and therefore cannot honestly be forced into the dialogue-lifecycle rule.
+2. **Mandatory event-only stages.** `npc_inquisitor/inquisitor_talk` and `npc_cultist/snake_back` have no selectable answer representing the required visit and therefore remain two exact verified fallbacks.
 
 A future maintainability refactor may build one shared parsed `WeekdayGraphIndex` so the task, navigation, and lifecycle derivation passes stop duplicating bootstrap parsing/indexing. That would be a code-organization improvement, not a new gameplay algorithm, and should only be attempted with static parity guards.
 
-Likewise, the remaining promoted completion routes may be audited for derivation by a bounded task-effect compiler. Do **not** replace the current small verified supplement with the previously rejected universal provenance parser merely to claim a single algorithm.
-
-The correct target is therefore **one compact interaction engine with a small number of evidence-backed derivation passes**, not one artificial predicate pretending that Graveyard Keeper authors every required visit through the same mechanism.
+The correct target remains **one compact interaction engine with a small number of evidence-backed derivation passes**, not one artificial predicate pretending that Graveyard Keeper authors every required visit through the same mechanism.
