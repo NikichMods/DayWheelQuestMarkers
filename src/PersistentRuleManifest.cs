@@ -12,7 +12,7 @@ using UnityEngine;
 namespace CalendarQuestsPins
 {
     /// <summary>
-    /// Schema-6 persistent manifest. It stores the accepted structural reminder rules, the unified
+    /// Schema-7 persistent manifest. It stores the accepted structural reminder rules, the unified
     /// exact-self-consuming dialogue rules, and compact root-to-answer navigation predicates derived
     /// from the same six Graveyard Keeper 1.407 graphs. Graph parsing remains loading-screen-only.
     /// </summary>
@@ -468,7 +468,7 @@ namespace CalendarQuestsPins
             }
             catch (Exception ex)
             {
-                failure = "could not persist schema-6 manifest: " + ex.GetType().Name + ": " + ex.Message;
+                failure = "could not persist schema-7 manifest: " + ex.GetType().Name + ": " + ex.Message;
                 try { if (File.Exists(_path + ".tmp")) File.Delete(_path + ".tmp"); } catch { }
                 return false;
             }
