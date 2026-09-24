@@ -10,7 +10,7 @@ namespace CalendarQuestsPins
     {
         public const string PluginGuid = "nikich.gyk.calendarquestspins";
         public const string PluginName = "Day Wheel Quest Markers";
-        public const string PluginVersion = "1.1.9";
+        public const string PluginVersion = "1.1.14";
 
         private const float TickSeconds = 1f;
         private const float StructureCheckSeconds = 30f;
@@ -121,11 +121,11 @@ namespace CalendarQuestsPins
             _loggedReady = false;
 
             if (loaded)
-                Logger.LogInfo("Persistent schema-6 interaction manifest loaded behind loading screen in " +
+                Logger.LogInfo("Persistent schema-7 interaction manifest loaded behind loading screen in " +
                                loadMs.ToString("F2") + " ms; FlowCanvas graph parse skipped.");
             else
             {
-                Logger.LogInfo("Persistent rule manifest schema 6 bootstrapped behind loading screen in " +
+                Logger.LogInfo("Persistent rule manifest schema 7 bootstrapped behind loading screen in " +
                                bootstrapMs.ToString("F2") + " ms; future loads can skip FlowCanvas graph parsing.");
                 if (!string.IsNullOrEmpty(bootstrapNote)) Logger.LogWarning(bootstrapNote);
             }
@@ -200,8 +200,7 @@ namespace CalendarQuestsPins
                             string taskId;
                             if (!WeekdayInteractionRuleCache.IsVisibleTask(task, out taskId)) continue;
                             var actionable = _reachability.IsOwnerTaskActionable(target, taskId, unlocked, blacklisted) ||
-                                             _verifiedCompletionRules.IsOwnerTaskActionable(target, taskId, unlocked, blacklisted,
-                                                 _reachability, _mainGame);
+                                             _verifiedCompletionRules.IsOwnerTaskActionable(target, taskId);
                             if (!actionable) continue;
                             AddMarker(sinTypeValue, GetMarkerStyle(taskId));
                         }
@@ -210,7 +209,7 @@ namespace CalendarQuestsPins
                     for (var i = 0; i < target.Topics.Count; i++)
                     {
                         var topic = target.Topics[i];
-                        if (topic == null || VerifiedCompletionReminderRules.IsPromotedCompletionTopic(target.NpcId, topic.AnswerId)) continue;
+                        if (topic == null) continue;
                         if (!_reachability.IsTopicActionable(target, topic, unlocked, blacklisted)) continue;
                         AddMarker(sinTypeValue, MarkerStyle.Base);
                     }
@@ -256,7 +255,7 @@ namespace CalendarQuestsPins
             _cacheReady = true;
             _runtimeRestoreAttemptedSave = null;
             ApplyKnownNpcState(fingerprint, hasPeriodicNpc, false);
-            Logger.LogInfo("Persistent schema-6 interaction manifest restored in " + loadMs.ToString("F2") +
+            Logger.LogInfo("Persistent schema-7 interaction manifest restored in " + loadMs.ToString("F2") +
                            " ms (" + reason + "); graph parse not required.");
             return true;
         }
@@ -364,7 +363,7 @@ namespace CalendarQuestsPins
             _loggedReady = true;
             if (_waitingForPeriodicNpc)
             {
-                Logger.LogInfo("Ready. Persistent schema-6 interaction manifest active; no weekday NPC is known yet.");
+                Logger.LogInfo("Ready. Persistent schema-7 interaction manifest active; no weekday NPC is known yet.");
                 return;
             }
             LogManifestSummary("Ready");

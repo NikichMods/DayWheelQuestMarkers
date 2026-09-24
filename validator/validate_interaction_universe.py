@@ -18,9 +18,13 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_BASELINE = ROOT / "validator" / "baseline-1.1.9.json"
+DEFAULT_BASELINE = ROOT / "validator" / "baseline-1.1.10.json"
 DEFAULT_LIFECYCLE = ROOT / "validator" / "fixtures" / "lifecycle-paths-1.1.6.tsv"
+DEFAULT_RAW_UNIVERSE = ROOT / "validator" / "fixtures" / "raw-interaction-universe-1.1.6.tsv"
+DEFAULT_NAVIGATION = ROOT / "validator" / "fixtures" / "navigation-paths-1.1.6.tsv"
+DEFAULT_NO_ROOT = ROOT / "validator" / "fixtures" / "no-root-frontier-1.1.6.tsv"
 DEFAULT_TASKS = ROOT / "validator" / "fixtures" / "task-census-1.1.6.tsv"
+DEFAULT_TASK_ROUTES = ROOT / "validator" / "fixtures" / "task-routes-1.1.6.tsv"
 DEFAULT_MULTIPLE_ANSWER = ROOT / "validator" / "fixtures" / "multiple-answerdata-1.407.tsv"
 DEFAULT_REPORT = ROOT / "validator" / "out" / "validation-report.json"
 
@@ -72,6 +76,91 @@ def load_tsv(path: Path) -> list[dict[str, str]]:
     if not lines:
         return []
     return list(csv.DictReader(lines, delimiter="\t"))
+
+
+def validate_interaction_partition(
+    raw_rows: list[dict[str, str]],
+    navigation_rows: list[dict[str, str]],
+    no_root_rows: list[dict[str, str]],
+    baseline: dict,
+    log: CheckLog,
+) -> dict:
+    expected_raw = baseline["raw_universe"]
+    expected_navigation = baseline["navigation"]
+    expected_no_root = baseline["no_root_frontier"]
+
+    kind_counts = Counter(row["kind"] for row in raw_rows)
+    expected_kinds = expected_raw["kinds"]
+    log.check("universe.raw_rows", len(raw_rows) == expected_raw["rows"],
+              f"observed={len(raw_rows)} expected={expected_raw['rows']}")
+    log.check("universe.kind_counts", dict(kind_counts) == expected_kinds,
+              f"observed={dict(kind_counts)} expected={expected_kinds}")
+
+    answers = [row for row in raw_rows if row["kind"] == "answer"]
+    occurrence_keys = {
+        (row["npc"], row["node"], row["index"], row["id"])
+        for row in answers
+    }
+    raw_unique = {(row["npc"], row["id"]) for row in answers}
+    log.check("universe.answer_occurrences",
+              len(answers) == expected_raw["answer_occurrences"] == len(occurrence_keys),
+              f"rows={len(answers)} uniqueOccurrences={len(occurrence_keys)} "
+              f"expected={expected_raw['answer_occurrences']}")
+    log.check("universe.unique_npc_answers", len(raw_unique) == expected_raw["unique_npc_answers"],
+              f"observed={len(raw_unique)} expected={expected_raw['unique_npc_answers']}")
+
+    navigation_unique = {(row["npc"], row["answer"]) for row in navigation_rows}
+    unsupported = [row for row in navigation_rows if row["unsupported"] != "False"]
+    log.check("navigation.path_count", len(navigation_rows) == expected_navigation["paths"],
+              f"observed={len(navigation_rows)} expected={expected_navigation['paths']}")
+    log.check("navigation.answer_count", len(navigation_unique) == expected_navigation["answers"],
+              f"observed={len(navigation_unique)} expected={expected_navigation['answers']}")
+    log.check("navigation.unsupported_paths", len(unsupported) == expected_navigation["unsupported_paths"],
+              f"observed={len(unsupported)} expected={expected_navigation['unsupported_paths']}")
+
+    path_index_errors = []
+    paths_by_answer: dict[tuple[str, str], list[int]] = defaultdict(list)
+    for row in navigation_rows:
+        paths_by_answer[(row["npc"], row["answer"])].append(int(row["pathIndex"]))
+    for key, indices in paths_by_answer.items():
+        ordered = sorted(indices)
+        if ordered != list(range(len(ordered))):
+            path_index_errors.append(f"{key}={ordered}")
+    log.check("navigation.path_indices_contiguous", not path_index_errors,
+              "all path indices contiguous" if not path_index_errors else "; ".join(path_index_errors[:8]))
+
+    no_root_unique = {(row["npc"], row["answer"]) for row in no_root_rows}
+    no_root_classes = {row["classification"] for row in no_root_rows}
+    root_events = Counter(row["rootEvent"] for row in no_root_rows)
+    log.check("no_root.row_count", len(no_root_rows) == expected_no_root["rows"],
+              f"observed={len(no_root_rows)} expected={expected_no_root['rows']}")
+    log.check("no_root.unique_count", len(no_root_unique) == expected_no_root["rows"],
+              f"observed={len(no_root_unique)} expected={expected_no_root['rows']}")
+    log.check("no_root.classification",
+              no_root_classes == {expected_no_root["classification"]},
+              f"observed={sorted(no_root_classes)} expected={expected_no_root['classification']}")
+    log.check("no_root.root_events", dict(root_events) == expected_no_root["root_events"],
+              f"observed={dict(root_events)} expected={expected_no_root['root_events']}")
+
+    overlap = navigation_unique & no_root_unique
+    covered = navigation_unique | no_root_unique
+    log.check("universe.navigation_no_root_disjoint", not overlap,
+              "disjoint" if not overlap else f"overlap={sorted(overlap)}")
+    log.check("universe.unique_answer_partition", covered == raw_unique,
+              f"missing={sorted(raw_unique - covered)} extra={sorted(covered - raw_unique)}")
+    log.check("universe.partition_arithmetic",
+              len(raw_unique) == len(navigation_unique) + len(no_root_unique),
+              f"raw={len(raw_unique)} navigation={len(navigation_unique)} noRoot={len(no_root_unique)}")
+
+    return {
+        "raw_rows": len(raw_rows),
+        "answer_occurrences": len(answers),
+        "unique_npc_answers": len(raw_unique),
+        "navigation_answers": len(navigation_unique),
+        "navigation_paths": len(navigation_rows),
+        "no_root_answers": len(no_root_unique),
+        "partition": f"{len(raw_unique)} = {len(navigation_unique)} + {len(no_root_unique)}",
+    }
 
 
 def derive_lifecycle_owner(row: dict[str, str]) -> tuple[str | None, str | None]:
@@ -283,6 +372,41 @@ def validate_task_census(sections: dict, baseline: dict, log: CheckLog) -> dict:
     }
 
 
+def validate_task_routes(rows: list[dict[str, str]], baseline: dict, log: CheckLog) -> dict:
+    expected = baseline["task_census"]
+    selectable = [row for row in rows if row["kind"] == "SELECTABLE"]
+    event_only = [row for row in rows if row["kind"] == "EVENT_OR_UNRESOLVED"]
+
+    log.check("task_routes.total", len(rows) == expected["owner_complete_nodes"],
+              f"observed={len(rows)} expected={expected['owner_complete_nodes']}")
+    log.check("task_routes.selectable",
+              len(selectable) == expected["final_selectable_task_completions"],
+              f"observed={len(selectable)} expected={expected['final_selectable_task_completions']}")
+    log.check("task_routes.event_only",
+              len(event_only) == expected["final_event_only_task_stages"],
+              f"observed={len(event_only)} expected={expected['final_event_only_task_stages']}")
+
+    actual_event_only = {(row["npc"], row["task"]) for row in event_only}
+    expected_event_only = {(row["npc"], row["task"]) for row in expected["event_only"]}
+    log.check("task_routes.event_only_exact_set", actual_event_only == expected_event_only,
+              f"observed={sorted(actual_event_only)} expected={sorted(expected_event_only)}")
+
+    selectable_set = {(row["npc"], row["task"], row["answer"]) for row in selectable}
+    derived_expected = {
+        (row["npc"], row["task"], row["answer"])
+        for row in baseline["verified_completion_supplement"]["derived_owner_routes"]
+    }
+    log.check("task_routes.derived_owner_routes", derived_expected.issubset(selectable_set),
+              f"missing={sorted(derived_expected - selectable_set)}")
+
+    return {
+        "records": len(rows),
+        "selectable": len(selectable),
+        "event_only": len(event_only),
+        "derived_owner_routes": sorted(derived_expected),
+    }
+
+
 def validate_multiple_answerdata(rows: list[dict[str, str]], baseline: dict, log: CheckLog) -> dict:
     expected = baseline["multiple_answerdata"]
     observed_set = {
@@ -389,6 +513,8 @@ def validate_production_source(baseline: dict, log: CheckLog) -> dict:
         "if (completionAnswerIds.Contains(ownerId))",
         "if (!navigation.HasInteractionRootPathWithoutAncestors",
         "if (removals.Contains(ownerId))",
+        "RebuildAtExactSelfTopics",
+        "HasInteractionRootPathWithoutAncestors(npcId, answerId, completionAnswerIds)",
     ]
     for needle in semantic_needles:
         log.check("source.lifecycle.guard." + str(abs(hash(needle))),
@@ -416,13 +542,35 @@ def validate_production_source(baseline: dict, log: CheckLog) -> dict:
     log.check("source.completion.event_only_exact_set", event_actual == event_expected,
               f"observed={sorted(event_actual)} expected={sorted(event_expected)}")
 
-    snake_trap_ok = (
-        '"snake_trap"' in completion
-        and 'const string answerId = "snake_stone_ready";' in completion
-        and 'CreateSmartRes("GameRes", "_rel", 10f' in completion
-    )
-    log.check("source.completion.snake_trap_exact_route", snake_trap_ok,
-              "expected snake_trap -> snake_stone_ready with GameRes:_rel 10")
+    answer_backed_special_tokens = [
+        "PromotedRoute",
+        "IsPromotedCompletionTopic",
+        '"snake_trap"',
+        '"snake_stone_ready"',
+        'CreateSmartRes("GameRes", "_rel", 10f',
+    ]
+    leaked_specials = [token for token in answer_backed_special_tokens if token in completion or token in plugin]
+    log.check("source.completion.no_answer_backed_specials", not leaked_specials,
+              f"answer-backed completion specials must be generic owner-task rules; leaked={leaked_specials}")
+
+    owner_task_topology_needles = [
+        "BuildOwnerTaskIncomingFlow",
+        "Flow_WaitForFlow",
+        "IsIntegerPort(c.TargetPort)",
+        '"_sourceOutputUID"',
+        '"_UID"',
+        "AddOwnerTaskFunctionLinks",
+        "Flow_FireEvent",
+        "CustomEvent",
+        "eventName",
+        "AddOwnerTaskEventLinks",
+        "var anchorFlow = ownerLocal ? ownerTaskIncomingFlow : incomingFlow;",
+        "AddCompiledTaskRuleAnswerIds(completionAnswerIds, target);",
+        "AddSupportedRuleAnswerIds",
+    ]
+    for needle in owner_task_topology_needles:
+        log.check("source.owner_task_topology.guard." + str(abs(hash(needle))),
+                  needle in rules, f"required bounded owner-task topology guard missing: {needle}")
 
     retired_snake_special = ("@snake_1с" in completion or "quest_fake_coins" in completion or
                              "@snake_1с" in plugin or "quest_fake_coins" in plugin)
@@ -468,8 +616,12 @@ def validate_production_source(baseline: dict, log: CheckLog) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--baseline", type=Path, default=DEFAULT_BASELINE)
+    parser.add_argument("--raw-universe", type=Path, default=DEFAULT_RAW_UNIVERSE)
+    parser.add_argument("--navigation", type=Path, default=DEFAULT_NAVIGATION)
+    parser.add_argument("--no-root", type=Path, default=DEFAULT_NO_ROOT)
     parser.add_argument("--lifecycle", type=Path, default=DEFAULT_LIFECYCLE)
     parser.add_argument("--tasks", type=Path, default=DEFAULT_TASKS)
+    parser.add_argument("--task-routes", type=Path, default=DEFAULT_TASK_ROUTES)
     parser.add_argument("--multiple-answer", type=Path, default=DEFAULT_MULTIPLE_ANSWER)
     parser.add_argument("--report", type=Path, default=DEFAULT_REPORT)
     args = parser.parse_args()
@@ -477,25 +629,19 @@ def main() -> int:
     baseline = load_json(args.baseline)
     log = CheckLog()
 
+    raw_rows = load_tsv(args.raw_universe)
+    navigation_rows = load_tsv(args.navigation)
+    no_root_rows = load_tsv(args.no_root)
+    universe_report = validate_interaction_partition(raw_rows, navigation_rows, no_root_rows, baseline, log)
     lifecycle_rows = load_lifecycle(args.lifecycle)
     lifecycle_report = validate_lifecycle(lifecycle_rows, baseline, log)
     task_sections = parse_task_fixture(args.tasks)
     task_report = validate_task_census(task_sections, baseline, log)
+    task_route_rows = load_tsv(args.task_routes)
+    task_route_report = validate_task_routes(task_route_rows, baseline, log)
     multiple_answer_rows = load_tsv(args.multiple_answer)
     multiple_answer_report = validate_multiple_answerdata(multiple_answer_rows, baseline, log)
     source_report = validate_production_source(baseline, log)
-
-    # This is an explicit coverage boundary, not a hidden pass condition.
-    log.warn(
-        "Owner-task census is complete at the 72-node classification level, but the historical "
-        "0.1.1 evidence did not emit a row for every one of the 70 selectable completion routes. "
-        "A one-time read-only route exporter is required to make that layer route-by-route exhaustive."
-    )
-    log.warn(
-        "Navigation has accepted runtime totals 210 answers / 270 paths / 151 predicates / 0 unsupported, "
-        "but no complete path fixture is yet stored. Lifecycle fixture coverage exercises many of those paths "
-        "but is not a complete navigation oracle."
-    )
 
     report = {
         "validator_format": 1,
@@ -508,13 +654,15 @@ def main() -> int:
         "warnings": log.warnings,
         "coverage": {
             "dialogue_lifecycle": "path-level exhaustive for accepted census",
-            "owner_task_completion": "complete census/classification; individual selectable-route fixture partial",
-            "navigation": "accepted totals plus lifecycle-path coverage; complete standalone path fixture pending",
+            "owner_task_completion": "route-level exhaustive: 72 completion routes = 70 selectable + 2 event-only",
+            "navigation": "route-level exhaustive: 210 unique answers / 270 exact root paths / 0 unsupported",
             "event_only": "exact accepted set",
             "production_contract": "static bounded contract checks",
         },
+        "interaction_universe": universe_report,
         "lifecycle": lifecycle_report,
         "tasks": task_report,
+        "task_routes": task_route_report,
         "multiple_answerdata": multiple_answer_report,
         "production_source": source_report,
         "checks": log.checks,
@@ -526,6 +674,11 @@ def main() -> int:
     print(f"Day Wheel interaction validator: {report['status']}")
     print(f"Checks: {report['checks_total']} total, {report['checks_failed']} failed")
     print(
+        "Interaction universe: "
+        f"{universe_report['answer_occurrences']} occurrences / "
+        f"{universe_report['partition']} unique answer partition"
+    )
+    print(
         "Lifecycle: "
         f"{lifecycle_report['records']} path records, "
         f"{lifecycle_report['derived_summary']['unique_admitted_owners']} unique admitted owners"
@@ -534,6 +687,11 @@ def main() -> int:
         "Tasks: "
         f"{task_report['owner_complete_nodes']} completion nodes -> "
         f"{task_report['final_selectable']} selectable + {task_report['final_event_only']} event-only"
+    )
+    print(
+        "Task routes: "
+        f"{task_route_report['records']} exact routes -> "
+        f"{task_route_report['selectable']} selectable + {task_route_report['event_only']} event-only"
     )
     print(
         "MultipleAnswerData: "

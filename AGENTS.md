@@ -10,11 +10,11 @@ Read the global engineering contract in `NikichMods/DevRules` before substantive
 - Game: Graveyard Keeper 1.407
 - Stable BepInEx GUID: `nikich.gyk.calendarquestspins`
 - Legacy source namespace `CalendarQuestsPins` is intentionally retained; do not change the GUID or namespace merely for cosmetic normalization.
-- Current accepted stable public baseline: **1.1.9**.
-- Exact accepted tested runtime source: `73b35a3bffcb440bf644dd03532fbf2cf6ce4b11`.
-- Accepted baseline ref: `baseline/1.1.9-accepted`.
-- Accepted DLL: **101,376 bytes**.
-- Accepted DLL SHA-256: `069f9e1533f42fb4c4673effb5069de4354d72aeeb32e48818b14a752cb6359e`.
+- Current accepted stable public baseline: **1.1.14**.
+- Exact accepted tested runtime source: `0189ecc8ed85fc0b4d57d1ba721d3f5dc1be33ad`.
+- Accepted baseline ref: `baseline/1.1.14-accepted`.
+- Accepted DLL: **101,888 bytes**.
+- Accepted DLL SHA-256: `ac422d1df5d4ff8beb235933cc70db137d83d6334c6c97a5c2230a51e87bd39b`.
 
 ## Product rule
 
@@ -36,45 +36,48 @@ Unknown, reversible, ambiguous, or unsupported structures fail closed. False pos
 
 ## Accepted runtime architecture
 
-Accepted production **1.1.9** uses one persistent schema-6 interaction manifest plus cheap live bindings:
+Accepted production **1.1.14** uses one persistent schema-7 interaction manifest plus cheap live bindings:
 
 - `WeekdayInteractionRuleCache` derives owner-local and cross-owner task rules plus persisted dialogue-topic rules;
+- the bounded owner-task compiler follows the verified local topology families used by GK 1.407: normal flow edges, numbered `Flow_WaitForFlow` inputs, exact `CustomFunctionCall._sourceOutputUID -> CustomFunctionEvent._UID` links, and exact same-graph `Flow_FireEvent.event -> CustomEvent.eventName` links;
+- all answer-backed task completions are derived structurally; `VerifiedCompletionReminderRules` now contains only the two verified event-only fallbacks `npc_inquisitor/inquisitor_talk` and `npc_cultist/snake_back`;
 - direct `Flow_Answer` gates retain the established game-owned SmartRes evaluation;
-- relay-backed `MultipleAnswerData` is now structurally supported through the verified chain `RelayValueOutput<MultipleAnswerData> -> RelayValueInput<MultipleAnswerData> -> Flow_MultipleAnswer -> Flow_AnswersArray -> child Flow_Answer`;
+- relay-backed `MultipleAnswerData` remains structurally supported through the verified chain `RelayValueOutput<MultipleAnswerData> -> RelayValueInput<MultipleAnswerData> -> Flow_MultipleAnswer -> Flow_AnswersArray -> child Flow_Answer`;
 - compound children use the game's verified native **AND** semantics: every child lock and price requirement must be sufficient;
 - production does not hard-code Souls quest IDs, weekday NPC IDs, or item IDs for that compound family;
 - `NavigationReachabilityCache` derives root-to-answer paths, ordered selectable ancestors, and compact phrase/AnswerData predicates;
-- `UnifiedDialogueLifecycleCompiler` is bootstrap-only and resolves exact-self plus nearest persistent lifecycle owners on concrete authored paths;
-- lifecycle precedence remains self first, otherwise nearest consumed selectable ancestor; task-owned owners and same-visit descendants are suppressed from the generic dialogue layer;
+- `UnifiedDialogueLifecycleCompiler` is bootstrap-only. After navigation exists it rebuilds the exact-self `@` topic layer from exact branch effects and applies the accepted independent-owner-root rule, then derives non-`@` exact-self and nearest persistent ancestor owners;
+- lifecycle precedence remains self first, otherwise nearest consumed selectable ancestor; task-owned owners and descendants reachable only through an already task-owned visit are suppressed from the generic dialogue layer;
 - the complete six-NPC lifecycle census remains six unique ancestor-owner candidates: four admitted independent owners and two task-owned suppressions, with zero reversible owners admitted;
-- `PersistentRuleManifest` schema 6 persists task rules, compound requirements, dialogue-lifecycle topics, navigation predicates, and lifecycle integrity counts to `BepInEx/cache/DayWheelQuestMarkers/rules-1.407.bin`;
-- schema-5 files are incompatible by design and rebuild once behind loading; later loads deserialize schema 6;
-- the exact six weekday-NPC graphs are parsed only during loading/bootstrap when schema 6 is missing or incompatible;
+- `PersistentRuleManifest` schema 7 persists task rules, compound requirements, dialogue-lifecycle topics, navigation predicates, and lifecycle integrity counts to `BepInEx/cache/DayWheelQuestMarkers/rules-1.407.bin`;
+- schema-6 and older files are incompatible by design and rebuild once behind loading; later loads deserialize schema 7;
+- the exact six weekday-NPC graphs are parsed only during loading/bootstrap when schema 7 is missing or incompatible;
 - normal gameplay never reparses FlowCanvas graphs;
 - owner-local rules retain the verified authoritative `WorldZone.GetTotalQuality()` fallback for unambiguous authored quality mirrors;
 - generic resource/relation/compound gates continue to delegate sufficiency to game-owned SmartRes/`Player.IsEnough` behavior;
-- `VerifiedCompletionReminderRules` remains only a narrow supplement for verified task-completion topologies not represented by the generic task compiler; the two mandatory event-only stages remain exact mappings;
 - there is no broad `Visible task`, arbitrary `CustomEvent`, translated-text, or universal external-provenance classifier;
 - native marker sprites remain game-owned and cached through bounded lookup;
 - known-NPC changes use cheap rebinding; steady one-second evaluation and approximately 30-second structural validation remain allocation-light.
 
-Accepted schema-6 integrity/runtime counts:
+Accepted schema-7 integrity/runtime counts:
 
-- owner: **81 supported / 0 unsupported**;
+- owner: **87 supported / 0 unsupported**;
 - cross-owner: **8 tasks / 6 supported / 0 unsupported**;
-- dialogue-lifecycle: **65 topics / 65 supported / 0 unsupported**;
+- base standalone `@` lifecycle topics: **50 / 50 supported / 0 unsupported**;
+- total dialogue-lifecycle: **60 topics / 60 supported / 0 unsupported**;
 - non-`@` universe: **77 unique / 19 exact-self / 6 admitted / 9 task/completion exclusions**;
 - ancestor lifecycle owners: **6 candidates / 2 task-owned exclusions / 4 admitted / 4 supported / 0 unsupported**;
 - navigation: **210 answers / 270 paths / 151 predicates / 0 unsupported**;
+- owner completion census: **72 nodes = 70 selectable + 2 event-only**;
 - verified relay-backed `MultipleAnswerData`: **7 menu uses across 4 weekday NPCs**.
 
-Accepted 1.1.9 runtime evidence:
+Accepted 1.1.14 runtime evidence:
 
-- schema-5 -> schema-6 bootstrap completed behind loading in **923.35 ms**;
-- a subsequent process deserialized the persisted schema-6 manifest in **10.62 ms** with `FlowCanvas graph parse skipped`;
-- the preserved Better Save Soul Snake state showed the expected **3 markers** including the new Envy/Snake reminder;
+- schema-6 -> schema-7 bootstrap completed behind loading in **900.68 ms** and reached `Ready` with the canonical counts above;
+- a subsequent process deserialized the persisted schema-7 manifest in **10.43 ms** with `FlowCanvas graph parse skipped`;
+- the preserved Better Save Soul Snake state showed **3 markers** before `@souls_s_s33_ask`;
 - selecting `@souls_s_s33_ask` completed `npc_cultist/dlc_souls_s29_3`, removed that authored answer, and the wheel transitioned **3 -> 2** while the two unrelated markers remained;
-- no Day Wheel Quest Markers warning/error was observed in the accepted test.
+- the player explicitly accepted the tested behavior as correct, and no Day Wheel Quest Markers warning/error was observed.
 
 The rejected universal provenance parser remains rejected. Production derives only verified local interaction/task/navigation semantics from the six weekday-NPC graphs and does not walk arbitrary external dependency chains.
 
@@ -115,9 +118,10 @@ Do not optimize speculative problems. The evidence-driven lineage is:
 - 1.0.35 generalized non-`@` exact-self interactions;
 - 1.1.3 unified exact-self persistence and fixed same-visit duplication;
 - 1.1.6 generalized dialogue ownership to nearest persistent lifecycle owner;
-- **1.1.9 closes the relay-backed `MultipleAnswerData` family without adding gameplay graph work**.
+- 1.1.9 closes the relay-backed `MultipleAnswerData` family without adding gameplay graph work;
+- **1.1.14 generalizes the remaining answer-backed owner-task routes and rebuilds exact-self `@` lifecycle ownership through the accepted navigation-backed independent-root rule**.
 
-The one-time schema-6 bootstrap remains about one second on the tested developed save. Cached schema-6 reads are low-millisecond work. Do not add complexity merely to optimize that bounded loading cost without measured user-visible need.
+The one-time schema-7 bootstrap remains about one second on the tested developed save. Cached schema-7 reads are low-millisecond work. Do not add complexity merely to optimize that bounded loading cost without measured user-visible need.
 
 ## Repository workflow
 

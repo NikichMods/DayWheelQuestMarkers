@@ -7,10 +7,10 @@ using System.Text.RegularExpressions;
 namespace CalendarQuestsPins
 {
     /// <summary>
-    /// Bootstrap-only compiler for authored one-visit dialogue lifecycles not already represented
-    /// by the base @ self-consuming parser.
+    /// Bootstrap-only compiler for authored one-visit dialogue lifecycles.
     ///
-    /// It preserves the accepted non-@ exact-self universe and adds the verified GK 1.407 rule that
+    /// It rebuilds the exact-self @ topic layer from exact branch effects plus navigation, preserves
+    /// the accepted non-@ exact-self universe, and adds the verified GK 1.407 rule that
     /// a progressing branch may persistently consume its nearest selectable ancestor instead of itself.
     /// Ownership is path-local, self consumption wins, task-owned visits are deduplicated, and runtime
     /// gameplay evaluates only persisted TopicRules/navigation predicates.
@@ -174,6 +174,15 @@ namespace CalendarQuestsPins
                 var removals = FindBlacklistRemovals(nodes, serialized);
                 var completionAnswerIds = FindProductionCompletionAnswerIds(nodes, productionIncoming, serialized);
                 AddProductionTaskRuleAnswerIds(completionAnswerIds, target);
+                var branches = BuildBranchEffects(nodes, exactIncoming, callsByUid, serialized);
+
+                // The older @ parser runs before navigation exists, so it can neither reject descendants
+                // reachable only through an already task-owned visit nor recover exact self-consumers that
+                // its narrower reverse-flow seam misses. Rebuild that layer here from the same exact branch
+                // effects and root-path model used by the accepted lifecycle census.
+                RebuildAtExactSelfTopics(npcId, serialized, nodes, connections, branches, removals,
+                    completionAnswerIds, target, cache, navigation);
+
                 var admitted = new Dictionary<string, WeekdayInteractionRuleCache.TopicRule>(StringComparer.Ordinal);
 
                 foreach (var node in nodes.Values)
@@ -243,7 +252,7 @@ namespace CalendarQuestsPins
                     }
                 }
 
-                CompileAncestorOwners(npcId, serialized, nodes, connections, exactIncoming, callsByUid,
+                CompileAncestorOwners(npcId, serialized, nodes, connections, branches,
                     removals, completionAnswerIds, target, cache, navigation, stats);
             }
 
@@ -292,14 +301,69 @@ namespace CalendarQuestsPins
             return true;
         }
 
+        private void RebuildAtExactSelfTopics(string npcId, string serialized,
+            Dictionary<string, Node> nodes, List<Connection> connections,
+            Dictionary<BranchKey, BranchEffects> branches, HashSet<string> removals,
+            HashSet<string> completionAnswerIds, WeekdayInteractionRuleCache.TargetRules target,
+            WeekdayInteractionRuleCache cache, NavigationReachabilityCache navigation)
+        {
+            if (target == null || branches == null) return;
+
+            // Throw away the pre-navigation @ layer and rebuild only independently reachable lifecycle owners.
+            for (var i = target.Topics.Count - 1; i >= 0; i--)
+            {
+                var topic = target.Topics[i];
+                if (topic != null && !string.IsNullOrEmpty(topic.AnswerId) &&
+                    topic.AnswerId.StartsWith("@", StringComparison.Ordinal))
+                    target.Topics.RemoveAt(i);
+            }
+
+            var admitted = new Dictionary<string, WeekdayInteractionRuleCache.TopicRule>(StringComparer.Ordinal);
+            foreach (var pair in branches)
+            {
+                var branch = pair.Value;
+                if (branch == null || branch.Key == null || string.IsNullOrEmpty(branch.Key.AnswerId)) continue;
+                var answerId = branch.Key.AnswerId;
+                if (!answerId.StartsWith("@", StringComparison.Ordinal) ||
+                    !branch.Blacklists.Contains(answerId)) continue;
+                if (removals.Contains(answerId) || IsUtilityLike(answerId) ||
+                    completionAnswerIds.Contains(answerId)) continue;
+
+                // This is the census' independentOwnerRoot control: a self-consuming descendant that
+                // can only be reached after selecting an already task-owned answer belongs to that same
+                // NPC visit and must not create a second reminder.
+                if (!navigation.HasInteractionRootPathWithoutAncestors(npcId, answerId, completionAnswerIds))
+                    continue;
+
+                var built = BuildTopic(answerId, branch.Key.MultiNodeId, branch.Key.AnswerIndex,
+                    serialized, nodes, connections, target.WorldObject, cache);
+                if (built == null || built.Variants.Count == 0) continue;
+
+                WeekdayInteractionRuleCache.TopicRule topic;
+                if (!admitted.TryGetValue(answerId, out topic))
+                {
+                    topic = new WeekdayInteractionRuleCache.TopicRule { AnswerId = answerId };
+                    admitted.Add(answerId, topic);
+                }
+                for (var v = 0; v < built.Variants.Count; v++) AddVariant(topic, built.Variants[v]);
+            }
+
+            var ids = new List<string>(admitted.Keys);
+            ids.Sort(StringComparer.Ordinal);
+            for (var i = 0; i < ids.Count; i++)
+            {
+                var topic = admitted[ids[i]];
+                if (topic != null && topic.Variants.Count != 0) target.Topics.Add(topic);
+            }
+        }
+
         private void CompileAncestorOwners(string npcId, string serialized,
             Dictionary<string, Node> nodes, List<Connection> connections,
-            Dictionary<string, List<Connection>> exactIncoming, Dictionary<string, List<string>> callsByUid,
+            Dictionary<BranchKey, BranchEffects> branches,
             HashSet<string> removals, HashSet<string> completionAnswerIds,
             WeekdayInteractionRuleCache.TargetRules target, WeekdayInteractionRuleCache cache,
             NavigationReachabilityCache navigation, Stats stats)
         {
-            var branches = BuildBranchEffects(nodes, exactIncoming, callsByUid, serialized);
             var owners = new HashSet<string>(StringComparer.Ordinal);
 
             foreach (var pair in branches)
