@@ -612,4 +612,27 @@ Every handed DLL is immutable and tied to exact committed source plus build arti
   2. first load of any developed save: return a fresh `BepInEx/LogOutput.log` so schema-7 bootstrap/integrity and the declared owner/base-topic partition can be verified;
   3. if the preserved pre-`@souls_s_s33_ask` Snake save is still available, use it as the representative changed-route smoke test: the same three-marker state accepted under 1.1.9 should appear, and consuming `@souls_s_s33_ask` should again remove only the Snake contribution (**3 -> 2**) while unrelated markers remain;
   4. report any missing/extra weekday marker; if a contradiction appears, investigate that concrete state with a targeted read-only diagnostic rather than reopening a universal watchdog.
+- Status: **frozen but superseded before user handoff**. Final pre-handoff inspection found stale runtime diagnostic text that still said schema 6 although the manifest is schema 7. Runtime classification was unchanged, but acceptance depends on trustworthy logs, so 1.1.10 was not handed out and its bytes remain frozen.
+
+
+## 1.1.11 — schema-7 diagnostic correction + exact-source candidate handoff
+
+- Date built: 2026-09-24.
+- Development branch: `dev/1.1.11`.
+- Exact executable/build source: `ca18f1576deab5aa17b2146e45f907a6989431b0`.
+- Frozen candidate ref: `candidate/1.1.11` at the exact build source above. Later workflow/docs commits do not change the handed binary identity.
+- Runtime behavior: identical task/dialogue/navigation classifier and schema-7 manifest contract to frozen 1.1.10. Only version metadata and stale diagnostic labels were corrected from schema 6 to schema 7 before player handoff.
+- Persistent manifest: schema **7**; canonical partition remains owner **87 supported / 0 unsupported**, cross-owner **8 tasks / 6 supported / 0 unsupported**, base `@` topics **50 / 50 supported / 0 unsupported**.
+- Exact-source CI hardening: PR candidate build/validator checkout was corrected to explicitly use the candidate/head SHA and verify `git rev-parse HEAD` before executable work. The earlier successful PR build `35940116017` used GitHub's synthetic merge ref and is therefore **not** the handed artifact even though its runtime source content was equivalent.
+- Exact-source interaction-universe validator: run `35940427903`, job `107446894675` — source-identity check **PASS** at `ca18f1576deab5aa17b2146e45f907a6989431b0`; validator **PASS 99 / 0 failed / 0 warnings**; tasks/routes **72 = 70 selectable + 2 event-only**; only exact event-only stages remain `npc_inquisitor/inquisitor_talk` and `npc_cultist/snake_back`.
+- Exact-source candidate CI build: run `35940428128`, job `107446895216` — source-identity check **PASS** at `ca18f1576deab5aa17b2146e45f907a6989431b0`; Release build **0 warnings / 0 errors**.
+- Artifact: `DayWheelQuestMarkers-1.1.11`, artifact ID `10785185482`, archive digest `sha256:40d06fb03d314b0178ab35fabcd30f3531c6c0af172f584b3a8567e18f854865`.
+- Raw DLL: **100,864 bytes**.
+- Raw DLL SHA-256: `727c044109084ae3bc6cc5de8428614be5915acb3bc348a9e36e63ebf8b67797`. Local extraction/hash exactly matches the CI-reported DLL hash.
+- Requested runtime acceptance:
+  1. remove the previous Day Wheel Quest Markers DLL and keep research probes removed; install only this 1.1.11 candidate;
+  2. start the game and load any developed save, then return a fresh `BepInEx/LogOutput.log`; acceptance first checks clean schema-7 bootstrap/load, canonical integrity counts and absence of Day Wheel Quest Markers warnings/errors;
+  3. also report the visible weekday markers on that save (a screenshot is sufficient). If one of the six formerly special answer-backed completion routes is currently reachable, use that state as the representative live smoke test; otherwise do not manufacture progress or restore an old save solely for this first gate;
+  4. if the preserved pre-`@souls_s_s33_ask` Snake save is readily available, it remains an ideal representative smoke: accepted 1.1.9 behavior was three markers before the interaction and two after consuming only the Snake contribution;
+  5. any concrete missing/extra marker is investigated with a targeted read-only diagnostic; the cancelled universal Watchdog 0.3 is not reopened.
 - Status: **candidate handed for runtime acceptance; not merged/released**.
