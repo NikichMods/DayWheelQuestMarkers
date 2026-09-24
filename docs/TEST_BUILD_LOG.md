@@ -661,4 +661,24 @@ Every handed DLL is immutable and tied to exact committed source plus build arti
   3. first gate: schema-7 bootstrap/load must complete without Day Wheel Quest Markers warning/error and runtime cache must reach `Ready`;
   4. report the visible weekday markers on that same save. Zero markers are allowed if the now-valid runtime evaluation finds no actionable weekday-NPC interaction; the previous global-cache failure must no longer be the reason;
   5. if the preserved pre-`@souls_s_s33_ask` Snake state is readily available, use it afterward as the representative changed-route smoke test; do not manufacture progress solely for the first bootstrap gate.
-- Status: **candidate handed for runtime acceptance; not merged/released**.
+- Player result: **failed on 2026-09-24 before marker evaluation**. The correct 1.1.12 DLL loaded, but schema-7 bootstrap again produced `owner=87/0, cross=8/6/0, self-consuming=61/61/0, nonAt=6/6/0, raw=19, excluded=9`. The manifest correctly failed closed; gameplay refused graph-parser fallback and the wheel remained empty.
+- Conclusion: folding supported compiled task-rule answer IDs into the base topic exclusion set was insufficient. The single extra standalone `@` owner must be identified directly before another semantic fix.
+- Status: **failed / frozen / superseded by targeted diagnostic 1.1.13 / do not merge or release**.
+
+
+## 1.1.13 — targeted schema-7 topic-overrun diagnostic
+
+- Date built: 2026-09-24.
+- Development branch: `dev/1.1.13`, created fresh from current stable `main` at `9ed3eda8f1a477a469159350a62b42220d5054eb`.
+- Exact executable/build source: `9bf52fe7823bd70ad2f43eba0b72b060f441dfb3`.
+- Frozen candidate ref: `candidate/1.1.13` at that exact source. Later documentation commits do not change the handed binary identity.
+- Purpose: identify the single extra schema-7 standalone `@` topic proven by 1.1.11 and 1.1.12 runtime. No reminder/classifier semantics or canonical expected counts are changed.
+- Diagnostic behavior: only when bootstrap is already non-canonical, append to the existing failure message (1) every actual `@` topic grouped by weekday NPC and (2) every supported compiled `@` task-answer ID grouped by task. Normal successful runtime would not emit this dump.
+- Independent oracle retained: exactly **50** unique admitted standalone `@` owners in the accepted lifecycle fixture. The diagnostic exists to name the runtime-only 51st entry rather than accepting or guessing around it.
+- Exact-source interaction-universe validator: run `35942804117`, job `107454210329` — source identity **PASS** at `9bf52fe7823bd70ad2f43eba0b72b060f441dfb3`; **PASS 101 / 0 failed**; lifecycle **216 paths / 60 unique admitted owners**; tasks/routes **72 = 70 selectable + 2 event-only**; `MultipleAnswerData` **7 verified uses across 4 weekday NPCs**.
+- Exact-source CI build: run `35942804104`, job `107454210168` — source identity **PASS** at `9bf52fe7823bd70ad2f43eba0b72b060f441dfb3`; Release build **0 warnings / 0 errors**.
+- Artifact: `DayWheelQuestMarkers-1.1.13`, artifact ID `10785164804`, archive digest `sha256:e1b396a46de2b958b0ad8663ba74c350044e069a863d5ce43f507210929b6cc0`.
+- Raw DLL: **102,400 bytes**.
+- Raw DLL SHA-256: `92c6aa04ae78e9f89f89419eb7294a3adcafab90f06856338f67f9fb98cb09ff`; local extraction matches CI exactly.
+- Requested runtime test: replace 1.1.12 with this 1.1.13 DLL, load the same developed save once, and return the fresh `BepInEx/LogOutput.log`. No quest progress or special save is required. The expected useful evidence is the single non-canonical bootstrap warning containing `atTopics=[...]` and `taskAnswers=[...]`.
+- Status: **targeted diagnostic handed; not a release candidate for acceptance**.
