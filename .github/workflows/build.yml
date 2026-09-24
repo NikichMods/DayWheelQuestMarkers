@@ -26,6 +26,7 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v4
         with:
+          # Candidate artifacts must come from the exact candidate commit, not GitHub's synthetic PR merge ref.
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
 
       - name: Verify source identity
