@@ -590,3 +590,75 @@ Every handed DLL is immutable and tied to exact committed source plus build arti
 - Published asset: `DayWheelQuestMarkers.dll`, release asset ID `584295078`, **101,376 bytes**, SHA-256 `069f9e1533f42fb4c4673effb5069de4354d72aeeb32e48818b14a752cb6359e`.
 - Publication: one-shot exact-artifact promotion run `35897935850` succeeded. The pre-existing generic publisher initially exposed an artifact-filename/install-filename contract mismatch; it was corrected to keep those identities separate and made idempotent. Verification run `35898105166`, job `107307017584`, succeeded and revalidated the exact published hash/target without replacing the release.
 - Status: **accepted stable / merged / released**.
+
+
+## 1.1.10 — generic owner-task completion topology candidate
+
+- Date built: 2026-09-24.
+- Development branch: `dev/1.1.10`.
+- Exact executable/build source: `942ecb046fb7eca244767cec3f177c52daea769b`.
+- Frozen candidate ref: `candidate/1.1.10` at the exact build source above.
+- Goal: eliminate the remaining six answer-backed completion exceptions by deriving them through the verified owner-local task topology, while retaining only the two genuinely event-only stages.
+- Runtime change: owner-local completion traversal additionally recognizes the three already-proven same-graph edge families: numbered `Flow_WaitForFlow` inputs, exact `CustomFunctionCall._sourceOutputUID -> CustomFunctionEvent._UID`, and exact `Flow_FireEvent(event) -> CustomEvent(eventName)`. Cross-owner and dialogue-lifecycle derivation are intentionally unchanged.
+- Removed answer-backed specials: five promoted completion mappings plus the exact `snake_trap -> snake_stone_ready` SmartRes special. `VerifiedCompletionReminderRules` now contains only `npc_inquisitor/inquisitor_talk` and `npc_cultist/snake_back`.
+- Persistent manifest: schema **7** so schema-6 1.1.9 caches cannot mask the newly generic owner rules. Candidate declared partition: owner **87 supported / 0 unsupported**, cross-owner unchanged **8 tasks / 6 supported / 0 unsupported**, base `@` topics **50 / 50 supported / 0 unsupported**.
+- Final interaction-universe validator on the exact build source: run `35938963309` — **PASS 99 / 0 failed**; raw answers **243 occurrences**; unique-answer partition **224 = 210 normal-root + 14 event-invoked**; lifecycle **216 paths / 60 admitted owners**; tasks/routes **72 = 70 selectable + 2 event-only**; `MultipleAnswerData` **7 verified menu uses across 4 weekday NPCs**.
+- Candidate CI build: run `35938963361`, job `107442363060` — success on `windows-latest`; Release build **0 warnings / 0 errors**.
+- Artifact: `DayWheelQuestMarkers-1.1.10`, artifact ID `10784167942`, archive digest `sha256:348f13447585c609df3ec8d8212e32ebd88b5e6cccab5fc2a3ef47830fed6efc`.
+- Raw DLL: **100,864 bytes**.
+- Raw DLL SHA-256: `c01c6acaaafd0c438a927e47024a9a3c1100de8979d489e6d6c010bf65ca2967`. Local extraction/hash exactly matches the CI-reported DLL hash.
+- Requested runtime acceptance:
+  1. replace 1.1.9 with this single 1.1.10 DLL and keep research probes removed;
+  2. first load of any developed save: return a fresh `BepInEx/LogOutput.log` so schema-7 bootstrap/integrity and the declared owner/base-topic partition can be verified;
+  3. if the preserved pre-`@souls_s_s33_ask` Snake save is still available, use it as the representative changed-route smoke test: the same three-marker state accepted under 1.1.9 should appear, and consuming `@souls_s_s33_ask` should again remove only the Snake contribution (**3 -> 2**) while unrelated markers remain;
+  4. report any missing/extra weekday marker; if a contradiction appears, investigate that concrete state with a targeted read-only diagnostic rather than reopening a universal watchdog.
+- Status: **frozen but superseded before user handoff**. Final pre-handoff inspection found stale runtime diagnostic text that still said schema 6 although the manifest is schema 7. Runtime classification was unchanged, but acceptance depends on trustworthy logs, so 1.1.10 was not handed out and its bytes remain frozen.
+
+
+## 1.1.11 — schema-7 diagnostic correction + exact-source candidate handoff
+
+- Date built: 2026-09-24.
+- Development branch: `dev/1.1.11`.
+- Exact executable/build source: `ca18f1576deab5aa17b2146e45f907a6989431b0`.
+- Frozen candidate ref: `candidate/1.1.11` at the exact build source above. Later workflow/docs commits do not change the handed binary identity.
+- Runtime behavior: identical task/dialogue/navigation classifier and schema-7 manifest contract to frozen 1.1.10. Only version metadata and stale diagnostic labels were corrected from schema 6 to schema 7 before player handoff.
+- Persistent manifest: schema **7**; canonical partition remains owner **87 supported / 0 unsupported**, cross-owner **8 tasks / 6 supported / 0 unsupported**, base `@` topics **50 / 50 supported / 0 unsupported**.
+- Exact-source CI hardening: PR candidate build/validator checkout was corrected to explicitly use the candidate/head SHA and verify `git rev-parse HEAD` before executable work. The earlier successful PR build `35940116017` used GitHub's synthetic merge ref and is therefore **not** the handed artifact even though its runtime source content was equivalent.
+- Exact-source interaction-universe validator: run `35940427903`, job `107446894675` — source-identity check **PASS** at `ca18f1576deab5aa17b2146e45f907a6989431b0`; validator **PASS 99 / 0 failed / 0 warnings**; tasks/routes **72 = 70 selectable + 2 event-only**; only exact event-only stages remain `npc_inquisitor/inquisitor_talk` and `npc_cultist/snake_back`.
+- Exact-source candidate CI build: run `35940428128`, job `107446895216` — source-identity check **PASS** at `ca18f1576deab5aa17b2146e45f907a6989431b0`; Release build **0 warnings / 0 errors**.
+- Artifact: `DayWheelQuestMarkers-1.1.11`, artifact ID `10785185482`, archive digest `sha256:40d06fb03d314b0178ab35fabcd30f3531c6c0af172f584b3a8567e18f854865`.
+- Raw DLL: **100,864 bytes**.
+- Raw DLL SHA-256: `727c044109084ae3bc6cc5de8428614be5915acb3bc348a9e36e63ebf8b67797`. Local extraction/hash exactly matches the CI-reported DLL hash.
+- Requested runtime acceptance:
+  1. remove the previous Day Wheel Quest Markers DLL and keep research probes removed; install only this 1.1.11 candidate;
+  2. start the game and load any developed save, then return a fresh `BepInEx/LogOutput.log`; acceptance first checks clean schema-7 bootstrap/load, canonical integrity counts and absence of Day Wheel Quest Markers warnings/errors;
+  3. also report the visible weekday markers on that save (a screenshot is sufficient). If one of the six formerly special answer-backed completion routes is currently reachable, use that state as the representative live smoke test; otherwise do not manufacture progress or restore an old save solely for this first gate;
+  4. if the preserved pre-`@souls_s_s33_ask` Snake save is readily available, it remains an ideal representative smoke: accepted 1.1.9 behavior was three markers before the interaction and two after consuming only the Snake contribution;
+  5. any concrete missing/extra marker is investigated with a targeted read-only diagnostic; the cancelled universal Watchdog 0.3 is not reopened.
+- Player result: **failed on 2026-09-24 before marker evaluation**. The supplied 1.1.11 log loaded the correct DLL, rebuilt schema 7, and produced `owner=87/0, cross=8/6/0, self-consuming=61/61/0, nonAt=6/6/0, raw=19, excluded=9`. The manifest rejected that result as non-canonical, and gameplay then correctly refused to run the FlowCanvas parser as a fallback, leaving the runtime cache unavailable and the wheel with no markers.
+- Root cause: the standalone `@` topic layer still trusted its anchor-derived `completionAnswerIds` set. After the owner-task compiler gained the three verified topology edge families, compiled task rules and that older bookkeeping set were no longer guaranteed to stay identical. Independent lifecycle evidence still proves exactly **50** standalone `@` owners, while all five former promoted completion answers are `SUPPRESS_TASK_OWNED`; accepting 51 would therefore hide a real duplicate-classification bug rather than fix it.
+- Status: **failed / frozen / superseded by 1.1.12 / do not merge or release**.
+
+
+## 1.1.12 — compiled-task/topic suppression alignment candidate
+
+- Date built: 2026-09-24.
+- Development branch: `dev/1.1.12`, created fresh from current stable `main` at `9ed3eda8f1a477a469159350a62b42220d5054eb`.
+- Exact executable/build source: `1a824749ee33a1218764c60a819a358b9fede70c`.
+- Frozen candidate ref: `candidate/1.1.12` at the exact build-bearing source above. Later documentation commits do not change the handed binary identity.
+- Trigger: 1.1.11 proved the schema-7 owner/cross compiler was reaching `87/0` and `8/6/0`, but the standalone topic layer retained one task-owned `@` answer because its exclusion set was derived separately from the compiled production task rules. The manifest correctly rejected the resulting 61-topic state.
+- Fix: after owner/cross task rules are compiled, every **supported compiled task-rule answer ID** is folded into the same `completionAnswerIds` set used to exclude standalone one-shot topics. This is generic and structural: no quest, NPC, item, relation or answer ID was added to production.
+- Independent evidence: accepted lifecycle fixture contains exactly **50 unique admitted standalone `@` owners**. The five former promoted completion answers are all independently classified `SUPPRESS_TASK_OWNED`; schema-7 canonical base-topic count therefore remains **50**, not 51.
+- Persistent manifest: schema **7** unchanged. Expected canonical partition remains owner **87/0**, cross-owner **8/6/0**, base `@` **50/50/0**. A valid schema-7 manifest from any earlier build would already satisfy these same semantics; no schema bump is needed.
+- Exact-source interaction-universe validator: run `35941810047`, job `107451120067` — source identity **PASS** at `1a824749ee33a1218764c60a819a358b9fede70c`; **PASS 101 / 0 failed**; lifecycle **216 paths / 60 admitted owners**; tasks/routes **72 = 70 selectable + 2 event-only**; `MultipleAnswerData` **7 verified uses across 4 weekday NPCs**.
+- Exact-source candidate CI build: run `35941810053`, job `107451120097` — source identity **PASS** at `1a824749ee33a1218764c60a819a358b9fede70c`; Release build **0 warnings / 0 errors**.
+- Artifact: `DayWheelQuestMarkers-1.1.12`, artifact ID `10785800231`, archive digest `sha256:b029a87fd4d6570914448c467a18e091991e6794e48d0ba9e0d33a752965716b`.
+- Raw DLL: **101,376 bytes**.
+- Raw DLL SHA-256: `1129845dc68f9ada1ba774546f064df0eb81013c27920e4e1dbca21184f0c89f`. Local extraction/hash exactly matches CI.
+- Requested runtime acceptance:
+  1. replace failed 1.1.11 with this single 1.1.12 DLL; keep unrelated research probes out of the Day Wheel Quest Markers test;
+  2. load the same developed save and return a fresh `BepInEx/LogOutput.log`;
+  3. first gate: schema-7 bootstrap/load must complete without Day Wheel Quest Markers warning/error and runtime cache must reach `Ready`;
+  4. report the visible weekday markers on that same save. Zero markers are allowed if the now-valid runtime evaluation finds no actionable weekday-NPC interaction; the previous global-cache failure must no longer be the reason;
+  5. if the preserved pre-`@souls_s_s33_ask` Snake state is readily available, use it afterward as the representative changed-route smoke test; do not manufacture progress solely for the first bootstrap gate.
+- Status: **candidate handed for runtime acceptance; not merged/released**.
