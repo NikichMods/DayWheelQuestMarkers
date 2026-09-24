@@ -715,4 +715,7 @@ Every handed DLL is immutable and tied to exact committed source plus build arti
   3. first gate: schema-7 bootstrap must pass canonical integrity and the plugin must reach `Ready` without Day Wheel Quest Markers warnings/errors;
   4. report the visible weekday-marker count/state on that save;
   5. only after the bootstrap gate passes, use the preserved pre-`@souls_s_s33_ask` Snake save if convenient for the representative **3 -> 2** changed-route smoke test; no need to manufacture progress otherwise.
-- Status: **candidate handed for runtime acceptance; not merged/released**.
+- Player result (2026-09-24): **bootstrap gate passed** on the handed 1.1.14 DLL. Fresh runtime log loaded Day Wheel Quest Markers 1.1.14, bootstrapped persistent manifest schema 7 behind the loading screen, and reached canonical counts: owner **87/0**, cross-owner **8/6/0**, dialogue-lifecycle **60/60/0**, non-@ admitted **6/6/0**, ancestor admitted **4/4/0**, reachability **210 answers / 270 paths / 0 unsupported**. The plugin then reached `Ready` with the same counts and no Day Wheel Quest Markers warning/error.
+- Visible player result on the same developed save: **3 weekday markers present on the wheel**. This confirms the previous global empty-wheel regression from failed schema bootstrap is fixed.
+- Remaining representative semantic smoke, if convenient: preserved pre-`@souls_s_s33_ask` Snake state should still transition **3 -> 2** after consuming only the Snake interaction, matching accepted 1.1.9 behavior. This is a semantic regression check, not a bootstrap blocker.
+- Status: **runtime bootstrap/visibility gate passed; candidate remains unmerged pending explicit player acceptance/release decision**.
