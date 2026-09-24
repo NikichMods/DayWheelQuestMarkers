@@ -125,7 +125,7 @@ The one-time schema-6 bootstrap remains about one second on the tested developed
 - Runtime work belongs in `dev/X.Y.Z` until explicit player acceptance.
 - A numbered DLL is immutable and tied to exact source SHA.
 - Candidate artifacts may live in Actions; accepted stable DLLs belong in GitHub Releases and must be the exact tested bytes, not a rebuild under the same version.
-- Candidate build workflow is manual-only; documentation-only changes do not justify hosted CI.
+- Candidate builds run automatically for code-bearing pull requests to `main` using path filters and `cancel-in-progress`; `workflow_dispatch` remains available for ad-hoc or handoff rebuilds. Documentation-only changes do not trigger the candidate build.
 - Public README and release notes are user-facing. Keep migration/provenance/private-development details out of them; such evidence belongs in engineering docs.
 
 ## Required evidence and records
