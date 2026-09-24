@@ -513,6 +513,8 @@ def validate_production_source(baseline: dict, log: CheckLog) -> dict:
         "if (completionAnswerIds.Contains(ownerId))",
         "if (!navigation.HasInteractionRootPathWithoutAncestors",
         "if (removals.Contains(ownerId))",
+        "RebuildAtExactSelfTopics",
+        "HasInteractionRootPathWithoutAncestors(npcId, answerId, completionAnswerIds)",
     ]
     for needle in semantic_needles:
         log.check("source.lifecycle.guard." + str(abs(hash(needle))),
@@ -565,8 +567,6 @@ def validate_production_source(baseline: dict, log: CheckLog) -> dict:
         "var anchorFlow = ownerLocal ? ownerTaskIncomingFlow : incomingFlow;",
         "AddCompiledTaskRuleAnswerIds(completionAnswerIds, target);",
         "AddSupportedRuleAnswerIds",
-        "RebuildAtExactSelfTopics",
-        "HasInteractionRootPathWithoutAncestors(npcId, answerId, completionAnswerIds)",
     ]
     for needle in owner_task_topology_needles:
         log.check("source.owner_task_topology.guard." + str(abs(hash(needle))),
