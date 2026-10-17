@@ -248,19 +248,28 @@ Production may derive an authoritative mirror only when that exact graph edge is
 
 Cross-owner and generic dialogue-lifecycle routes retain their accepted SmartRes/`Player.IsEnough` semantics unless separate evidence establishes that authoritative zone substitution is required there.
 
-## Final binding after repeat loads — observed in 1.1.15
+## Final binding after repeat loads — verified cause in 1.1.15
 
-Evidence: the acceptance-session snapshot identified in `TEST_BUILD_LOG.md`; production `CalendarQuestsPinsPlugin.EnsureRuntime`, `PersistentRuleManifest.Bind/IsRuntimeValid`, and `LoadingCachePrewarmGate.IsReady`.
+Evidence: research diagnostic 0.1.0, exact source `ba08480248d317a6af63e058c8d20fb51f766a34`, frozen at `frozen/runtime-binding-diagnostic-0.1.0`. Log snapshot SHA-256: `88e97f1df8e6072efe0c9b21bd54de975d12512128619cf02860a080decaec9d`; full build/restore identity is in `TEST_BUILD_LOG.md`. The probe logs at the actual existing false-return branches and snapshots already-cached references; it does not replace the bind decision.
 
-Observed sequence:
+Player-reported A -> A -> B -> A, within one process:
 
-- first load: the manifest is loaded near progress 0.85, then reaches Ready without a final-binding warning;
-- two repeat loads in the same process: the manifest is loaded immediately after `Load game` at progress 0, **before RestoreScene/PrepareScene**; the final gameplay bind then warns and restores the manifest in reported **2.73 / 2.70 ms**, reaching canonical Ready without graph parsing;
-- no mod error/exception or repeated steady-gameplay recovery loop is observed in this snapshot. Reported manifest timing is not a complete frame-time measurement.
+| Load | Prewarm relative to RestoreScene | Result |
+| --- | --- | --- |
+| Initial A | after RestoreScene, near progress 0.85 | all six cached weekday objects alive; Ready without recovery |
+| A -> A | before RestoreScene, immediately after Load game | all six cached weekday objects dead at final bind; recovery 3.19 ms |
+| A -> B | before RestoreScene, immediately after Load game | all six cached weekday objects dead at final bind; recovery 3.75 ms |
+| B -> A | after RestoreScene, near progress 0.85 | all six cached weekday objects alive; Ready without recovery |
 
-The readiness gate verifies that player/NPC/graph objects exist, but does not establish that those objects belong to the final restored scene. Bind refreshes player/KnownNPC references while retaining the cached weekday WorldObjects and requirement bindings; TryLoad resolves those again. Thus premature preparation against objects from the previous scene is the leading explanation for the repeat-load pattern. **The exact failed condition/object is not logged**, so this is not a proved object-level diagnosis.
+The exact rejected condition in both failing loads was **`Bind / world_object_dead / npc_astrologer`**. Astrologer is merely the first entry in the fixed iteration order: the pre-bind snapshots show all six cached WorldObjects are no longer Unity-alive. Player binding and the navigation-readiness check already passed before that return. The short-circuited IsRuntimeValid call was not the rejection source.
 
-The recovery mechanism is intentional and succeeded. The early preparation/redundant load is a bounded maintenance issue to investigate when next changing the loading lifecycle, not a demonstrated marker defect or a reason by itself to rebuild the accepted version. Reopen promptly if recovery fails, warnings recur during steady gameplay, reminders disappear, or an observable loading hitch occurs. A future narrow diagnostic should identify the failed bind/validity condition and scene phase; do not add a broad graph probe, change cache semantics or merely suppress the warning without that evidence.
+Root cause is established for the observed failures: `LoadingCachePrewarmGate.IsReady` accepts existing live objects without proving they belong to the restored scene. On the early path, prewarm retains the previous scene's exact managed references; RestoreScene invalidates those objects. `PersistentRuleManifest.Bind` refreshes player/KnownNPC state but retains the cached WorldObjects. The one-attempt-per-save prewarm guard prevents a later loading-stage retry. Gameplay recovery through TryLoad then resolves fresh WorldObjects and reconstructs their requirement bindings; every resulting object was alive and canonical Ready followed, with graph parsing skipped.
+
+This is not specific to switching between different save files: the same-save control also failed. Managed save_ref values identify deserialized object instances, not save filenames. A separate stable-session control also had two successful post-RestoreScene prewarms with zero final-binding warnings. The exact reason the scheduler reaches the readiness window earlier in some loads is not yet isolated; that does not leave the observed rejection/root stale-reference mechanism ambiguous.
+
+The existing recovery succeeded. The reported 3.19 / 3.75 ms values are manifest-restore timings, not complete frame-time measurements. No marker failure is established by this test, and the on-disk manifest hash remained unchanged. Stable 1.1.15 was restored after capture, with its exact accepted DLL hash verified; the diagnostic remains off main.
+
+**Disposition:** a real bounded loading-lifecycle defect is now identified; a narrow production fix is reasonable, but its implementation is not authorized/adopted merely by completing this investigation. Before changing the gate, verify a native readiness boundary after restoration rather than assuming object presence or a guessed delay is sufficient. Preserve bootstrap on fresh caches, loading-time graph work, native SmartRes owner binding and the existing safe recovery. Merely silencing the warning or replacing target WorldObject references without updating linked requirements would not address the full contract. The minimal eventual runtime regression is A -> A -> B -> A; no broad classifier/probe is needed.
 
 ## Accepted persistent loading/performance contract
 

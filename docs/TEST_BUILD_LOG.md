@@ -2,6 +2,24 @@
 
 Every handed DLL is immutable and tied to exact committed source plus build artifact identity.
 
+## Binding Diagnostic 0.1.0 — research complete, stable restored
+
+- Purpose: identify the actual rejected Bind/IsRuntimeValid condition during repeat loads, before deciding whether a production fix is justified. No fix is implemented.
+- Branch: `research/runtime-binding-diagnostic`; source: `ba08480248d317a6af63e058c8d20fb51f766a34`; frozen ref: `frozen/runtime-binding-diagnostic-0.1.0`.
+- Stable behavior base: accepted 1.1.15; only exact-rejection logs, bounded reference snapshots and diagnostic identity were added. Protocol/method checkpoint: `research/binding-diagnostic/README.md` at the frozen diagnostic source (research-only file, not part of main).
+- Clean Release CI: run `39024675268`, job `117373210529`, success, **0 warnings / 0 errors**, exact source/assembly version verified.
+- Artifact ID: `12097099595`; archive digest `sha256:b02dc6faceb97ca50a24b7e2edfd1c0ce71c6faa318d787a8503131b1be09463`.
+- DLL: `DayWheelQuestMarkersBindingDiagnostic-0.1.0.dll`, **106,496 bytes**, assembly **0.1.0.0**, SHA-256 `fa270c0fab25f9a16272147ae44388f7e31e574fe78050c63d7dacb2073bbf22`.
+- Local native-reference compile and all **103 structural checks** passed. Compiled reminder-policy regression also passed against the exact CI DLL.
+- A later stable-session control log, SHA-256 `7dbfc0620612a51bb907b046570a499f18915a058a6d805ae317832301bcf81b`, contains two manifest loads after RestoreScene/progress 0.85 and **zero final-binding warnings**. Repeat loading alone is not a deterministic trigger; compare the actual readiness timing and rejection snapshots.
+- Installed with host closed, temporarily replacing the canonical active `DayWheelQuestMarkers.dll` under the same plugin GUID. Installed diagnostic hash verified. Exact stable 1.1.15 backup was preserved outside the plugin directory and verified against `b9ccd2f89d9f308b785ee864703b3ff33cce2294b58633383318545cafc660e4`.
+- Existing manifest SHA-256 before/after installation: `aa132998c86c747eee1ae547816f57451f514905a02bccb30449c0cf3e979e54`. No saves/cache were modified by installation.
+- Requested runtime sequence (clarified after the player confirmed switching between different saves in the original session): within one game process use **A -> A -> B -> A**, returning through the main menu. A is the current save and B a different existing save, preferably with different progression. A -> A is the same-save control; A -> B and B -> A test cross-save reference replacement. Reuse any already completed same-save control instead of repeating it. No quest/loan interaction is required. Switching saves is a candidate trigger, not an established cause. Agent collects the accessible local log; after capture and host closure, restore the exact stable DLL.
+- Returned runtime evidence (2026-10-17), log SHA-256 `88e97f1df8e6072efe0c9b21bd54de975d12512128619cf02860a080decaec9d`: player-reported A -> A -> B -> A was captured. Both A -> A and A -> B rejected `Bind` at `world_object_dead / npc_astrologer`; final snapshots show **all six cached weekday WorldObjects destroyed**, not only the first checked NPC. Recovery recreated live bindings and reached Ready in **3.19 / 3.75 ms**, without graph parsing. Initial A and final B -> A prepared after RestoreScene and had no rejection.
+- Root cause established: prewarm can bind to the still-live previous scene before RestoreScene; those references become destroyed during restoration. The actual reject occurs after player binding/navigation checks have passed. This is not specific to changing save files.
+- Stable restored with host closed: exact 1.1.15 DLL SHA-256 `b9ccd2f89d9f308b785ee864703b3ff33cce2294b58633383318545cafc660e4`, assembly 1.1.15.0. Manifest hash remained `aa132998c86c747eee1ae547816f57451f514905a02bccb30449c0cf3e979e54`.
+- Status: **research complete / stable 1.1.15 restored / production fix decision open**. Keep the diagnostic frozen and off main; promote distilled evidence only.
+
 ## 1.1.15 — accepted Merchant loan-offer reminder correction
 
 - Date built/installed: 2026-10-17.
