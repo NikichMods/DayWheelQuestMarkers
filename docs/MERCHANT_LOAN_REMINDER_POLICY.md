@@ -1,8 +1,8 @@
-# Merchant loan reminder policy — 1.1.15 candidate
+# Merchant loan reminder policy — accepted 1.1.15
 
 ## Adopted scope
 
-On 2026-10-17 the player approved excluding only the Merchant's optional loan offer from calendar reminders. Repayment of an existing debt and every other optional dialogue remain unchanged. Stable remains 1.1.14 until explicit player acceptance of a numbered candidate.
+On 2026-10-17 the player approved excluding only the Merchant's optional loan offer from calendar reminders. Repayment of an existing debt and every other optional dialogue remain unchanged. The player accepted 1.1.15 on 2026-10-17 after confirming the marker disappeared and the loan offer remained available; log review found no mod error and confirmed successful bounded cache recovery.
 
 ## Evidence and cause
 
@@ -26,7 +26,7 @@ Gate: **READY** before production mutation, based on the inspected emission loop
 - Narrow mechanism: skip exactly `(npc_merchant, @merchant_2e_1e)` in that dialogue emission loop through `ShouldRemindDialogueTopic`.
 - Blast radius: this policy has one production caller, the dialogue-topic emission loop. Owner-task and cross-owner loops are untouched.
 - Preserved invariants: `merchant_debt / @merchant_2e_1f` continues through the existing task path with its authored money/phrase/navigation gates; all other dialogue owners, resources, cache integrity, HUD lifecycle and gameplay remain unchanged.
-- Acceptance: compiled policy regression across the 60 accepted dialogue owners must exclude exactly one; the unchanged 103-check interaction validator must pass. Installed-game smoke must show no Merchant marker in the preserved no-items/no-debt state while the offer remains available. Player acceptance is still required.
+- Acceptance: compiled policy regression across the 60 accepted dialogue owners must exclude exactly one; the unchanged 103-check interaction validator must pass. Installed-game smoke must show no Merchant marker in the preserved no-items/no-debt state while the offer remains available. Player acceptance passed on 2026-10-17.
 
 Filtering in the compiler would change the structural census and invalidate existing manifests for a presentation exception. A post-validation emission policy is smaller and works with both existing and newly generated schema-7 manifests. The underlying 60-owner census and fixtures remain valid; effective dialogue reminder policy admits 59 owners. No translated-text matching, schema bump, graph rebuild, configuration option, or general exclusion of optional content is introduced.
 
@@ -34,4 +34,4 @@ Filtering in the compiler would change the structural census and invalidate exis
 
 The compiled regression executes the shipped policy against every unique `ADMIT` owner in the independent lifecycle fixture and checks repayment/nearby identities remain allowed. This proves the policy boundary, not native live affordability or rendered HUD behavior. Existing accepted repayment rules are preserved byte-for-byte; no claim of a new in-game repayment test is made.
 
-Candidate identity and installed/player results belong in `TEST_BUILD_LOG.md`.
+Exact accepted source, artifact and installed/player results are recorded in `TEST_BUILD_LOG.md`.

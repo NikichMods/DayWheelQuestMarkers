@@ -2,7 +2,7 @@
 
 Every handed DLL is immutable and tied to exact committed source plus build artifact identity.
 
-## 1.1.15 — Merchant loan-offer reminder candidate
+## 1.1.15 — accepted Merchant loan-offer reminder correction
 
 - Date built/installed: 2026-10-17.
 - Development branch: `dev/1.1.15`; PR #12.
@@ -19,7 +19,10 @@ Every handed DLL is immutable and tied to exact committed source plus build arti
 - Installed with host closed under the canonical filename `DayWheelQuestMarkers.dll`; installed hash matches the exact CI artifact. The prior accepted 1.1.14 payload was preserved outside the plugin directory and its obsolete active filename was removed only after verification. No saves or rule cache were changed.
 - Requested installed-game smoke: load the preserved new-game state with no hiccup grass/crops and no existing debt. Merchant should have no marker, while the optional loan offer remains available. Taking a loan is unnecessary for this check. Existing repayment code/rules are unchanged; no new live repayment test is claimed.
 - First CI attempt at source `64b993f171c470929af988446270864ba132617b` compiled successfully but its policy test could not resolve compile-only host references. The build-workflow reference paths were corrected before producing the frozen artifact; production code did not change between these attempts.
-- Status: **candidate installed / player runtime verdict pending**. Stable remains **1.1.14**; no stable promotion or release publication is authorized by implementation alone.
+- Player result: **accepted**, 2026-10-17. The player confirmed the Merchant marker disappeared and the optional loan offer remained available, and authorized stable promotion if log review passed.
+- Acceptance log snapshot SHA-256: `64e9a562de8baa072cc4d9c27c7aae2b817797b88c5a7c8a6a64cfeef0a0267a`. It loads 1.1.15, reads schema 7 in **10.38 ms**, skips graph parsing, and reaches canonical `Ready`. Two final-binding warnings were followed immediately by successful cheap manifest reloads in **2.73 / 2.70 ms** and `Ready`. No Day Wheel Quest Markers error/exception was found; the overall host log contains other Unity warnings/errors, so it is not described as globally clean. The snapshot was captured from a running session.
+- Accepted baseline ref: `baseline/1.1.15-accepted` at exact tested source `2dee8941d2fb6a8257dd7f6b048d6b256e7354d4`.
+- Status: **accepted stable / publication in progress**. Publish the exact tested artifact; do not rebuild 1.1.15.
 
 ## 1.0.17 — accepted legacy stable baseline
 

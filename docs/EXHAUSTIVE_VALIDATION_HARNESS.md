@@ -162,7 +162,7 @@ It also guards the complete **243-occurrence raw interaction universe**, the exa
 
 ## What it cannot prove by itself
 
-Candidate 1.1.15 adds a separate compiled reminder-emission policy regression in `tests/ReminderPolicyTests.cs`, run by the build workflow. It requires the 60 accepted structural owners to yield 59 eligible dialogue reminders, excluding only the Merchant loan offer. Structural fixtures and their canonical counts remain unchanged; see [MERCHANT_LOAN_REMINDER_POLICY.md](MERCHANT_LOAN_REMINDER_POLICY.md).
+Accepted 1.1.15 adds a separate compiled reminder-emission policy regression in `tests/ReminderPolicyTests.cs`, run by the build workflow. It requires the 60 accepted structural owners to yield 59 eligible dialogue reminders, excluding only the Merchant loan offer. Structural fixtures and their canonical counts remain unchanged; see [MERCHANT_LOAN_REMINDER_POLICY.md](MERCHANT_LOAN_REMINDER_POLICY.md).
 
 Static CI cannot execute Graveyard Keeper's live runtime:
 

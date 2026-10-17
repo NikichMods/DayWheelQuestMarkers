@@ -6,13 +6,15 @@ A lightweight QoL/UI mod for **Graveyard Keeper 1.407**.
 
 ## Download
 
-Current stable: **1.1.14**. Stable builds are available from [GitHub Releases](https://github.com/NikichMods/DayWheelQuestMarkers/releases).
+Current stable: **1.1.15**. Stable builds are available from [GitHub Releases](https://github.com/NikichMods/DayWheelQuestMarkers/releases).
 
 ## How it works
 
 A day is not marked merely because an unfinished quest belongs to an NPC. A marker appears only when the current state actually allows a relevant weekday-NPC interaction.
 
 This includes both actionable quest steps and authored one-time dialogue topics that are currently available. Missing items, crafting steps, insufficient quality or relationship requirements, exploration steps, and other unmet prerequisites do not create reminders. Repeatable utility/menu choices such as Trade, Leave, Back, or non-consuming submenu headers are not treated as reminders. Follow-up choices that are reachable only after completing an already-reminded interaction are treated as part of the same NPC visit rather than as extra reminders.
+
+The Merchant's optional loan offer does not create a reminder; repayment of an existing debt still follows the normal actionability checks.
 
 Unsupported structures fail closed rather than producing a misleading marker.
 

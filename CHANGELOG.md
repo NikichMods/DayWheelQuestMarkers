@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.1.15 — candidate
+## 1.1.15
 
 - Stops reminding the player merely because the Merchant offers a loan. Reminders to repay an existing debt and all other conversations remain unchanged.
 
