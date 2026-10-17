@@ -92,7 +92,7 @@ The rejected universal provenance parser remains rejected. Production derives on
 
 Known diagnosed loading issue: prewarm can bind to the previous scene before RestoreScene; final Bind then rejects destroyed weekday WorldObjects and the existing manifest reload recovers. The exact rejection and A -> A -> B -> A evidence are recorded in `docs/VERIFIED_RUNTIME_DATA.md`. Stable 1.1.15 remains unchanged; a narrow readiness fix was authorized for candidate 1.1.16, with player acceptance still pending.
 
-Candidate 1.1.16 implements the authorized current-save player ownership gate described in `docs/SCENE_READINESS_1.1.16.md`. Runtime acceptance is pending; all marker semantics and schema-7 rules remain unchanged.
+Candidate 1.1.16 implements the authorized current-save player ownership gate described in `docs/SCENE_READINESS_1.1.16.md`. The installed A -> A -> B -> A loading regression passed on 2026-10-17: four canonical Ready records, zero plugin warnings/errors, cold bootstrap and cached reads all behind loading after restoration. All marker semantics and schema-7 rules remain unchanged. Explicit player acceptance/stable promotion is pending; stable remains 1.1.15.
 
 ## Marker sprite contract
 

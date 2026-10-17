@@ -6,6 +6,10 @@ The optional Merchant loan offer `@merchant_2e_1e` remains a structurally valid 
 
 This document records runtime facts that production Day Wheel Quest Markers is allowed to depend on. Unknown structures fail closed.
 
+## Current-save readiness regression (1.1.16 candidate, 2026-10-17)
+
+The authorized inventory-ownership gate passed the installed A -> A -> B -> A loading test on exact frozen source `e9d9b86427a5155f91299676249d9636dae354ff`. Log snapshot SHA-256: `c4adec9b00a3f276046d462cd0560137f32d24f65ba8d3171b3d27919aca9b7c`. In all four loads, prewarm followed RestoreScene and GetSavedPlayerInventory and finished before loading hid. Four canonical Ready records and zero plugin warnings/errors were observed, with no final-binding recovery. Cold bootstrap took 885.42 ms; cached reads took 5.50 / 3.14 / 2.82 ms with graph parsing skipped. Recreated schema-7 bytes matched the original accepted cache. Exact artifact identity and limits are in TEST_BUILD_LOG.md and SCENE_READINESS_1.1.16.md. Visual marker correctness and explicit stable acceptance are separate; stable remains 1.1.15.
+
 ## Weekday HUD
 
 Verified calendar root:
