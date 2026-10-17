@@ -115,16 +115,23 @@ namespace CalendarQuestsPins
 
         internal bool IsRuntimeValid(object mainGame)
         {
-            if (mainGame == null || _playerField == null) return false;
+            if (mainGame == null) return BindingDiagnosticLog.Fail("IsRuntimeValid", "main_game_null");
+            if (_playerField == null) return BindingDiagnosticLog.Fail("IsRuntimeValid", "player_field_missing");
             object livePlayer;
-            if (!ReflectionUtil.TryRead(mainGame, "player", out livePlayer) || !ReflectionUtil.IsUnityAlive(livePlayer)) return false;
+            if (!ReflectionUtil.TryRead(mainGame, "player", out livePlayer)) return BindingDiagnosticLog.Fail("IsRuntimeValid", "player_read_failed");
+            if (!ReflectionUtil.IsUnityAlive(livePlayer)) return BindingDiagnosticLog.Fail("IsRuntimeValid", "live_player_dead", BindingDiagnosticLog.Describe(livePlayer));
             var cachedPlayer = _playerField.GetValue(_cache);
-            if (!ReferenceEquals(livePlayer, cachedPlayer)) return false;
+            if (!ReferenceEquals(livePlayer, cachedPlayer)) return BindingDiagnosticLog.Fail("IsRuntimeValid", "player_reference_changed", "cached=" + BindingDiagnosticLog.Describe(cachedPlayer) + " live=" + BindingDiagnosticLog.Describe(livePlayer));
 
             var targets = GetTargets();
-            if (targets == null || targets.Count != NpcIds.Length || !_navigation.IsReadyForTargets(targets)) return false;
+            if (targets == null) return BindingDiagnosticLog.Fail("IsRuntimeValid", "targets_null");
+            if (targets.Count != NpcIds.Length) return BindingDiagnosticLog.Fail("IsRuntimeValid", "target_count", "count=" + targets.Count);
+            if (!_navigation.IsReadyForTargets(targets)) return BindingDiagnosticLog.Fail("IsRuntimeValid", "navigation_not_ready");
             for (var i = 0; i < targets.Count; i++)
-                if (targets[i] == null || !ReflectionUtil.IsUnityAlive(targets[i].WorldObject)) return false;
+            {
+                if (targets[i] == null) return BindingDiagnosticLog.Fail("IsRuntimeValid", "target_null", "index=" + i);
+                if (!ReflectionUtil.IsUnityAlive(targets[i].WorldObject)) return BindingDiagnosticLog.Fail("IsRuntimeValid", "world_object_dead", "npc=" + targets[i].NpcId + " " + BindingDiagnosticLog.Describe(targets[i].WorldObject));
+            }
             return true;
         }
 
@@ -357,16 +364,21 @@ namespace CalendarQuestsPins
         {
             fingerprint = 0UL;
             hasPeriodicNpc = false;
-            if (save == null || mainGame == null || !InvokeTryBindPlayer(mainGame)) return false;
+            if (save == null) return BindingDiagnosticLog.Fail("Bind", "save_null");
+            if (mainGame == null) return BindingDiagnosticLog.Fail("Bind", "main_game_null");
+            if (!InvokeTryBindPlayer(mainGame)) return BindingDiagnosticLog.Fail("Bind", "player_bind_failed");
             int knownCount;
             var knownNpcMap = ReadKnownNpcs(save, out knownCount);
             var targets = GetTargets();
-            if (targets == null || targets.Count != NpcIds.Length || !_navigation.IsReadyForTargets(targets)) return false;
+            if (targets == null) return BindingDiagnosticLog.Fail("Bind", "targets_null");
+            if (targets.Count != NpcIds.Length) return BindingDiagnosticLog.Fail("Bind", "target_count", "count=" + targets.Count);
+            if (!_navigation.IsReadyForTargets(targets)) return BindingDiagnosticLog.Fail("Bind", "navigation_not_ready");
 
             for (var i = 0; i < targets.Count; i++)
             {
                 var target = targets[i];
-                if (target == null || !ReflectionUtil.IsUnityAlive(target.WorldObject)) return false;
+                if (target == null) return BindingDiagnosticLog.Fail("Bind", "target_null", "index=" + i);
+                if (!ReflectionUtil.IsUnityAlive(target.WorldObject)) return BindingDiagnosticLog.Fail("Bind", "world_object_dead", "npc=" + target.NpcId + " " + BindingDiagnosticLog.Describe(target.WorldObject));
                 object knownNpc;
                 knownNpcMap.TryGetValue(target.NpcId, out knownNpc);
                 target.KnownNpc = knownNpc;
@@ -374,7 +386,7 @@ namespace CalendarQuestsPins
                 for (var c = 0; c < target.CrossTasks.Count; c++)
                 {
                     var cross = target.CrossTasks[c];
-                    if (cross == null) return false;
+                    if (cross == null) return BindingDiagnosticLog.Fail("Bind", "cross_task_null", "npc=" + target.NpcId + " index=" + c);
                     object owner;
                     knownNpcMap.TryGetValue(cross.OwnerNpcId, out owner);
                     cross.KnownNpc = owner;
@@ -494,9 +506,10 @@ namespace CalendarQuestsPins
             try
             {
                 var result = _tryBindPlayer.Invoke(_cache, new[] { mainGame });
-                return result is bool && (bool)result;
+                if (!(result is bool)) return BindingDiagnosticLog.Fail("InvokeTryBindPlayer", "non_boolean_result");
+                return (bool)result;
             }
-            catch { return false; }
+            catch (Exception ex) { return BindingDiagnosticLog.Fail("InvokeTryBindPlayer", "exception", "type=" + ex.GetType().Name); }
         }
 
         private string ReadSerializedGraph(string npcId)

@@ -1,0 +1,56 @@
+name: Build runtime binding diagnostic
+
+on:
+  push:
+    branches: [research/runtime-binding-diagnostic]
+    paths:
+      - 'src/**'
+      - 'research/binding-diagnostic/**'
+      - 'DayWheelQuestMarkers.csproj'
+      - '.github/workflows/binding-diagnostic.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: binding-diagnostic-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Verify source identity
+        shell: pwsh
+        run: |
+          if ((git rev-parse HEAD).Trim() -ne '${{ github.sha }}') { throw 'Source identity mismatch' }
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Restore
+        run: dotnet restore DayWheelQuestMarkers.csproj --configfile nuget.config
+      - name: Build research DLL
+        run: dotnet build DayWheelQuestMarkers.csproj -c Release --no-restore
+      - name: Verify identity and stage
+        shell: pwsh
+        run: |
+          $path = 'bin/Release/DayWheelQuestMarkersBindingDiagnostic.dll'
+          [xml]$project = Get-Content DayWheelQuestMarkers.csproj -Raw
+          $source = Get-Content src/CalendarQuestsPinsPlugin.cs -Raw
+          if ($source -notmatch 'PluginVersion\s*=\s*"([^"]+)"') { throw 'Plugin version missing' }
+          if ($Matches[1] -ne '0.1.0' -or [string]$project.Project.PropertyGroup.Version -ne '0.1.0') { throw 'Version mismatch' }
+          if ([Reflection.AssemblyName]::GetAssemblyName((Resolve-Path $path)).Version.ToString() -ne '0.1.0.0') { throw 'Assembly version mismatch' }
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Copy-Item $path dist/DayWheelQuestMarkersBindingDiagnostic-0.1.0.dll
+          Write-Host "Source: ${{ github.sha }}"
+          Get-FileHash dist/DayWheelQuestMarkersBindingDiagnostic-0.1.0.dll -Algorithm SHA256 | Format-List
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DayWheelQuestMarkersBindingDiagnostic-0.1.0
+          path: dist/DayWheelQuestMarkersBindingDiagnostic-0.1.0.dll
+          if-no-files-found: error
+          retention-days: 7

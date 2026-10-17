@@ -1026,12 +1026,13 @@ namespace CalendarQuestsPins
         private bool TryBindPlayer(object mainGame)
         {
             object player;
-            if (!ReflectionUtil.TryRead(mainGame, "player", out player) || player == null || !ReflectionUtil.IsUnityAlive(player)) return false;
+            if (!ReflectionUtil.TryRead(mainGame, "player", out player)) return BindingDiagnosticLog.Fail("TryBindPlayer", "player_read_failed");
+            if (player == null || !ReflectionUtil.IsUnityAlive(player)) return BindingDiagnosticLog.Fail("TryBindPlayer", "player_missing_or_dead", BindingDiagnosticLog.Describe(player));
             if (ReferenceEquals(player, _player) && _isEnough != null) return true;
             _player = player;
             _isEnough = null;
             var smartResType = ReflectionUtil.FindType("SmartRes");
-            if (smartResType == null) return false;
+            if (smartResType == null) return BindingDiagnosticLog.Fail("TryBindPlayer", "smart_res_type_missing");
             foreach (var method in player.GetType().GetMethods(ReflectionUtil.AnyInstance))
             {
                 var p = method.GetParameters();
@@ -1041,7 +1042,8 @@ namespace CalendarQuestsPins
                     break;
                 }
             }
-            return _isEnough != null;
+            if (_isEnough == null) return BindingDiagnosticLog.Fail("TryBindPlayer", "is_enough_method_missing");
+            return true;
         }
 
         private object GetWorldObject(string npcId)

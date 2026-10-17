@@ -2,6 +2,10 @@
 
 Read the global engineering contract in `NikichMods/DevRules` before substantive work. `ENGINEERING_RULES.md`, `CI_POLICY.md`, `GIT_WORKFLOW.md`, and `PROJECT_BOOTSTRAP.md` apply here; this file adds project-specific constraints.
 
+## Active research branch
+
+`research/runtime-binding-diagnostic` contains temporary diagnostic version **0.1.0**, based on accepted stable 1.1.15. It adds observations at the existing bind rejection sites; it is not a production fix and must not be merged or released as stable. Read `research/binding-diagnostic/README.md` for the question, test procedure, identity and restore boundary. The accepted stable identity below remains unchanged.
+
 ## Project identity
 
 - Public mod: **Day Wheel Quest Markers**

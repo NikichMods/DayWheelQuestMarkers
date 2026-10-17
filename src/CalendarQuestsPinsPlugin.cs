@@ -9,8 +9,8 @@ namespace CalendarQuestsPins
     public sealed class CalendarQuestsPinsPlugin : BaseUnityPlugin
     {
         public const string PluginGuid = "nikich.gyk.calendarquestspins";
-        public const string PluginName = "Day Wheel Quest Markers";
-        public const string PluginVersion = "1.1.15";
+        public const string PluginName = "Day Wheel Quest Markers Binding Diagnostic";
+        public const string PluginVersion = "0.1.0";
 
         private const float TickSeconds = 1f;
         private const float StructureCheckSeconds = 30f;
@@ -130,6 +130,7 @@ namespace CalendarQuestsPins
                 if (!string.IsNullOrEmpty(bootstrapNote)) Logger.LogWarning(bootstrapNote);
             }
             LogManifestSummary("Loading manifest ready");
+            BindingDiagnosticLog.Snapshot("prewarm_complete", _save, _mainGame, _rules.AllTargets);
             return true;
         }
 
@@ -255,6 +256,7 @@ namespace CalendarQuestsPins
             _cacheReady = true;
             _runtimeRestoreAttemptedSave = null;
             ApplyKnownNpcState(fingerprint, hasPeriodicNpc, false);
+            BindingDiagnosticLog.Snapshot("restore_complete", _save, _mainGame, _rules.AllTargets);
             Logger.LogInfo("Persistent schema-7 interaction manifest restored in " + loadMs.ToString("F2") +
                            " ms (" + reason + "); graph parse not required.");
             return true;
@@ -296,6 +298,7 @@ namespace CalendarQuestsPins
                 _prewarmedDuringLoading = false;
                 ulong fingerprint;
                 bool hasPeriodicNpc;
+                BindingDiagnosticLog.Snapshot("final_before_bind", _save, _mainGame, _rules.AllTargets);
                 var valid = _manifest.Bind(_save, _mainGame, out fingerprint, out hasPeriodicNpc) && _manifest.IsRuntimeValid(_mainGame);
                 if (valid)
                 {
