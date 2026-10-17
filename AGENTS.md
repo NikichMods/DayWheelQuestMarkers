@@ -32,6 +32,8 @@ Do not mark a weekday merely because an NPC has an unfinished quest. If the rele
 
 Do not treat arbitrary visible menu options as reminders. Repeatable utility/navigation entries such as Trade, Leave, Back, or ordinary non-consuming submenu headers are excluded structurally. Do not implement this through translated/display-text matching.
 
+Adopted product exception (2026-10-17, candidate 1.1.15): the Merchant's optional loan offer `npc_merchant / @merchant_2e_1e` must not create a calendar reminder. Apply this exact exception at reminder emission, after structural manifest validation. Repayment `merchant_debt / @merchant_2e_1f` retains its existing task/phrase/resource gates. Other optional conversations remain unchanged. The schema-7 structural census remains 60 dialogue owners; the presentation policy admits 59 of those owners.
+
 Unknown, reversible, ambiguous, or unsupported structures fail closed. False positives remain more harmful than an unsupported false negative.
 
 ## Accepted runtime architecture

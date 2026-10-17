@@ -7,6 +7,7 @@ on:
       - main
     paths:
       - 'src/**'
+      - 'tests/**'
       - 'DayWheelQuestMarkers.csproj'
       - 'nuget.config'
       - '.github/workflows/build.yml'
@@ -48,6 +49,15 @@ jobs:
       - name: Build Release DLL
         run: dotnet build DayWheelQuestMarkers.csproj -c Release --no-restore
 
+      - name: Verify dialogue reminder policy
+        shell: pwsh
+        run: |
+          $compiler = Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
+          & $compiler /nologo /out:bin\Release\ReminderPolicyTests.exe tests\ReminderPolicyTests.cs
+          if ($LASTEXITCODE -ne 0) { throw 'Policy test compilation failed' }
+          & bin/Release/ReminderPolicyTests.exe bin/Release/DayWheelQuestMarkers.dll validator/fixtures/lifecycle-paths-1.1.6.tsv
+          if ($LASTEXITCODE -ne 0) { throw 'Dialogue reminder policy regression' }
+
       - name: Read version and stage artifact
         id: artifact
         shell: pwsh
@@ -57,8 +67,14 @@ jobs:
             throw 'Could not read PluginVersion from src/CalendarQuestsPinsPlugin.cs'
           }
           $version = $Matches[1]
+          [xml]$project = Get-Content 'DayWheelQuestMarkers.csproj' -Raw
+          $projectVersion = [string]$project.Project.PropertyGroup.Version
+          $assemblyVersion = [Reflection.AssemblyName]::GetAssemblyName((Resolve-Path 'bin/Release/DayWheelQuestMarkers.dll')).Version.ToString()
+          if ($projectVersion -ne $version -or $assemblyVersion -ne "$version.0") {
+            throw "Version identity mismatch: plugin=$version project=$projectVersion assembly=$assemblyVersion"
+          }
           New-Item -ItemType Directory -Force -Path dist | Out-Null
-          $asset = "Day Wheel Quest Markers $version.dll"
+          $asset = "DayWheelQuestMarkers-$version.dll"
           Copy-Item 'bin/Release/DayWheelQuestMarkers.dll' "dist/$asset"
           $hash = (Get-FileHash "dist/$asset" -Algorithm SHA256).Hash.ToLowerInvariant()
           "version=$version" >> $env:GITHUB_OUTPUT

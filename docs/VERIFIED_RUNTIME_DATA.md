@@ -1,5 +1,9 @@
 # Verified Runtime Data — Graveyard Keeper 1.407
 
+## Adopted reminder-policy exception (1.1.15 candidate)
+
+The optional Merchant loan offer `@merchant_2e_1e` remains a structurally valid dialogue-lifecycle owner, but the player has excluded it from calendar reminder emission. The schema-7 census remains 60 owners; the exact product policy admits 59. Debt repayment `merchant_debt / @merchant_2e_1f` retains its existing task and resource gates. See [MERCHANT_LOAN_REMINDER_POLICY.md](MERCHANT_LOAN_REMINDER_POLICY.md) for the concrete-state evidence, scope and verification boundaries. Installed candidate acceptance is pending.
+
 This document records runtime facts that production Day Wheel Quest Markers is allowed to depend on. Unknown structures fail closed.
 
 ## Weekday HUD
