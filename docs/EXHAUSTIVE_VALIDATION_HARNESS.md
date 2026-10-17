@@ -1,6 +1,6 @@
 # Exhaustive Interaction Validation Harness
 
-Status: **accepted validation tooling, current baseline 1.1.9**.
+Status: **accepted validation tooling used by stable 1.1.15**. The validator uses the frozen structural snapshot `baseline-1.1.10.json` and its evidence fixtures; that historical filename/candidate metadata does not identify the current release. Live acceptance and artifact identity belong in `AGENTS.md` and `TEST_BUILD_LOG.md`.
 
 This harness exists to reduce dependence on full manual Graveyard Keeper playthroughs after structural reminder changes.
 
@@ -123,7 +123,7 @@ The former per-route owner-task and standalone-navigation fixture gaps are close
 
 The lifecycle fixture remains an independent oracle rather than being replaced by production-derived navigation data.
 
-## Current accepted 1.1.9 validator result
+## Historical accepted 1.1.9 validator result
 
 Exact accepted build-bearing source `73b35a3bffcb440bf644dd03532fbf2cf6ce4b11` was validated in workflow run `35894904798`, job `107296291101`:
 
@@ -134,7 +134,7 @@ Exact accepted build-bearing source `73b35a3bffcb440bf644dd03532fbf2cf6ce4b11` w
 - `MultipleAnswerData`: **7 verified menu uses across 4 weekday NPCs**;
 - canonical schema-6 owner partition: **81 supported / 0 unsupported**.
 
-## Current 1.1.10 candidate validator result
+## Historical 1.1.10 candidate validator result
 
 Candidate source `7e7b429ca9d8c9b6d10c7a236f546809f2589378` was validated in workflow run `35907144881`, job `107337542683`:
 
@@ -151,6 +151,10 @@ Candidate source `7e7b429ca9d8c9b6d10c7a236f546809f2589378` was validated in wor
 - answer-backed completion supplement: **0**; only the two verified event-only stages remain.
 
 This run closes the previously documented standalone navigation and selectable task-route fixture gaps.
+
+## Current accepted verification (1.1.15)
+
+The accepted 1.1.15 source `2dee8941d2fb6a8257dd7f6b048d6b256e7354d4` passed **103 checks / 0 failures** in run `39020620004`. The structural universe remains 243 occurrences, 210 normal-root answers, 270 paths and 60 dialogue owners. The separate compiled reminder policy retains 59 of those owners, excluding only the Merchant loan offer. The player smoke passed; exact build and publication evidence is in `TEST_BUILD_LOG.md`.
 
 ## What the validator proves
 

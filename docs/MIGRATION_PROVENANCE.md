@@ -35,14 +35,4 @@ Private 1.0.18–1.0.20 development experiments are not accepted release baselin
 
 ## Current accepted public stable line
 
-The migration baseline above is historical provenance, not the current release.
-
-- Current stable version: **1.1.9**
-- Exact accepted runtime source: `73b35a3bffcb440bf644dd03532fbf2cf6ce4b11`
-- Candidate ref: `candidate/1.1.9`
-- Accepted baseline ref: `baseline/1.1.9-accepted`
-- CI run: `35894899505`
-- Artifact: `DayWheelQuestMarkers-1.1.9` (`10766711402`)
-- Accepted raw DLL SHA-256: `069f9e1533f42fb4c4673effb5069de4354d72aeeb32e48818b14a752cb6359e`
-- Player acceptance: 2026-09-23
-- Stable distribution: GitHub Release `v1.1.9`, using the exact accepted DLL without rebuilding.
+The migration baselines above are historical provenance, not the current release. Current version, exact accepted source and DLL identity are owned by [AGENTS.md](../AGENTS.md), [the release manifest](../release/manifest.json), and [TEST_BUILD_LOG.md](TEST_BUILD_LOG.md). Do not use this migration history as a second live release ledger.

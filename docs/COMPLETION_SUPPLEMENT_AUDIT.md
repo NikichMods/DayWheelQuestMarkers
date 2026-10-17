@@ -1,6 +1,6 @@
 # Residual VerifiedCompletionReminderRules Audit — 2026-09-23
 
-Status: **Point 3 evidence complete; implementation candidate justified; production `main` unchanged by this research branch**.
+Status: **historical Point 3 audit; its generic answer-backed implementation was accepted in 1.1.14 and remains in 1.1.15**. The two verified event-only cases remain separate. The 1.1.9 residual list below describes the audited input, not current production.
 
 ## Question
 
@@ -12,7 +12,7 @@ The product rule remains:
 
 The goal is not “one algorithm at any cost”. A special case should be removed only when a narrower generic structural rule can represent the same authored semantics without broad provenance parsing or new runtime work.
 
-## Current residual layer in accepted 1.1.9
+## Historical residual layer in accepted 1.1.9
 
 `VerifiedCompletionReminderRules` contains three categories:
 
@@ -166,4 +166,4 @@ The five promoted route mappings, the custom `snake_trap` SmartRes construction,
 - Point 1 — adversarial negative audit: complete.
 - Point 2 — Watchdog 0.3: intentionally cancelled.
 - **Point 3 — residual `VerifiedCompletionReminderRules` audit: complete; bounded implementation justified.**
-- Point 4 — final coverage audit: pending after implementation/parity validation.
+- Point 4 — final coverage audit: complete at the static layer (`FINAL_COVERAGE_AUDIT_1.1.10.md`); subsequent correction/runtime acceptance completed in 1.1.14. Current acceptance is recorded in `TEST_BUILD_LOG.md`.

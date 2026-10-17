@@ -1,8 +1,8 @@
 # Unified Interaction Architecture — accepted 1.1.9
 
-Status: **accepted stable architecture for Graveyard Keeper 1.407**.
+Status: **historical accepted 1.1.9 architecture for Graveyard Keeper 1.407**.
 
-This document supersedes `docs/UNIFIED_INTERACTION_1.1.6.md` as the current architecture summary. The 1.1.6 document remains historical evidence for the nearest-lifecycle-owner change.
+This document superseded the 1.1.6 summary at the time. Current schema-7 architecture (introduced by accepted 1.1.14) and the accepted 1.1.15 reminder-policy exception are owned by `AGENTS.md` and `docs/VERIFIED_RUNTIME_DATA.md`. The version-specific schema-6 contracts below remain historical evidence, not current implementation instructions.
 
 ## Product invariant
 

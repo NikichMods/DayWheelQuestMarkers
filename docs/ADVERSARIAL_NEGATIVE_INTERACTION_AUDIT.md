@@ -1,6 +1,6 @@
 # Adversarial Negative Interaction Audit — 2026-09-23
 
-Status: **Point 1 complete; research evidence only; production runtime unchanged**.
+Status: **accepted historical Point 1 audit**. This research itself did not change production. Later Points 3/4 and runtime correction closed in accepted 1.1.14; current stable acceptance is owned by `AGENTS.md` and `TEST_BUILD_LOG.md`.
 
 Branch: `research/adversarial-negative-audit`.
 
@@ -439,7 +439,7 @@ Existing repository and archived authored-graph/runtime evidence is sufficient t
 
 - **Point 1 — adversarial audit of negative interaction cases: complete.**
 - **Point 2 — Runtime Watchdog 0.3: intentionally cancelled as redundant after Point 1.**
-- **Point 3 — audit residual `VerifiedCompletionReminderRules`: next.**
-- **Point 4 — final coverage audit: pending after Point 3.**
+- **Point 3 — residual audit and bounded generic implementation: complete; accepted in 1.1.14.**
+- **Point 4 — final coverage audit: complete; subsequent runtime correction accepted in 1.1.14.**
 
-The next technical question is whether the remaining verified completion supplement can be reduced or eliminated by the current generic task/dialogue architecture without weakening evidence or reintroducing broad provenance parsing.
+The follow-up residual-supplement question was resolved by the bounded generic task compiler in 1.1.14. Only the two verified event-only fallbacks remain; see `AGENTS.md` for the current contract.

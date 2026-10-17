@@ -210,17 +210,13 @@ Cross-owner task reminder is allowed only when a weekday NPC graph explicitly co
 
 These task-linked rules remain necessary because not every actionable quest interaction is represented by the generic dialogue-lifecycle class.
 
-## Verified completion-route supplements
+## Verified completion-route supplement
 
-The accepted direct owner-task classifier does not represent every verified completion topology. Accepted 1.0.32 therefore retains a narrow supplement:
+Current accepted 1.1.15 derives all selectable answer-backed task completions through the bounded generic task compiler introduced in 1.1.14. `VerifiedCompletionReminderRules` contains only two mandatory event-only stages: `npc_inquisitor/inquisitor_talk` and `npc_cultist/snake_back`; their Visible task is the verified actionability boundary.
 
-- promoted task/topic pairs reuse existing persisted exact-self-consuming topic/navigation predicates;
-- `npc_cultist/snake_trap` uses the verified `snake_stone_ready` answer plus `_rel >= 10` through game-owned SmartRes sufficiency;
-- `npc_inquisitor/inquisitor_talk` and `npc_cultist/snake_back` are exact mandatory interaction-event stages whose visible task is the verified actionability boundary;
-- accepted 1.1.9 represents `@souls_s_s33_ask` and the complete verified relay-backed `MultipleAnswerData` family through the generic compound-gate compiler rather than a Snake-specific rule;
-- there is no broad `Visible task`, `CustomEvent`, or `AddInteractionEvent` classifier.
+Historical 1.0.32–1.1.9 also used promoted task/topic mappings and an exact `snake_trap / snake_stone_ready` SmartRes path. Those answer-backed specials were retired in 1.1.14 after the local topology families were proved; they are not current implementation instructions. Generic relay-backed MultipleAnswerData support remains in the shared compiler. See `COMPLETION_SUPPLEMENT_AUDIT.md` for the historical residual audit and `TEST_BUILD_LOG.md` for runtime correction/acceptance.
 
-Research after accepted 1.0.35 shows that several answer-backed supplemental routes are candidates for future consolidation into a common graph compiler, but the two mandatory event-only stages remain a genuinely distinct evidence type unless a broader event contract is separately proved.
+There is no broad Visible-task, CustomEvent or AddInteractionEvent classifier. The two genuine event-only stages remain separate unless additional evidence proves another appropriate host contract.
 
 ## Verified bridge / intermediate topics
 
@@ -251,6 +247,20 @@ GK 1.407 graphs can mirror live `WorldZone.GetTotalQuality()` into a player `Gam
 Production may derive an authoritative mirror only when that exact graph edge is unambiguous. For such an owner-local requirement it compares the live `WorldZone.GetTotalQuality()` against the authored requirement value instead of trusting the stale mirrored player parameter. Ambiguous or unresolved mirrors fail closed.
 
 Cross-owner and generic dialogue-lifecycle routes retain their accepted SmartRes/`Player.IsEnough` semantics unless separate evidence establishes that authoritative zone substitution is required there.
+
+## Final binding after repeat loads — observed in 1.1.15
+
+Evidence: the acceptance-session snapshot identified in `TEST_BUILD_LOG.md`; production `CalendarQuestsPinsPlugin.EnsureRuntime`, `PersistentRuleManifest.Bind/IsRuntimeValid`, and `LoadingCachePrewarmGate.IsReady`.
+
+Observed sequence:
+
+- first load: the manifest is loaded near progress 0.85, then reaches Ready without a final-binding warning;
+- two repeat loads in the same process: the manifest is loaded immediately after `Load game` at progress 0, **before RestoreScene/PrepareScene**; the final gameplay bind then warns and restores the manifest in reported **2.73 / 2.70 ms**, reaching canonical Ready without graph parsing;
+- no mod error/exception or repeated steady-gameplay recovery loop is observed in this snapshot. Reported manifest timing is not a complete frame-time measurement.
+
+The readiness gate verifies that player/NPC/graph objects exist, but does not establish that those objects belong to the final restored scene. Bind refreshes player/KnownNPC references while retaining the cached weekday WorldObjects and requirement bindings; TryLoad resolves those again. Thus premature preparation against objects from the previous scene is the leading explanation for the repeat-load pattern. **The exact failed condition/object is not logged**, so this is not a proved object-level diagnosis.
+
+The recovery mechanism is intentional and succeeded. The early preparation/redundant load is a bounded maintenance issue to investigate when next changing the loading lifecycle, not a demonstrated marker defect or a reason by itself to rebuild the accepted version. Reopen promptly if recovery fails, warnings recur during steady gameplay, reminders disappear, or an observable loading hitch occurs. A future narrow diagnostic should identify the failed bind/validity condition and scene phase; do not add a broad graph probe, change cache semantics or merely suppress the warning without that evidence.
 
 ## Accepted persistent loading/performance contract
 

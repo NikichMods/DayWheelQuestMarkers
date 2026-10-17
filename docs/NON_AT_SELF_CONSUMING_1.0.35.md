@@ -1,6 +1,6 @@
 # 1.0.35 — generalized non-`@` exact-self-consuming reminders
 
-Status: **accepted stable**.
+Status: **historical accepted 1.0.35 evidence**. Its separate cache architecture was superseded by the unified lifecycle/schema-7 model; use `AGENTS.md` and `VERIFIED_RUNTIME_DATA.md` for current implementation contracts.
 
 ## Why this replaces 1.0.33 / 1.0.34
 

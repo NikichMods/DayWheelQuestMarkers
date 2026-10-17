@@ -1,6 +1,6 @@
 # Final Interaction Coverage Audit — 1.1.10 Candidate
 
-Status: **Point 4 complete at the static/evidence layer; player/runtime acceptance pending**.
+Status: **historical Point 4 static audit of 1.1.10**. The original candidate was superseded during runtime correction; the resulting schema-7 architecture was accepted in 1.1.14 and retained by stable 1.1.15. Candidate identity and obligations below describe that historical audit, not an outstanding release task. See `TEST_BUILD_LOG.md` and `AGENTS.md` for current acceptance.
 
 Candidate branch: `dev/1.1.10`.
 
@@ -193,4 +193,4 @@ No new broad diagnostic is justified. If a live contradiction appears, use a tar
 
 There is no remaining known authored interaction class that requires another universal research subsystem.
 
-The next step is candidate build/runtime acceptance of 1.1.10, not more interaction discovery.
+At the time of this audit the next step was runtime acceptance of 1.1.10. That candidate was superseded; the correction and acceptance path closed in 1.1.14. No 1.1.10 acceptance task remains open.
