@@ -55,7 +55,13 @@ jobs:
           $compiler = Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
           & $compiler /nologo /out:bin\Release\ReminderPolicyTests.exe tests\ReminderPolicyTests.cs
           if ($LASTEXITCODE -ne 0) { throw 'Policy test compilation failed' }
-          & bin/Release/ReminderPolicyTests.exe bin/Release/DayWheelQuestMarkers.dll validator/fixtures/lifecycle-paths-1.1.6.tsv
+          # Host references are compile-only packages and are not copied beside the plugin.
+          $packageRoot = Join-Path $env:USERPROFILE '.nuget/packages'
+          $dependencyDirectories = @('bepinex.core/5.4.21', 'bepinex.baselib/5.4.21', 'unity3d.sdk/2020.3.13.1') |
+            ForEach-Object { Get-ChildItem (Join-Path $packageRoot $_) -Recurse -Filter '*.dll' } |
+            Select-Object -ExpandProperty DirectoryName -Unique
+          $testArguments = @('bin/Release/DayWheelQuestMarkers.dll', 'validator/fixtures/lifecycle-paths-1.1.6.tsv') + @($dependencyDirectories)
+          & bin/Release/ReminderPolicyTests.exe @testArguments
           if ($LASTEXITCODE -ne 0) { throw 'Dialogue reminder policy regression' }
 
       - name: Read version and stage artifact
