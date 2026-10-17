@@ -90,7 +90,9 @@ Historical accepted 1.1.14 runtime evidence:
 
 The rejected universal provenance parser remains rejected. Production derives only verified local interaction/task/navigation semantics from the six weekday-NPC graphs and does not walk arbitrary external dependency chains.
 
-Known diagnosed loading issue: prewarm can bind to the previous scene before RestoreScene; final Bind then rejects destroyed weekday WorldObjects and the existing manifest reload recovers. The exact rejection and A -> A -> B -> A evidence are recorded in `docs/VERIFIED_RUNTIME_DATA.md`. Stable 1.1.15 remains unchanged; choosing/accepting a narrow readiness fix is a separate next decision.
+Known diagnosed loading issue: prewarm can bind to the previous scene before RestoreScene; final Bind then rejects destroyed weekday WorldObjects and the existing manifest reload recovers. The exact rejection and A -> A -> B -> A evidence are recorded in `docs/VERIFIED_RUNTIME_DATA.md`. Stable 1.1.15 remains unchanged; a narrow readiness fix was authorized for candidate 1.1.16, with player acceptance still pending.
+
+Candidate 1.1.16 implements the authorized current-save player ownership gate described in `docs/SCENE_READINESS_1.1.16.md`. Runtime acceptance is pending; all marker semantics and schema-7 rules remain unchanged.
 
 ## Marker sprite contract
 

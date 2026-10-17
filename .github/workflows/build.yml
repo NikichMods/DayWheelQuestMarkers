@@ -49,12 +49,14 @@ jobs:
       - name: Build Release DLL
         run: dotnet build DayWheelQuestMarkers.csproj -c Release --no-restore
 
-      - name: Verify dialogue reminder policy
+      - name: Verify reminder policy and scene readiness
         shell: pwsh
         run: |
           $compiler = Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
           & $compiler /nologo /out:bin\Release\ReminderPolicyTests.exe tests\ReminderPolicyTests.cs
           if ($LASTEXITCODE -ne 0) { throw 'Policy test compilation failed' }
+          & $compiler /nologo /out:bin\Release\SceneReadinessTests.exe tests\SceneReadinessTests.cs
+          if ($LASTEXITCODE -ne 0) { throw 'Scene readiness test compilation failed' }
           # Host references are compile-only packages and are not copied beside the plugin.
           $packageRoot = Join-Path $env:USERPROFILE '.nuget/packages'
           $dependencyDirectories = @('bepinex.core/5.4.21', 'bepinex.baselib/5.4.21', 'unity3d.sdk/2020.3.13.1') |
@@ -63,6 +65,8 @@ jobs:
           $testArguments = @('bin/Release/DayWheelQuestMarkers.dll', 'validator/fixtures/lifecycle-paths-1.1.6.tsv') + @($dependencyDirectories)
           & bin/Release/ReminderPolicyTests.exe @testArguments
           if ($LASTEXITCODE -ne 0) { throw 'Dialogue reminder policy regression' }
+          & bin/Release/SceneReadinessTests.exe @testArguments
+          if ($LASTEXITCODE -ne 0) { throw 'Scene readiness regression' }
 
       - name: Read version and stage artifact
         id: artifact

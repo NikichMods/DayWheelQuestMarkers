@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.16 — candidate
+
+- Waits for the player to be bound to the current save before preparing weekday reminders during loading, avoiding stale scene references on reloads.
+- Keeps marker rules, existing caches and the safe recovery path unchanged.
+
 ## 1.1.15
 
 - Stops reminding the player merely because the Merchant offers a loan. Reminders to repay an existing debt and all other conversations remain unchanged.
