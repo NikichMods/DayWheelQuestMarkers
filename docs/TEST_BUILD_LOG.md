@@ -2,6 +2,21 @@
 
 Every handed DLL is immutable and tied to exact committed source plus build artifact identity.
 
+## Binding Diagnostic 0.1.0 — research only, installed
+
+- Purpose: identify the actual rejected Bind/IsRuntimeValid condition during repeat loads, before deciding whether a production fix is justified. No fix is implemented.
+- Branch: `research/runtime-binding-diagnostic`; source: `ba08480248d317a6af63e058c8d20fb51f766a34`; frozen ref: `frozen/runtime-binding-diagnostic-0.1.0`.
+- Stable behavior base: accepted 1.1.15; only exact-rejection logs, bounded reference snapshots and diagnostic identity were added. Protocol/method checkpoint: `research/binding-diagnostic/README.md`.
+- Clean Release CI: run `39024675268`, job `117373210529`, success, **0 warnings / 0 errors**, exact source/assembly version verified.
+- Artifact ID: `12097099595`; archive digest `sha256:b02dc6faceb97ca50a24b7e2edfd1c0ce71c6faa318d787a8503131b1be09463`.
+- DLL: `DayWheelQuestMarkersBindingDiagnostic-0.1.0.dll`, **106,496 bytes**, assembly **0.1.0.0**, SHA-256 `fa270c0fab25f9a16272147ae44388f7e31e574fe78050c63d7dacb2073bbf22`.
+- Local native-reference compile and all **103 structural checks** passed. Compiled reminder-policy regression also passed against the exact CI DLL.
+- A later stable-session control log, SHA-256 `7dbfc0620612a51bb907b046570a499f18915a058a6d805ae317832301bcf81b`, contains two manifest loads after RestoreScene/progress 0.85 and **zero final-binding warnings**. Repeat loading alone is not a deterministic trigger; compare the actual readiness timing and rejection snapshots.
+- Installed with host closed, temporarily replacing the canonical active `DayWheelQuestMarkers.dll` under the same plugin GUID. Installed diagnostic hash verified. Exact stable 1.1.15 backup was preserved outside the plugin directory and verified against `b9ccd2f89d9f308b785ee864703b3ff33cce2294b58633383318545cafc660e4`.
+- Existing manifest SHA-256 before/after installation: `aa132998c86c747eee1ae547816f57451f514905a02bccb30449c0cf3e979e54`. No saves/cache were modified by installation.
+- Requested runtime sequence: start/load, then main-menu reload (preferably repeat once more because the timing condition is intermittent). No quest/loan interaction is required. Agent collects the accessible local log; after capture and host closure, restore the exact stable DLL.
+- Status: **research diagnostic installed / runtime evidence pending**. `main` and the stable release remain 1.1.15. Do not merge/release this diagnostic or infer a fix from successful recovery alone.
+
 ## 1.1.15 — accepted Merchant loan-offer reminder correction
 
 - Date built/installed: 2026-10-17.
