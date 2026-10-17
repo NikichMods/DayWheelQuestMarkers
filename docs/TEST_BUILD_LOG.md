@@ -2,6 +2,19 @@
 
 Every handed DLL is immutable and tied to exact committed source plus build artifact identity.
 
+## 1.1.16 — current-save scene-readiness candidate
+
+- Date built/installed: 2026-10-17. Branch: `dev/1.1.16`; draft PR #13. Stable remains 1.1.15; runtime acceptance is pending.
+- Exact executable/build source and frozen `candidate/1.1.16`: `e9d9b86427a5155f91299676249d9636dae354ff`. Subsequent documentation commits do not change the binary identity.
+- Scope: require the current save's non-null `_inventory` to be reference-identical to the live player's `_data` before loading prewarm can bind weekday NPCs. Native assignment evidence and readiness gate: `SCENE_READINESS_1.1.16.md`. Marker semantics, schema 7, existing binding checks and safe recovery are unchanged. No diagnostic code ships.
+- Clean Release CI: run `39027464936`, job `117381172236`, **0 warnings / 0 errors**; compiled readiness, reminder policy and version-identity checks passed. Interaction validator run `39027464961`: **103 / 103 passed**.
+- Artifact: `DayWheelQuestMarkers-1.1.16`, ID `12099460127`; archive digest `sha256:37e923a0d35f523cc1034c6f89c44f6836fb5e651cdebea06846baf884415732`.
+- Raw DLL: `DayWheelQuestMarkers-1.1.16.dll`, **102,400 bytes**, assembly **1.1.16.0**, SHA-256 `e9e31edb7ec29d469fcd7f7c842fc756f986f84f7f3cfc906a48c0120198f809`. Retrieved exact CI bytes also passed all **11** compiled ownership/transition/read-only checks and the **60 owners -> 59 reminders** policy regression using installed native game dependencies.
+- Installed with the host closed at the canonical `BepInEx/plugins/DayWheelQuestMarkers.dll`; installed hash verified against the exact CI DLL. Accepted stable 1.1.15 was verified and retained outside the plugin directory for rollback.
+- Cold-cache preparation: existing schema-7 manifest SHA-256 `aa132998c86c747eee1ae547816f57451f514905a02bccb30449c0cf3e979e54` was copied to the ignored local installation backups and verified before removing only its active cache file. Saves and unrelated mods were not changed.
+- Requested runtime test: within one process load **A -> A -> B -> A**, returning through the main menu and waiting for the HUD/markers each time. Initial A proves cold bootstrap behind loading; subsequent loads prove persisted reads and same-save/cross-save binding. No quest/loan action is required. Close the game afterward so the agent can capture the complete log.
+- Acceptance target: canonical Ready after every load, no diagnosed stale-WorldObject final-binding warnings/recovery, no gameplay graph parsing, and expected marker behavior preserved. Installed timing and runtime behavior remain **unverified** until that evidence returns; do not merge or release yet.
+
 ## Binding Diagnostic 0.1.0 — research complete, stable restored
 
 - Purpose: identify the actual rejected Bind/IsRuntimeValid condition during repeat loads, before deciding whether a production fix is justified. No fix is implemented.
@@ -18,7 +31,7 @@ Every handed DLL is immutable and tied to exact committed source plus build arti
 - Returned runtime evidence (2026-10-17), log SHA-256 `88e97f1df8e6072efe0c9b21bd54de975d12512128619cf02860a080decaec9d`: player-reported A -> A -> B -> A was captured. Both A -> A and A -> B rejected `Bind` at `world_object_dead / npc_astrologer`; final snapshots show **all six cached weekday WorldObjects destroyed**, not only the first checked NPC. Recovery recreated live bindings and reached Ready in **3.19 / 3.75 ms**, without graph parsing. Initial A and final B -> A prepared after RestoreScene and had no rejection.
 - Root cause established: prewarm can bind to the still-live previous scene before RestoreScene; those references become destroyed during restoration. The actual reject occurs after player binding/navigation checks have passed. This is not specific to changing save files.
 - Stable restored with host closed: exact 1.1.15 DLL SHA-256 `b9ccd2f89d9f308b785ee864703b3ff33cce2294b58633383318545cafc660e4`, assembly 1.1.15.0. Manifest hash remained `aa132998c86c747eee1ae547816f57451f514905a02bccb30449c0cf3e979e54`.
-- Status: **research complete / stable 1.1.15 restored / production fix decision open**. Keep the diagnostic frozen and off main; promote distilled evidence only.
+- Status: **research complete / stable 1.1.15 restored after diagnostic / narrow fix subsequently authorized as candidate 1.1.16**. Keep the diagnostic frozen and off main; promote distilled evidence only.
 
 ## 1.1.15 — accepted Merchant loan-offer reminder correction
 
