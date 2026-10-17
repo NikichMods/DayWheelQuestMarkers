@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.1.16 — candidate
+## 1.1.16
 
 - Waits for the player to be bound to the current save before preparing weekday reminders during loading, avoiding stale scene references on reloads.
 - Keeps marker rules, existing caches and the safe recovery path unchanged.

@@ -10,11 +10,11 @@ Read the global engineering contract in `NikichMods/DevRules` before substantive
 - Game: Graveyard Keeper 1.407
 - Stable BepInEx GUID: `nikich.gyk.calendarquestspins`
 - Legacy source namespace `CalendarQuestsPins` is intentionally retained; do not change the GUID or namespace merely for cosmetic normalization.
-- Current accepted stable public baseline: **1.1.15**.
-- Exact accepted tested runtime source: `2dee8941d2fb6a8257dd7f6b048d6b256e7354d4`.
-- Accepted baseline ref: `baseline/1.1.15-accepted`.
-- Accepted DLL: **101,888 bytes**.
-- Accepted DLL SHA-256: `b9ccd2f89d9f308b785ee864703b3ff33cce2294b58633383318545cafc660e4`.
+- Current accepted stable public baseline: **1.1.16**.
+- Exact accepted tested runtime source: `e9d9b86427a5155f91299676249d9636dae354ff`.
+- Accepted baseline ref: `baseline/1.1.16-accepted`.
+- Accepted DLL: **102,400 bytes**.
+- Accepted DLL SHA-256: `e9e31edb7ec29d469fcd7f7c842fc756f986f84f7f3cfc906a48c0120198f809`.
 
 ## Product rule
 
@@ -38,7 +38,7 @@ Unknown, reversible, ambiguous, or unsupported structures fail closed. False pos
 
 ## Accepted runtime architecture
 
-Accepted production **1.1.15** uses one persistent schema-7 interaction manifest plus cheap live bindings:
+Accepted production **1.1.16** uses one persistent schema-7 interaction manifest plus cheap live bindings:
 
 - `WeekdayInteractionRuleCache` derives owner-local and cross-owner task rules plus persisted dialogue-topic rules;
 - the bounded owner-task compiler follows the verified local topology families used by GK 1.407: normal flow edges, numbered `Flow_WaitForFlow` inputs, exact `CustomFunctionCall._sourceOutputUID -> CustomFunctionEvent._UID` links, and exact same-graph `Flow_FireEvent.event -> CustomEvent.eventName` links;
@@ -90,9 +90,9 @@ Historical accepted 1.1.14 runtime evidence:
 
 The rejected universal provenance parser remains rejected. Production derives only verified local interaction/task/navigation semantics from the six weekday-NPC graphs and does not walk arbitrary external dependency chains.
 
-Known diagnosed loading issue: prewarm can bind to the previous scene before RestoreScene; final Bind then rejects destroyed weekday WorldObjects and the existing manifest reload recovers. The exact rejection and A -> A -> B -> A evidence are recorded in `docs/VERIFIED_RUNTIME_DATA.md`. Stable 1.1.15 remains unchanged; a narrow readiness fix was authorized for candidate 1.1.16, with player acceptance still pending.
+Historical loading defect in 1.1.15: prewarm could bind to the previous scene before RestoreScene; final Bind then rejected destroyed weekday WorldObjects and recovered by manifest reload. Accepted 1.1.16 gates prewarm on current-save player inventory ownership. Exact diagnosis and regression evidence are recorded in `docs/VERIFIED_RUNTIME_DATA.md`.
 
-Candidate 1.1.16 implements the authorized current-save player ownership gate described in `docs/SCENE_READINESS_1.1.16.md`. The installed A -> A -> B -> A loading regression passed on 2026-10-17: four canonical Ready records, zero plugin warnings/errors, cold bootstrap and cached reads all behind loading after restoration. All marker semantics and schema-7 rules remain unchanged. Explicit player acceptance/stable promotion is pending; stable remains 1.1.15.
+Accepted stable 1.1.16 implements the current-save player ownership gate described in `docs/SCENE_READINESS_1.1.16.md`. The installed A -> A -> B -> A regression passed on 2026-10-17: four canonical Ready records, zero plugin warnings/errors, cold bootstrap and cached reads all behind loading after restoration. The player confirmed normal marker visuals and explicitly accepted 1.1.16. All marker semantics and schema-7 rules remain unchanged.
 
 ## Marker sprite contract
 

@@ -6,7 +6,7 @@ A lightweight QoL/UI mod for **Graveyard Keeper 1.407**.
 
 ## Download
 
-Current stable: **1.1.15**. Stable builds are available from [GitHub Releases](https://github.com/NikichMods/DayWheelQuestMarkers/releases).
+Current stable: **1.1.16**. Stable builds are available from [GitHub Releases](https://github.com/NikichMods/DayWheelQuestMarkers/releases).
 
 ## How it works
 

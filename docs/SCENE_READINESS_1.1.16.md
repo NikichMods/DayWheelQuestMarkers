@@ -1,8 +1,8 @@
-# Current-save player readiness — 1.1.16 candidate
+# Current-save player readiness — accepted 1.1.16
 
 ## Scope and evidence gate
 
-The player authorized a narrow readiness fix, preserving all marker logic and testing A -> A -> B -> A. Stable remains 1.1.15 until explicit acceptance.
+The player authorized a narrow readiness fix, preserving all marker logic and testing A -> A -> B -> A. The player explicitly accepted 1.1.16 on 2026-10-17 after the loading regression and normal marker visuals were confirmed.
 
 Gate: **READY**, before production mutation. The reported stale-WorldObject failure is proved by diagnostic 0.1.0; exact artifact/log evidence is in `TEST_BUILD_LOG.md` and `VERIFIED_RUNTIME_DATA.md`.
 
@@ -22,4 +22,4 @@ Native IL proves the assignment path; deterministic tests prove the ownership pr
 
 ## Installed regression result — 2026-10-17
 
-The exact frozen 1.1.16 DLL passed the player-operated A -> A -> B -> A loading regression. Every prewarm occurred after RestoreScene and GetSavedPlayerInventory and before loading hid; all four loads reached canonical Ready without plugin warnings/errors or final-binding recovery. Cold bootstrap took 885.42 ms; cached reads took 5.50 / 3.14 / 2.82 ms with graph parsing skipped. The regenerated schema-7 manifest is byte-identical to the pre-test accepted manifest. Snapshot/artifact hashes are recorded in TEST_BUILD_LOG.md. This verifies the observed loading defect on the tested sequence; it does not infer visual marker correctness or constitute explicit stable acceptance. Stable remains 1.1.15 pending the player's acceptance.
+The exact frozen 1.1.16 DLL passed the player-operated A -> A -> B -> A loading regression. Every prewarm occurred after RestoreScene and GetSavedPlayerInventory and before loading hid; all four loads reached canonical Ready without plugin warnings/errors or final-binding recovery. Cold bootstrap took 885.42 ms; cached reads took 5.50 / 3.14 / 2.82 ms with graph parsing skipped. The regenerated schema-7 manifest is byte-identical to the pre-test accepted manifest. Snapshot/artifact hashes are recorded in TEST_BUILD_LOG.md. This verifies the observed loading defect on the tested sequence. The player subsequently confirmed normal marker visuals and explicitly accepted 1.1.16 on 2026-10-17. Exact tested bytes are the stable payload; no rebuild is used for publication.
