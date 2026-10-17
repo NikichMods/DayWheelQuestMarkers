@@ -2,7 +2,7 @@
 
 Every handed DLL is immutable and tied to exact committed source plus build artifact identity.
 
-## Binding Diagnostic 0.1.0 — research only, installed
+## Binding Diagnostic 0.1.0 — research complete, stable restored
 
 - Purpose: identify the actual rejected Bind/IsRuntimeValid condition during repeat loads, before deciding whether a production fix is justified. No fix is implemented.
 - Branch: `research/runtime-binding-diagnostic`; source: `ba08480248d317a6af63e058c8d20fb51f766a34`; frozen ref: `frozen/runtime-binding-diagnostic-0.1.0`.
@@ -15,7 +15,10 @@ Every handed DLL is immutable and tied to exact committed source plus build arti
 - Installed with host closed, temporarily replacing the canonical active `DayWheelQuestMarkers.dll` under the same plugin GUID. Installed diagnostic hash verified. Exact stable 1.1.15 backup was preserved outside the plugin directory and verified against `b9ccd2f89d9f308b785ee864703b3ff33cce2294b58633383318545cafc660e4`.
 - Existing manifest SHA-256 before/after installation: `aa132998c86c747eee1ae547816f57451f514905a02bccb30449c0cf3e979e54`. No saves/cache were modified by installation.
 - Requested runtime sequence (clarified after the player confirmed switching between different saves in the original session): within one game process use **A -> A -> B -> A**, returning through the main menu. A is the current save and B a different existing save, preferably with different progression. A -> A is the same-save control; A -> B and B -> A test cross-save reference replacement. Reuse any already completed same-save control instead of repeating it. No quest/loan interaction is required. Switching saves is a candidate trigger, not an established cause. Agent collects the accessible local log; after capture and host closure, restore the exact stable DLL.
-- Status: **research diagnostic installed / runtime evidence pending**. `main` and the stable release remain 1.1.15. Do not merge/release this diagnostic or infer a fix from successful recovery alone.
+- Returned runtime evidence (2026-10-17), log SHA-256 `88e97f1df8e6072efe0c9b21bd54de975d12512128619cf02860a080decaec9d`: player-reported A -> A -> B -> A was captured. Both A -> A and A -> B rejected `Bind` at `world_object_dead / npc_astrologer`; final snapshots show **all six cached weekday WorldObjects destroyed**, not only the first checked NPC. Recovery recreated live bindings and reached Ready in **3.19 / 3.75 ms**, without graph parsing. Initial A and final B -> A prepared after RestoreScene and had no rejection.
+- Root cause established: prewarm can bind to the still-live previous scene before RestoreScene; those references become destroyed during restoration. The actual reject occurs after player binding/navigation checks have passed. This is not specific to changing save files.
+- Stable restored with host closed: exact 1.1.15 DLL SHA-256 `b9ccd2f89d9f308b785ee864703b3ff33cce2294b58633383318545cafc660e4`, assembly 1.1.15.0. Manifest hash remained `aa132998c86c747eee1ae547816f57451f514905a02bccb30449c0cf3e979e54`.
+- Status: **research complete / stable 1.1.15 restored / production fix decision open**. Keep the diagnostic frozen and off main; promote distilled evidence only.
 
 ## 1.1.15 — accepted Merchant loan-offer reminder correction
 
