@@ -2,6 +2,25 @@
 
 Every handed DLL is immutable and tied to exact committed source plus build artifact identity.
 
+## 1.1.15 — Merchant loan-offer reminder candidate
+
+- Date built/installed: 2026-10-17.
+- Development branch: `dev/1.1.15`; PR #12.
+- Exact executable/build source: `2dee8941d2fb6a8257dd7f6b048d6b256e7354d4`.
+- Frozen candidate ref: `candidate/1.1.15` at that exact source.
+- Scope: exclude only dialogue reminder emission for `npc_merchant / @merchant_2e_1e`; debt repayment and all other optional dialogue retain their accepted paths. Structural schema-7 rules/counts are unchanged; no cache deletion/rebuild is required.
+- Evidence/readiness: `docs/MERCHANT_LOAN_REMINDER_POLICY.md`.
+- Local native-reference compilation passed. The compiled policy regression passes against the exact retrieved CI DLL: 60 accepted dialogue owners -> 59 eligible reminders, excluding exactly the loan offer; repayment and nearby identity controls remain allowed.
+- Clean CI build: run `39020619949`, job `117361521326`, success, **0 warnings / 0 errors**. CI checked out and verified the exact source SHA above; compiled policy and plugin/project/assembly version checks passed.
+- Interaction validator: run `39020620004`, success; **103 checks / 0 failures**, unchanged accepted structural universe.
+- Artifact: `DayWheelQuestMarkers-1.1.15`, ID `12096049728`; archive digest `sha256:658d0bfcd83b6a6e411ae1d502b357ba057ad0fe43a3c6e7a7d6537760242a56`.
+- Raw DLL: `DayWheelQuestMarkers-1.1.15.dll`, **101,888 bytes**, assembly version **1.1.15.0**.
+- Raw DLL SHA-256: `b9ccd2f89d9f308b785ee864703b3ff33cce2294b58633383318545cafc660e4`.
+- Installed with host closed under the canonical filename `DayWheelQuestMarkers.dll`; installed hash matches the exact CI artifact. The prior accepted 1.1.14 payload was preserved outside the plugin directory and its obsolete active filename was removed only after verification. No saves or rule cache were changed.
+- Requested installed-game smoke: load the preserved new-game state with no hiccup grass/crops and no existing debt. Merchant should have no marker, while the optional loan offer remains available. Taking a loan is unnecessary for this check. Existing repayment code/rules are unchanged; no new live repayment test is claimed.
+- First CI attempt at source `64b993f171c470929af988446270864ba132617b` compiled successfully but its policy test could not resolve compile-only host references. The build-workflow reference paths were corrected before producing the frozen artifact; production code did not change between these attempts.
+- Status: **candidate installed / player runtime verdict pending**. Stable remains **1.1.14**; no stable promotion or release publication is authorized by implementation alone.
+
 ## 1.0.17 — accepted legacy stable baseline
 
 - Frozen source: `CalendarQuestsPins-legacy-private`, `frozen/1.0.17`, commit `507fc6dd192993bf6290f7b6735718e3b98430a4`.
