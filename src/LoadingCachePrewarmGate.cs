@@ -5,7 +5,7 @@ using UnityEngine;
 namespace CalendarQuestsPins
 {
     // Read-only readiness gate for the pre-game loading window. It does not build or mutate caches;
-    // it only verifies that every runtime object the existing cache builders already depend on is present.
+    // The player's inventory must belong to the current save before NPC presence can mean readiness.
     internal sealed class LoadingCachePrewarmGate
     {
         private static readonly string[] PeriodicNpcIds =
@@ -30,6 +30,10 @@ namespace CalendarQuestsPins
             if (!ReflectionUtil.TryRead(mainGame, "player", out player) || player == null || !ReflectionUtil.IsUnityAlive(player))
                 return false;
 
+            object save;
+            if (!ReflectionUtil.TryRead(mainGame, "save", out save) || !HasPlayerInventoryForSave(save, player))
+                return false;
+
             for (var i = 0; i < PeriodicNpcIds.Length; i++)
             {
                 var wgo = GetWorldObject(PeriodicNpcIds[i]);
@@ -46,6 +50,17 @@ namespace CalendarQuestsPins
             }
 
             return true;
+        }
+
+        internal static bool HasPlayerInventoryForSave(object save, object player)
+        {
+            object savedInventory;
+            object playerData;
+            // Native SpawnPlayer(true, save.GetSavedPlayerInventory()) installs this exact Item
+            // through RestoreSavedInventory. Read fields only; the data getter can initialize state.
+            return ReflectionUtil.TryRead(save, "_inventory", out savedInventory) && savedInventory != null &&
+                   ReflectionUtil.TryRead(player, "_data", out playerData) &&
+                   ReferenceEquals(savedInventory, playerData);
         }
 
         private object GetWorldObject(string npcId)

@@ -1,6 +1,6 @@
 # Exhaustive Interaction Validation Harness
 
-Status: **accepted validation tooling used by stable 1.1.15**. The validator uses the frozen structural snapshot `baseline-1.1.10.json` and its evidence fixtures; that historical filename/candidate metadata does not identify the current release. Live acceptance and artifact identity belong in `AGENTS.md` and `TEST_BUILD_LOG.md`.
+Status: **accepted validation tooling used by stable 1.1.16**. The validator uses the frozen structural snapshot `baseline-1.1.10.json` and its evidence fixtures; that historical filename/candidate metadata does not identify the current release. Live acceptance and artifact identity belong in `AGENTS.md` and `TEST_BUILD_LOG.md`.
 
 This harness exists to reduce dependence on full manual Graveyard Keeper playthroughs after structural reminder changes.
 
@@ -152,9 +152,9 @@ Candidate source `7e7b429ca9d8c9b6d10c7a236f546809f2589378` was validated in wor
 
 This run closes the previously documented standalone navigation and selectable task-route fixture gaps.
 
-## Current accepted verification (1.1.15)
+## Current accepted verification (1.1.16)
 
-The accepted 1.1.15 source `2dee8941d2fb6a8257dd7f6b048d6b256e7354d4` passed **103 checks / 0 failures** in run `39020620004`. The structural universe remains 243 occurrences, 210 normal-root answers, 270 paths and 60 dialogue owners. The separate compiled reminder policy retains 59 of those owners, excluding only the Merchant loan offer. The player smoke passed; exact build and publication evidence is in `TEST_BUILD_LOG.md`.
+The accepted 1.1.16 source `e9d9b86427a5155f91299676249d9636dae354ff` passed **103 checks / 0 failures** in run `39027464961`. Its separate compiled scene-readiness regression passed all 11 ownership/transition/read-only checks. The structural universe remains 243 occurrences, 210 normal-root answers, 270 paths and 60 dialogue owners. The separate compiled reminder policy retains 59 of those owners, excluding only the Merchant loan offer. The player smoke passed; exact build and publication evidence is in `TEST_BUILD_LOG.md`.
 
 ## What the validator proves
 

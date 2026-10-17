@@ -10,7 +10,7 @@ namespace CalendarQuestsPins
     {
         public const string PluginGuid = "nikich.gyk.calendarquestspins";
         public const string PluginName = "Day Wheel Quest Markers";
-        public const string PluginVersion = "1.1.15";
+        public const string PluginVersion = "1.1.16";
 
         private const float TickSeconds = 1f;
         private const float StructureCheckSeconds = 30f;

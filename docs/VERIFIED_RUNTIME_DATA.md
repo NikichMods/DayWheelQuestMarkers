@@ -6,6 +6,10 @@ The optional Merchant loan offer `@merchant_2e_1e` remains a structurally valid 
 
 This document records runtime facts that production Day Wheel Quest Markers is allowed to depend on. Unknown structures fail closed.
 
+## Current-save readiness regression (accepted 1.1.16, 2026-10-17)
+
+The authorized inventory-ownership gate passed the installed A -> A -> B -> A loading test on exact frozen source `e9d9b86427a5155f91299676249d9636dae354ff`. Log snapshot SHA-256: `c4adec9b00a3f276046d462cd0560137f32d24f65ba8d3171b3d27919aca9b7c`. In all four loads, prewarm followed RestoreScene and GetSavedPlayerInventory and finished before loading hid. Four canonical Ready records and zero plugin warnings/errors were observed, with no final-binding recovery. Cold bootstrap took 885.42 ms; cached reads took 5.50 / 3.14 / 2.82 ms with graph parsing skipped. Recreated schema-7 bytes matched the original accepted cache. Exact artifact identity and limits are in TEST_BUILD_LOG.md and SCENE_READINESS_1.1.16.md. The player then confirmed normal marker visuals and explicitly accepted 1.1.16 as stable.
+
 ## Weekday HUD
 
 Verified calendar root:
@@ -212,7 +216,7 @@ These task-linked rules remain necessary because not every actionable quest inte
 
 ## Verified completion-route supplement
 
-Current accepted 1.1.15 derives all selectable answer-backed task completions through the bounded generic task compiler introduced in 1.1.14. `VerifiedCompletionReminderRules` contains only two mandatory event-only stages: `npc_inquisitor/inquisitor_talk` and `npc_cultist/snake_back`; their Visible task is the verified actionability boundary.
+Current accepted 1.1.16 derives all selectable answer-backed task completions through the bounded generic task compiler introduced in 1.1.14. `VerifiedCompletionReminderRules` contains only two mandatory event-only stages: `npc_inquisitor/inquisitor_talk` and `npc_cultist/snake_back`; their Visible task is the verified actionability boundary.
 
 Historical 1.0.32–1.1.9 also used promoted task/topic mappings and an exact `snake_trap / snake_stone_ready` SmartRes path. Those answer-backed specials were retired in 1.1.14 after the local topology families were proved; they are not current implementation instructions. Generic relay-backed MultipleAnswerData support remains in the shared compiler. See `COMPLETION_SUPPLEMENT_AUDIT.md` for the historical residual audit and `TEST_BUILD_LOG.md` for runtime correction/acceptance.
 
@@ -269,11 +273,11 @@ This is not specific to switching between different save files: the same-save co
 
 The existing recovery succeeded. The reported 3.19 / 3.75 ms values are manifest-restore timings, not complete frame-time measurements. No marker failure is established by this test, and the on-disk manifest hash remained unchanged. Stable 1.1.15 was restored after capture, with its exact accepted DLL hash verified; the diagnostic remains off main.
 
-**Disposition:** a real bounded loading-lifecycle defect is now identified; a narrow production fix is reasonable, but its implementation is not authorized/adopted merely by completing this investigation. Before changing the gate, verify a native readiness boundary after restoration rather than assuming object presence or a guessed delay is sufficient. Preserve bootstrap on fresh caches, loading-time graph work, native SmartRes owner binding and the existing safe recovery. Merely silencing the warning or replacing target WorldObject references without updating linked requirements would not address the full contract. The minimal eventual runtime regression is A -> A -> B -> A; no broad classifier/probe is needed.
+**Disposition (updated after acceptance):** the bounded loading-lifecycle defect is fixed by accepted 1.1.16 using the verified native current-save inventory ownership boundary after restoration. The initial diagnostic alone did not authorize a production change; the player subsequently authorized the narrow fix and accepted its A -> A -> B -> A result. Future changes must likewise establish a native readiness boundary rather than assuming object presence or a guessed delay is sufficient. Preserve bootstrap on fresh caches, loading-time graph work, native SmartRes owner binding and the existing safe recovery. Merely silencing the warning or replacing target WorldObject references without updating linked requirements would not address the full contract. The minimal eventual runtime regression is A -> A -> B -> A; no broad classifier/probe is needed.
 
 ## Accepted persistent loading/performance contract
 
-Accepted runtime architecture as of **1.1.15**:
+Accepted runtime architecture as of **1.1.16**:
 
 - per frame: timer comparison only until the one-second refresh is due;
 - one schema-7 manifest path: `BepInEx/cache/DayWheelQuestMarkers/rules-1.407.bin`;
