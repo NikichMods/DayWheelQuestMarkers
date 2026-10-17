@@ -22,7 +22,10 @@ Every handed DLL is immutable and tied to exact committed source plus build arti
 - Player result: **accepted**, 2026-10-17. The player confirmed the Merchant marker disappeared and the optional loan offer remained available, and authorized stable promotion if log review passed.
 - Acceptance log snapshot SHA-256: `64e9a562de8baa072cc4d9c27c7aae2b817797b88c5a7c8a6a64cfeef0a0267a`. It loads 1.1.15, reads schema 7 in **10.38 ms**, skips graph parsing, and reaches canonical `Ready`. Two final-binding warnings were followed immediately by successful cheap manifest reloads in **2.73 / 2.70 ms** and `Ready`. No Day Wheel Quest Markers error/exception was found; the overall host log contains other Unity warnings/errors, so it is not described as globally clean. The snapshot was captured from a running session.
 - Accepted baseline ref: `baseline/1.1.15-accepted` at exact tested source `2dee8941d2fb6a8257dd7f6b048d6b256e7354d4`.
-- Status: **accepted stable / publication in progress**. Publish the exact tested artifact; do not rebuild 1.1.15.
+- Stable promotion: PR #12 merged to `main` as `1f4280b414d948c3745aeec504f281b9b74aff1e`; production inputs match the exact tested source.
+- Release publication: run `39022066117`, job `117365689723`, **success**, including downloaded published-asset hash verification.
+- Published release: `v1.1.15`, target `2dee8941d2fb6a8257dd7f6b048d6b256e7354d4`; asset `DayWheelQuestMarkers.dll`, ID `650098711`, **101,888 bytes**. Published digest `sha256:b9ccd2f89d9f308b785ee864703b3ff33cce2294b58633383318545cafc660e4` matches the exact tested/installed DLL. No rebuild was used for publication.
+- Status: **accepted stable / released**.
 
 ## 1.0.17 — accepted legacy stable baseline
 
