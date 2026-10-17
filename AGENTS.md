@@ -10,11 +10,11 @@ Read the global engineering contract in `NikichMods/DevRules` before substantive
 - Game: Graveyard Keeper 1.407
 - Stable BepInEx GUID: `nikich.gyk.calendarquestspins`
 - Legacy source namespace `CalendarQuestsPins` is intentionally retained; do not change the GUID or namespace merely for cosmetic normalization.
-- Current accepted stable public baseline: **1.1.14**.
-- Exact accepted tested runtime source: `0189ecc8ed85fc0b4d57d1ba721d3f5dc1be33ad`.
-- Accepted baseline ref: `baseline/1.1.14-accepted`.
+- Current accepted stable public baseline: **1.1.15**.
+- Exact accepted tested runtime source: `2dee8941d2fb6a8257dd7f6b048d6b256e7354d4`.
+- Accepted baseline ref: `baseline/1.1.15-accepted`.
 - Accepted DLL: **101,888 bytes**.
-- Accepted DLL SHA-256: `ac422d1df5d4ff8beb235933cc70db137d83d6334c6c97a5c2230a51e87bd39b`.
+- Accepted DLL SHA-256: `b9ccd2f89d9f308b785ee864703b3ff33cce2294b58633383318545cafc660e4`.
 
 ## Product rule
 
@@ -32,11 +32,13 @@ Do not mark a weekday merely because an NPC has an unfinished quest. If the rele
 
 Do not treat arbitrary visible menu options as reminders. Repeatable utility/navigation entries such as Trade, Leave, Back, or ordinary non-consuming submenu headers are excluded structurally. Do not implement this through translated/display-text matching.
 
+Adopted product exception (2026-10-17, accepted 1.1.15): the Merchant's optional loan offer `npc_merchant / @merchant_2e_1e` must not create a calendar reminder. Apply this exact exception at reminder emission, after structural manifest validation. Repayment `merchant_debt / @merchant_2e_1f` retains its existing task/phrase/resource gates. Other optional conversations remain unchanged. The schema-7 structural census remains 60 dialogue owners; the presentation policy admits 59 of those owners.
+
 Unknown, reversible, ambiguous, or unsupported structures fail closed. False positives remain more harmful than an unsupported false negative.
 
 ## Accepted runtime architecture
 
-Accepted production **1.1.14** uses one persistent schema-7 interaction manifest plus cheap live bindings:
+Accepted production **1.1.15** uses one persistent schema-7 interaction manifest plus cheap live bindings:
 
 - `WeekdayInteractionRuleCache` derives owner-local and cross-owner task rules plus persisted dialogue-topic rules;
 - the bounded owner-task compiler follows the verified local topology families used by GK 1.407: normal flow edges, numbered `Flow_WaitForFlow` inputs, exact `CustomFunctionCall._sourceOutputUID -> CustomFunctionEvent._UID` links, and exact same-graph `Flow_FireEvent.event -> CustomEvent.eventName` links;
@@ -71,7 +73,14 @@ Accepted schema-7 integrity/runtime counts:
 - owner completion census: **72 nodes = 70 selectable + 2 event-only**;
 - verified relay-backed `MultipleAnswerData`: **7 menu uses across 4 weekday NPCs**.
 
-Accepted 1.1.14 runtime evidence:
+Accepted 1.1.15 runtime evidence:
+
+- the player confirmed the Merchant marker disappeared while the loan offer remained available, then authorized stable promotion after log review;
+- exact installed bytes matched the accepted SHA-256; schema 7 loaded in **10.38 ms**, with graph parsing skipped and canonical counts unchanged;
+- two final-binding warnings were immediately followed by successful cheap manifest restores in **2.73 / 2.70 ms** and `Ready`; no Day Wheel Quest Markers error/exception was found;
+- repayment rules and all other optional topics are unchanged; the 60-owner compiled policy regression admits 59 reminders, excluding only the loan offer.
+
+Historical accepted 1.1.14 runtime evidence:
 
 - schema-6 -> schema-7 bootstrap completed behind loading in **900.68 ms** and reached `Ready` with the canonical counts above;
 - a subsequent process deserialized the persisted schema-7 manifest in **10.43 ms** with `FlowCanvas graph parse skipped`;

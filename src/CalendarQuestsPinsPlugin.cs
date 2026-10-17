@@ -10,7 +10,7 @@ namespace CalendarQuestsPins
     {
         public const string PluginGuid = "nikich.gyk.calendarquestspins";
         public const string PluginName = "Day Wheel Quest Markers";
-        public const string PluginVersion = "1.1.14";
+        public const string PluginVersion = "1.1.15";
 
         private const float TickSeconds = 1f;
         private const float StructureCheckSeconds = 30f;
@@ -209,7 +209,7 @@ namespace CalendarQuestsPins
                     for (var i = 0; i < target.Topics.Count; i++)
                     {
                         var topic = target.Topics[i];
-                        if (topic == null) continue;
+                        if (topic == null || !ShouldRemindDialogueTopic(target.NpcId, topic.AnswerId)) continue;
                         if (!_reachability.IsTopicActionable(target, topic, unlocked, blacklisted)) continue;
                         AddMarker(sinTypeValue, MarkerStyle.Base);
                     }
@@ -405,6 +405,14 @@ namespace CalendarQuestsPins
             if (string.Equals(npcId, "npc_actress", StringComparison.Ordinal)) return 5;
             if (string.Equals(npcId, "npc_bishop", StringComparison.Ordinal)) return 6;
             return -1;
+        }
+
+        internal static bool ShouldRemindDialogueTopic(string npcId, string answerId)
+        {
+            // Optional borrowing is a service, even though accepting consumes its dialogue owner.
+            // Apply this after manifest validation so existing schema-7 caches remain valid.
+            return !string.Equals(npcId, "npc_merchant", StringComparison.Ordinal) ||
+                   !string.Equals(answerId, "@merchant_2e_1e", StringComparison.Ordinal);
         }
 
         private static MarkerStyle GetMarkerStyle(string taskId)
