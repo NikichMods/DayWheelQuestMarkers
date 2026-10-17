@@ -2,7 +2,7 @@
 
 Date: 2026-09-12
 
-Historical audit of the pre-1.0.30 implementation. Its reported final-answer-only limitations were addressed by the accepted persisted root-to-answer navigation model introduced in 1.0.30 and retained in 1.1.15. The problem statements and proposed next version below are historical evidence; current contracts are in `AGENTS.md` and `VERIFIED_RUNTIME_DATA.md`.
+Historical audit of the pre-1.0.30 implementation. Its reported final-answer-only limitations were addressed by the accepted persisted root-to-answer navigation model introduced in 1.0.30 and retained in current production. The problem statements and proposed next version below are historical evidence; current contracts are in `AGENTS.md` and `VERIFIED_RUNTIME_DATA.md`.
 
 Scope: Graveyard Keeper 1.407, all six weekday-NPC graphs, and all three current Day Wheel Quest Markers reminder layers (owner-local tasks, cross-owner tasks, self-consuming persisted `@` topics).
 

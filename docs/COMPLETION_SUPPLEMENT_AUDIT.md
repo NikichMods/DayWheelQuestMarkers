@@ -1,6 +1,6 @@
 # Residual VerifiedCompletionReminderRules Audit — 2026-09-23
 
-Status: **historical Point 3 audit; its generic answer-backed implementation was accepted in 1.1.14 and remains in 1.1.15**. The two verified event-only cases remain separate. The 1.1.9 residual list below describes the audited input, not current production.
+Status: **historical Point 3 audit; its generic answer-backed implementation was accepted in 1.1.14 and remains in current production; see `AGENTS.md`**. The two verified event-only cases remain separate. The 1.1.9 residual list below describes the audited input, not current production.
 
 ## Question
 

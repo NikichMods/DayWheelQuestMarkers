@@ -2,7 +2,7 @@
 
 Status: **historical accepted 1.1.9 architecture for Graveyard Keeper 1.407**.
 
-This document superseded the 1.1.6 summary at the time. Current schema-7 architecture (introduced by accepted 1.1.14) and the accepted 1.1.15 reminder-policy exception are owned by `AGENTS.md` and `docs/VERIFIED_RUNTIME_DATA.md`. The version-specific schema-6 contracts below remain historical evidence, not current implementation instructions.
+This document superseded the 1.1.6 summary at the time. Current schema-7 architecture (introduced by accepted 1.1.14), the accepted 1.1.15 reminder-policy exception, and the accepted 1.1.16 loading-readiness gate are owned by `AGENTS.md` and `docs/VERIFIED_RUNTIME_DATA.md`. The version-specific schema-6 contracts below remain historical evidence, not current implementation instructions.
 
 ## Product invariant
 

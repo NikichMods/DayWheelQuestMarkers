@@ -1,6 +1,6 @@
 # Final Interaction Coverage Audit — 1.1.10 Candidate
 
-Status: **historical Point 4 static audit of 1.1.10**. The original candidate was superseded during runtime correction; the resulting schema-7 architecture was accepted in 1.1.14 and retained by stable 1.1.15. Candidate identity and obligations below describe that historical audit, not an outstanding release task. See `TEST_BUILD_LOG.md` and `AGENTS.md` for current acceptance.
+Status: **historical Point 4 static audit of 1.1.10**. The original candidate was superseded during runtime correction; the resulting schema-7 architecture was accepted in 1.1.14 and retained by current stable; see `AGENTS.md`. Candidate identity and obligations below describe that historical audit, not an outstanding release task. See `TEST_BUILD_LOG.md` and `AGENTS.md` for current acceptance.
 
 Candidate branch: `dev/1.1.10`.
 

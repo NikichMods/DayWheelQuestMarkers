@@ -2,7 +2,7 @@
 
 > Historical accepted architecture. Superseded by `docs/UNIFIED_INTERACTION_1.1.6.md`, which generalizes exact-self dialogue ownership to nearest persistent lifecycle ownership.
 
-Status: **accepted stable architecture for Graveyard Keeper 1.407**.
+Status: **historical accepted 1.1.3 architecture for Graveyard Keeper 1.407**.
 
 ## Why 1.1.3 exists
 

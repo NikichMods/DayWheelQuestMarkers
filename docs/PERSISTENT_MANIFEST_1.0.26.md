@@ -1,5 +1,7 @@
 # 1.0.26 Persistent Rule Manifest
 
+Historical accepted 1.0.26 architecture. Current schema-7 runtime and loading-readiness contracts are owned by `AGENTS.md` and `VERIFIED_RUNTIME_DATA.md`; version-specific plans below are provenance, not outstanding release work.
+
 ## Problem established by runtime evidence
 
 Fresh-game testing of 1.0.25 proved two separate facts:

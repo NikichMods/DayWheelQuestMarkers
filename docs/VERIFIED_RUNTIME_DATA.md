@@ -273,11 +273,13 @@ This is not specific to switching between different save files: the same-save co
 
 The existing recovery succeeded. The reported 3.19 / 3.75 ms values are manifest-restore timings, not complete frame-time measurements. No marker failure is established by this test, and the on-disk manifest hash remained unchanged. Stable 1.1.15 was restored after capture, with its exact accepted DLL hash verified; the diagnostic remains off main.
 
-**Disposition (updated after acceptance):** the bounded loading-lifecycle defect is fixed by accepted 1.1.16 using the verified native current-save inventory ownership boundary after restoration. The initial diagnostic alone did not authorize a production change; the player subsequently authorized the narrow fix and accepted its A -> A -> B -> A result. Future changes must likewise establish a native readiness boundary rather than assuming object presence or a guessed delay is sufficient. Preserve bootstrap on fresh caches, loading-time graph work, native SmartRes owner binding and the existing safe recovery. Merely silencing the warning or replacing target WorldObject references without updating linked requirements would not address the full contract. The minimal eventual runtime regression is A -> A -> B -> A; no broad classifier/probe is needed.
+**Disposition (updated after acceptance):** the bounded loading-lifecycle defect is fixed by accepted 1.1.16 using the verified native current-save inventory ownership boundary after restoration. The initial diagnostic alone did not authorize a production change; the player subsequently authorized the narrow fix and accepted its A -> A -> B -> A result. Future changes must likewise establish a native readiness boundary rather than assuming object presence or a guessed delay is sufficient. Preserve bootstrap on fresh caches, loading-time graph work, native SmartRes owner binding and the existing safe recovery. Merely silencing the warning or replacing target WorldObject references without updating linked requirements would not address the full contract. The A -> A -> B -> A regression has passed for accepted 1.1.16 as recorded above; no outstanding follow-up is required for this defect.
 
 ## Accepted persistent loading/performance contract
 
 Accepted runtime architecture as of **1.1.16**:
+
+Loading prewarm requires current-save player inventory ownership before the existing six-NPC/graph readiness checks. This rejects the previous-scene window while preserving loading-time cold bootstrap, cached reads and safe final-binding recovery. See `SCENE_READINESS_1.1.16.md`.
 
 - per frame: timer comparison only until the one-second refresh is due;
 - one schema-7 manifest path: `BepInEx/cache/DayWheelQuestMarkers/rules-1.407.bin`;

@@ -1,5 +1,7 @@
 # 1.0.24 Unified Cache Refactor
 
+Historical accepted 1.0.24 architecture. Current schema-7 runtime and loading-readiness contracts are owned by `AGENTS.md` and `VERIFIED_RUNTIME_DATA.md`; version-specific plans below are provenance, not outstanding release work.
+
 ## Goal
 
 Replace the accepted 1.0.23 loading architecture's duplicated graph parsing with one bounded structural cache while preserving the product rule and steady-state behavior.
